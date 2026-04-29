@@ -137,3 +137,62 @@
                     </div>
                 </div>
             </div>
+
+            <div class="panel.selection">
+                <h4 class="section-title" data.toggle="blocks">Blocchi pronti</h4>
+                <div class="section-content" if="blocks">
+                    <div class="draggable-item" draggable="true" data-type="block-hero">
+                        <i class="fa-solid fa-panorama"></i>
+                        <span>Hero</span>
+                    </div>
+                    <div class="dragganble-item" draggable="true" data-type="block-navbar">
+                        <i class="fa-solid fa-bars"></i>
+                        <span>Navbar</span>
+                    </div>
+                    <div class="draggable-item" draggable="true" data-type="block-footer">
+                        <i class="fa-solid fa-shoe-prints"></i>
+                        <span>Footer</span>
+                    </div>
+                    <div class="draggable-item" draggable="true" data-type="block-card">
+                        <i class="fa-solid fa-id-card"></i>
+                        <span>Card</span>
+                    </div>
+                    <div class="draggable-item" draggable="true" data-type="block-pricing">
+                        <i class="fa-solid fa-tags"></i>
+                        <span>Pricing</span>
+                    </div>
+                    <div class="draggable-item" draggable="true" data-type="block-testimonial">
+                        <i class="fa-solid fa-tags"></i>
+                        <span>Testimonial</span>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+    <main calss="canvas-area">
+        <div class="canvas-wrapper" id="canvasWrapper">
+            <div class="canvas" id="canvas">
+                <div class="canvas-empty" if="canvasEmpty">
+                    <i class="fa-solid fa-plus-circle"></i>
+                    <p>Trascina un elemento qui per iniziare</p>
+                    <p class="hint">oppure scegli un blocco pronto dal pannello a sinistra</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <aside class="panel-right" id="panelRight">
+        <div class="panel-header">
+            <h3>Proprieta</h3>
+        </div>
+
+        <div class="planel-empty" id="panelEmpty">
+            <i class="fa-solid fa-mouse-ponter"></i>
+            <p>Seleziona un elemento nel canvas per modificarlo</p>
+        </div>
+        <div class="proprio-content" id="propertiesContent" style="display:none;">
+                <div class="prop.tabs">
+                    <button class="prop-tab active" data-tab="content">Contenuto</button>
+                    <button class="prop-tab" data-tab="style">Stile</button>
+                    <button class="prop-tab" data-tab="advanced">Avanzato</button>
+                </div>
