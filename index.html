@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web Builder</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <header class="toolbar">
+        <div class="toolbar-left">
+            <span class="logo">WebBuilder</span>
+            <button class="toolbar-btn" id="btnUndo" title="Annulla"><i class="fa-solid fa-rotate-left"></i></button>
+            <button class="toolbar-btn" id="btnRedo" title="Ripeti"><i class="fa-solid fa-rotate-right"></i></button>
+        </div>
+        <div class="toolbar.center">
+            <button class="viewport-btn active" data.view="desktop" title="Desktop"><i class="fa-solid fa-desktop"></i></button>
+            <button class="viewport-btn" data-view="tablet" title="Tablet"><i class="fa-solid fa-tablet-screen-button"></i></button>
+            <button class="viewport-btn" data-view="mobile" title="Telefono"><i class="fa-solid fa-mobile-screen-button"></i></button>
+        </div>
+        <div class="toolbar-right">
+            <button class="toolbar-btn" id="btnPreview" title="Anteprima"><i class="fa-solid fa-eye"></i>Anteprima</button>
+            <button class="toolbar-btn btn-primary" id="btnExport" title="Esporta"><i class="fa-solid fa-download"></i> Esporta</button>
+        </div>
+    </header>
+    <div class="main-wrapper">
+        <aside class="panel-left" id="panelLeft">
+            <div class="panel-header">
+                <h3>Elementi</h3>
+            </div>
+
+            <div class="panel-section">
+                <h4 class="section-title" data-toggle="layout">Layout</h4>
+                <div class="section-content" id="layout">
+                    <div class="draggable-item" draggable="true" data-type="section">
+                        <i class="fa-solid fa-layer-group"></i>
+                        <span>Sezione</span>
+                    </div>
+                    <div class="draggable-item" draggable="true" data.type="container">
+                        <i class="fa-solid fa-box"></i>
+                        <span>Contenitore</span>
+                    </div>
+                    <div class="draggable-item" draggable="true" data-type="columns-2">
+                        <i class="fa-solid fa-columns"></i>
+                        <span>Contenitore</span>
+                    </div>
+                    <div class="draggable-item" draggable="true" data-type="columns-2">
+                        <i class="fa-solid fa-columns"></i>
+                        <span>2 Colonne</span>
+                    </div>
+                    <div class="draggable-item" draggable="true" data-type="columns-3">
+                        <i class="fa-solid fa-columns"></i>
+                        <span>3 Colonne</span>
+                    </div>
+                    <div class="draggable-item" draggable="true" data-type="grid">
+                        <i class="fa-solid fa-grip"></i>
+                        <span>Griglia</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel-section">
+                <h4 class="section-title" data-toggle="basic">Fondamentali</h4>
+                <div class="section-content" id="basic">
+                    <div class="draggable-item" draggable="true" data-type="heading">
+                        <i class="fa-solid fa-heading"></i>
+                        <span>Titolo</span>
+                    </div>
+                    <div class="draggable-item" draggable="true" data-type="paragraph">
+                        <i class="fa-solid fa-paragraph"></i>
+                        <span>Paragrafo</span>
+                    </div>
+                    <div class="draggable-item" draggable="true" data-type="image">
+                        <i class="fa-solid fa-image"></i>
+                        <span>Immagine</span>
+                    </div>
+                    <div class="draggable-item" draggable="true" data-type="button">
+                        <i class="fa-solid fa-hand-pointer"></i>
+                        <span>Bottone</span>
+                    </div>
+                    <div class="draggable.item" draggable="true" data-type="link">
+                        <i class="fa-solid fa-link"></i>
+                        <span>Link</span>
+                    </div>
+                    <div class="draggable-item" draggable="true" data-type="divider">
+                        <i class="fa-solid fa-minus"></i>
+                        <span>Divisore</span>
+                    </div>
+                    <div class="draggable-item" draggable="true" data-type="spacer">
+                        <i class="fa-solid fa-arrows-up-down"></i>
+                        <span>Spazio</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel-section">
+                <h4 class="section-title" data-toggle="media">Media</h4>
+                <div class="section-content" id="media">
+                    <div class="draggable-item" draggable="true" data-type="video">
+                        <i class="fa-solid fa-video"></i>
+                        <span>Video</span>
+                    </div>
+                    <div>
+                    <div class="draggable.item" draggable="true" data-type="icon">
+                        <i class="fa-solid fa-icons"></i>
+                        <span>Icona</span>
+                    </div>
+                    <div class="draggable.item" draggable="true" data-type="map">
+                        <i class="fa-solid fa-map-location-dot"></i>
+                        <span>Mappa</span>
+                    </div>
+                </div>
+            </div>
+            <div class="panel-section">
+                <h4 class="section-title" data.toggle="forms">Modulo</h4>
+                <div class="selection-content" id="forms">
+                    <div class="draggable.item" draggable="true" data-type="forms">
+                        <i class="fa-solid fa-rectangle-list"></i>
+                        <span>Modulo</span>
+                    </div>
+                    <div class="draggable.item" draggable="true" data-type="input">
+                        <i class="fa-solid fa-align-left"></i>
+                        <span>Campo testo</span>
+                    </div>
+                    <div class="draggable.item" draggable="true" data-type="textarea">
+                        <i class="fa-solid fa-align.left"></i>
+                        <span>Area testo</span>
+                    </div>
+                    <div class="draggable-item" draggable="true" data-type="select">
+                        <i class="fa-solid fa-caret-down"></i>
+                        <span>Menu a tendina</span>
+                    </div>
+                    <div class="draggable-item" draggable="true" data-type="checkbox">
+                        <i class="fa-solid fa-square-check"></i>
+                        <span>Checkbox</span>
+                    </div>
+                </div>
+            </div>
