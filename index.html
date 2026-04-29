@@ -196,3 +196,84 @@
                     <button class="prop-tab" data-tab="style">Stile</button>
                     <button class="prop-tab" data-tab="advanced">Avanzato</button>
                 </div>
+
+                <div class="prop-panel active" if="tab-content">
+                    <div class="prop-group">
+                        <label class="prop-label">Testo</label>
+                        <textarea class="prop-input prop-textarea" id="propText" rows="3"></textarea>
+                    </div>
+                    <div class="prop-group">
+                        <label class="prop-label">URL link</label>
+                        <input type="text" class="prop-input" id="propLink" placeholder=""https://...">
+                    </div>
+                    <div class="prop-group">
+                        <label class="prop-label">Sorgente immagine</label>
+                        <input type="text" class="prop-input" id="propImagSrc" placeholder="URL immagine">
+                        <button class="prop-btn-small" id="btnUploadImage">Carica file</button>
+                    </div>
+                    <div class="prop-group">
+                        <label class="prop-label">Sorgente immagine</label>
+                        <input type="text" class="prop-input" id="propImageSrc" placeholder="URL immagine">
+                        <button class="prop-btn-small" id="btnUploadImage">Carico file</button>
+                    </div>
+
+                    <div class="prop-group">
+                        <label class="prop-label">Testo alternativo</label>
+                        <input type="text" class="prop-input" id="propAlt" placeholder="Descrizione immagine">
+                    </div>
+
+                    <div class="prop-panel" id="tab-style">
+                        <div class="prop-group">
+                            <label class="prop-label">Font</label>
+                            <select class="prop-input" id="propFont">
+                                <option value="Arial, sans-serif">Arial</option>
+                                <option value="'Helvetica Neue', sans-serif">Helvetica</option>
+                                <option value="Georgia, serif">Georgia</option>
+                                <option value="'Times New Roman', serif">Times New Roman</option>
+                                <option value="'Courier New', monospace">Courier New</option>
+                                <option value="Verdana, sans-serif">Verdana</option>
+                                <option value="'Trebuchet MS', sans-serif">Trebuchet MS</option>
+                                <option value="Impact, sans-serif">Impact</option>
+                                <option value="'Inter', sans-serif">Inter</option>
+                                <option value="'Roboto', sans-serif">Roboto</option>
+                                <option value="'Open Sans', sans-serif">Open Sans</option>
+                                <option value="'Poppins', sans-serif">Poppins</option>
+                                <option value="'Montserrat', sans-serif">Montserrat</option>
+                                <option value="'Lato', sans-serif">Lato</option>
+                                <option value="'Playfair Display', serif">Playfair Display</option>
+                            </select>
+                        </div>
+                        <div class="prop-group prop-row">
+                            <div class="prop-half">
+                                <label class="prop-label">Dimensione</label>
+                                <input type="number" class="prop-input" id="propFontSize" placeholder="16" min="8" max="200">
+                            </div>
+                            <div class="prop-half">
+                                <label class="prop-label">Peso</label>
+                                <select class="prop-input" id="propFontWeight">
+                                    <option value="300">Leggero</option>
+                                    <option value="400">Normale</option>
+                                    <option value="500">Medie</option>
+                                    <option value="600">Semi-grassetto</option>
+                                    <option value="700">Grassetto</option>
+                                    <option value="900">Nero</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="prop-group">
+                            <label class="prop-label">Allineamento testo</label>
+                            <div class="prop-button-group">
+                                <button class="prop-btn-icon" data-align="left" title="Sinistra"><i class="fa-solid fa-align-left"></i></button>
+                                <button class="prop-btn-icon" data-align="center" title="Centro"><i class="fa-solid fa-align-center"></i></button>
+                                <button class="prop-btn-icon" data-align="right" title="Destra"><i class="fa-solid fa-anign-right"></i></button>
+                                <button class="prop-btn-icon" data-aligns="justify" title="Giustificato"><i class="fa-solid fa-align-justify"></i></button>
+                            </div>
+                        </div>
+
+                        <div class="prop-group prop-row">
+                            <div class="prop-half">
+                                <label class="prop-label">Colore testo</label>
+                                <div class="color-picker-wrapper">
+                                    <input type="color" class="prop.color" id="propColor" value="#333333">
+                                    <input type="text" class="prop-input prop-color.text" id="propColorText" value = "#333333>
