@@ -14,8 +14,8 @@
             <button class="toolbar-btn" id="btnUndo" title="Annulla"><i class="fa-solid fa-rotate-left"></i></button>
             <button class="toolbar-btn" id="btnRedo" title="Ripeti"><i class="fa-solid fa-rotate-right"></i></button>
         </div>
-        <div class="toolbar.center">
-            <button class="viewport-btn active" data.view="desktop" title="Desktop"><i class="fa-solid fa-desktop"></i></button>
+        <div class="toolbar-center">
+            <button class="viewport-btn active" data-view="desktop" title="Desktop"><i class="fa-solid fa-desktop"></i></button>
             <button class="viewport-btn" data-view="tablet" title="Tablet"><i class="fa-solid fa-tablet-screen-button"></i></button>
             <button class="viewport-btn" data-view="mobile" title="Telefono"><i class="fa-solid fa-mobile-screen-button"></i></button>
         </div>
@@ -37,12 +37,8 @@
                         <i class="fa-solid fa-layer-group"></i>
                         <span>Sezione</span>
                     </div>
-                    <div class="draggable-item" draggable="true" data.type="container">
+                    <div class="draggable-item" draggable="true" data-type="container">
                         <i class="fa-solid fa-box"></i>
-                        <span>Contenitore</span>
-                    </div>
-                    <div class="draggable-item" draggable="true" data-type="columns-2">
-                        <i class="fa-solid fa-columns"></i>
                         <span>Contenitore</span>
                     </div>
                     <div class="draggable-item" draggable="true" data-type="columns-2">
@@ -79,7 +75,7 @@
                         <i class="fa-solid fa-hand-pointer"></i>
                         <span>Bottone</span>
                     </div>
-                    <div class="draggable.item" draggable="true" data-type="link">
+                    <div class="draggable-item" draggable="true" data-type="link">
                         <i class="fa-solid fa-link"></i>
                         <span>Link</span>
                     </div>
@@ -101,30 +97,29 @@
                         <i class="fa-solid fa-video"></i>
                         <span>Video</span>
                     </div>
-                    <div>
-                    <div class="draggable.item" draggable="true" data-type="icon">
+                    <div class="draggable-item" draggable="true" data-type="icon">
                         <i class="fa-solid fa-icons"></i>
                         <span>Icona</span>
                     </div>
-                    <div class="draggable.item" draggable="true" data-type="map">
+                    <div class="draggable-item" draggable="true" data-type="map">
                         <i class="fa-solid fa-map-location-dot"></i>
                         <span>Mappa</span>
                     </div>
                 </div>
             </div>
             <div class="panel-section">
-                <h4 class="section-title" data.toggle="forms">Modulo</h4>
-                <div class="selection-content" id="forms">
-                    <div class="draggable.item" draggable="true" data-type="forms">
+                <h4 class="section-title" data-toggle="forms">Modulo</h4>
+                <div class="section-content" id="forms">
+                    <div class="draggable-item" draggable="true" data-type="form">
                         <i class="fa-solid fa-rectangle-list"></i>
                         <span>Modulo</span>
                     </div>
-                    <div class="draggable.item" draggable="true" data-type="input">
+                    <div class="draggable-item" draggable="true" data-type="input">
                         <i class="fa-solid fa-align-left"></i>
                         <span>Campo testo</span>
                     </div>
-                    <div class="draggable.item" draggable="true" data-type="textarea">
-                        <i class="fa-solid fa-align.left"></i>
+                    <div class="draggable-item" draggable="true" data-type="textarea">
+                        <i class="fa-solid fa-align-left"></i>
                         <span>Area testo</span>
                     </div>
                     <div class="draggable-item" draggable="true" data-type="select">
@@ -138,14 +133,14 @@
                 </div>
             </div>
 
-            <div class="panel.selection">
-                <h4 class="section-title" data.toggle="blocks">Blocchi pronti</h4>
-                <div class="section-content" if="blocks">
+            <div class="panel-section">
+                <h4 class="section-title" data-toggle="blocks">Blocchi pronti</h4>
+                <div class="section-content" id="blocks">
                     <div class="draggable-item" draggable="true" data-type="block-hero">
                         <i class="fa-solid fa-panorama"></i>
                         <span>Hero</span>
                     </div>
-                    <div class="dragganble-item" draggable="true" data-type="block-navbar">
+                    <div class="draggable-item" draggable="true" data-type="block-navbar">
                         <i class="fa-solid fa-bars"></i>
                         <span>Navbar</span>
                     </div>
@@ -169,10 +164,10 @@
             </div>
         </aside>
 
-    <main calss="canvas-area">
+    <main class="canvas-area">
         <div class="canvas-wrapper" id="canvasWrapper">
             <div class="canvas" id="canvas">
-                <div class="canvas-empty" if="canvasEmpty">
+                <div class="canvas-empty" id="canvasEmpty">
                     <i class="fa-solid fa-plus-circle"></i>
                     <p>Trascina un elemento qui per iniziare</p>
                     <p class="hint">oppure scegli un blocco pronto dal pannello a sinistra</p>
@@ -186,42 +181,37 @@
             <h3>Proprieta</h3>
         </div>
 
-        <div class="planel-empty" id="panelEmpty">
-            <i class="fa-solid fa-mouse-ponter"></i>
+        <div class="panel-empty" id="panelEmpty">
+            <i class="fa-solid fa-mouse-pointer"></i>
             <p>Seleziona un elemento nel canvas per modificarlo</p>
         </div>
-        <div class="proprio-content" id="propertiesContent" style="display:none;">
-                <div class="prop.tabs">
+        <div class="properties-content" id="propertiesContent" style="display:none;">
+                <div class="prop-tabs">
                     <button class="prop-tab active" data-tab="content">Contenuto</button>
                     <button class="prop-tab" data-tab="style">Stile</button>
                     <button class="prop-tab" data-tab="advanced">Avanzato</button>
                 </div>
 
-                <div class="prop-panel active" if="tab-content">
+                <div class="prop-panel active" id="tab-content">
                     <div class="prop-group">
                         <label class="prop-label">Testo</label>
                         <textarea class="prop-input prop-textarea" id="propText" rows="3"></textarea>
                     </div>
                     <div class="prop-group">
                         <label class="prop-label">URL link</label>
-                        <input type="text" class="prop-input" id="propLink" placeholder=""https://...">
-                    </div>
-                    <div class="prop-group">
-                        <label class="prop-label">Sorgente immagine</label>
-                        <input type="text" class="prop-input" id="propImagSrc" placeholder="URL immagine">
-                        <button class="prop-btn-small" id="btnUploadImage">Carica file</button>
+                        <input type="text" class="prop-input" id="propLink" placeholder="https://...">
                     </div>
                     <div class="prop-group">
                         <label class="prop-label">Sorgente immagine</label>
                         <input type="text" class="prop-input" id="propImageSrc" placeholder="URL immagine">
-                        <button class="prop-btn-small" id="btnUploadImage">Carico file</button>
+                        <button class="prop-btn-small" id="btnUploadImage">Carica file</button>
                     </div>
 
                     <div class="prop-group">
                         <label class="prop-label">Testo alternativo</label>
                         <input type="text" class="prop-input" id="propAlt" placeholder="Descrizione immagine">
                     </div>
-
+                    </div>
                     <div class="prop-panel" id="tab-style">
                         <div class="prop-group">
                             <label class="prop-label">Font</label>
@@ -266,8 +256,8 @@
                             <div class="prop-button-group">
                                 <button class="prop-btn-icon" data-align="left" title="Sinistra"><i class="fa-solid fa-align-left"></i></button>
                                 <button class="prop-btn-icon" data-align="center" title="Centro"><i class="fa-solid fa-align-center"></i></button>
-                                <button class="prop-btn-icon" data-align="right" title="Destra"><i class="fa-solid fa-anign-right"></i></button>
-                                <button class="prop-btn-icon" data-aligns="justify" title="Giustificato"><i class="fa-solid fa-align-justify"></i></button>
+                                <button class="prop-btn-icon" data-align="right" title="Destra"><i class="fa-solid fa-align-right"></i></button>
+                                <button class="prop-btn-icon" data-align="justify" title="Giustificato"><i class="fa-solid fa-align-justify"></i></button>
                             </div>
                         </div>
 
@@ -275,26 +265,26 @@
                             <div class="prop-half">
                                 <label class="prop-label">Colore testo</label>
                                 <div class="color-picker-wrapper">
-                                    <input type="color" class="prop.color" id="propColor" value="#333333">
-                                    <input type="text" class="prop-input prop-color.text" id="propColorText" value = "#333333">>
+                                    <input type="color" class="prop-color" id="propColor" value="#333333">
+                                    <input type="text" class="prop-input prop-color-text" id="propColorText" value = "#333333">
                                 </div>
                             </div>
                         <div class="prop-half">
                             <label class="prop-label">Colore sfondo</label>
-                            <div class="color-picker-wrapped">
+                            <div class="color-picker-wrapper">
                                 <input type="color" class="prop-color" id="propBgColor" value="#ffffff">
-                                <input type="text" class="prop-input prop-color--text" id="propBgColorText" value="#ffffff">
-                            </div>
+                                <input type="text" class="prop-input prop-color-text" id="propBgColorText" value="#ffffff">
+                        </div>
                         </div>
                     </div>
                     <div class="prop-group prop-row">
                         <div class="prop-half">
-                            <label class="prop-label"Interlinea></label>
+                            <label class="prop-label">Interlinea</label>
                             <input type="number" class="prop-input" id="propLineHeight" placeholder="1.5" step="0.1" min="0.5" max="5">
                         </div>
                         <div class="prop-half">
                             <label class="prop-label">Spaziatura lettere</label>
-                            <input type="number" class="prop-input id=propLetterSpacing" placeholder="0" step="0.5" min="-5" max="20">
+                            <input type="number" class="prop-input" id="propLetterSpacing" placeholder="0" step="0.5" min="-5" max="20">
                         </div>
                     </div>
                     <hr class="prop-divider">
@@ -312,25 +302,201 @@
                         <label class="prop-label">Margine (px)</label>
                         <div class="spacing-inputs">
                             <input type="number" class="prop-input prop-spacing" id="propMarginTop" placeholder="Su" min="0">
-                            <input type="number" class="prop-input prop-spacing" id="propMarginRight" placegholder="Dx" min="0">
+                            <input type="number" class="prop-input prop-spacing" id="propMarginRight" placeholder="Dx" min="0">
                             <input type="number" class="prop-input prop-spacing" id="propMarginBottom" placeholder="Giu" min="0">
-                            <input type="number" class="prop-input propspacinng" id="propMarginLeft" placeholder="Sx" min="0">
+                            <input type="number" class="prop-input prop-spacing" id="propMarginLeft" placeholder="Sx" min="0">
                         </div>
                     </div>
 
                     <div class="prop-group">
                         <label class="prop-label">Padding (px)</label>
-                        <div class spacing inputs>
-                            <input type="number" class="prop-input prop-spacing" id = propPaddingTop>
-                            <input type="number" class="prop-input prop-spacing" id=propPaddingRight>
+                        <div class="spacing-inputs">
+                            <input type="number" class="prop-input prop-spacing" id="propPaddingTop">
+                            <input type="number" class="prop-input prop-spacing" id="propPaddingRight">
                             <input type="number" class="prop-input prop-spacing" id="propPaddingBottom">
-                            <input type="number" class="prop.input prop-spacing" id="propPaddingLeft">
+                            <input type="number" class="prop-input prop-spacing" id="propPaddingLeft">
                         </div>
                     </div>
                     <hr class="prop-divider">
                         <div class="prop-group prop-row">
-                            <div class="prop.half">
-                                <label class="prop.label">Bordo (px)</label>
-                                <input type="number" class="prop-input", id="propBorderWidth" placeholder="0" min="0" max="50">
+                            <div class="prop-half">
+                                <label class="prop-label">Bordo (px)</label>
+                                <input type="number" class="prop-input" id="propBorderWidth" placeholder="0" min="0" max="50">
+                            </div>
+                            <div class="prop-half">
+                                <label class="prop-label">Raggio bordo(px)</label>
+                                <input type="number" class="prop-input" id="propBorderRadius" placeholder="0" min="0" max="500">
+                            </div>
+                        </div>
+                        <div class="prop-group prop-row">
+                            <div class="prop-half">
+                                <label class="prop-label">Stile Bordo</label>
+                                <select class="prop-input" id="propBorderStyle">
+                                    <option value="none">Nessuno</option>
+                                    <option value="solid">Solido</option>
+                                    <option value="dashed">Trateggiato</option>
+                                    <option value="dotted">Punteggiato</option>
+                                    <option value="double">Doppio</option>
+                                </select>
+                            </div>
+                            <div class="prop-half">
+                                <label class="prop-label">Colore bordo</label>
+                                <div class="color-picker-wrapper">
+                                    <input type="color" class="prop-color" id="propBorderColor" value="#cccccc">
+                                    <input type="text" class="prop-input prop-color-text" id="propBorderColorText" value="#cccccc">
+                                </div>
+                            </div>
+                        </div>
 
-                            
+                        <div class="prop-group">
+                            <label class="prop-label">Ombra</label>
+                            <select class="prop-input" id="propShadow">
+                                <option value="none">Nessuna</option>
+                                <option value="0 1px 3px rgba(0,0,0,0.12)">Leggera</option>
+                                <option value="0 4px 6px rgba(0,0,0,0.1)">Media</option>
+                                <option value="0 10px 25px rgba(0,0,0,0.15)">Forte</option>
+                                <option value="0 20px 50px rgba(0,0,0,0.2)">Molto forte</option>
+                            </select>
+                        </div>
+                        <div class="prop-group">
+                            <label class="prop-label">Opacita</label>
+                            <input type="range" class="prop-range" id="propOpacity" min="0" max="100" value="100">
+                            <span class="range-value" id="opacityValue">100%</span>
+                        </div>
+                    </div>
+                    <div class="prop-panel" id="tab-advanced">
+                        <div class="prop-group">
+                            <label class="prop-label">ID elemento</label>
+                            <input type="text" class="prop-input" id="propId" placeholder="mio-elemento">
+                        </div>
+                    <div class="prop-group">
+                        <label class="prop-label">Classi CSS</label>
+                        <input type="text" class="prop-input" id="propClasses" placeholder="classe1 classe2">
+                    </div>
+                    <div class="prop-group">
+                        <label class="prop-label">CSS personalizzato</label>
+                        <textarea class="prop-input prop-textarea prop-code" id="propCustomCSS" rows="5" placeholder="color: red&#10;transform: rotate(5deg);"></textarea>
+                    </div>
+                    <div class="prop-group">
+                        <label class="prop-label">Display</label>
+                        <select class="prop-input" id="propDisplay">
+                            <option value="block">Block</option>
+                            <option value="flex">Flex</option>
+                            <option value="grid">Grid</option>
+                            <option value="inline-block">Inline-block</option>
+                            <option value="inline">Inline</option>
+                            <option value="none">Nascosto</option>
+                        </select>
+                    </div>
+                    <div class="prop-group" id="flexOptions" style="display:none;">
+                        <label class="prop-label">Direzione flex</label>
+                        <select class="prop-input" id="propFlexDirection">
+                            <option value="row">Riga</option>
+                            <option value="column">Colonna</option>
+                        </select>
+                        <label class="prop-label" style="margin-top:8px;">Allinea elementi</label>
+                        <select class="prop-input" id="propAlignItems">
+                            <option value="stretch">Stretch</option>
+                            <option value="flex-start">Inizio</option>
+                            <option value="center">Centro</option>
+                            <option value="flex-end">Fine</option>
+                        </select>
+                        <label class="prop-label" style="margin-top:8px;">Giustifica contenuto</label>
+                        <select class="prop-input" id="propJustifyContent">
+                            <option value="flex-start">Inizio</option>
+                            <option value="center">Centro</option>
+                            <option value="flex-end">Fine</option>
+                            <option value="space-between">Spazio tra</option>
+                            <option value="space-around">Spazio intorno</option>
+                        </select>
+                        <label class="prop-label" style="margin-top:8px;">Gap (px)</label>
+                        <input type="number" class="prop-input" id="propGap" placeholder="0" min="0" max="200">
+                    </div>
+                    <div class="prop-group">                
+                        <label class="prop-label">Posizione</label>
+                        <select class="prop-input" id="propPosition">
+                            <option value="static">Statica</option>
+                            <option value="relative">Relative</option>
+                            <option value="absolute">Assoluta</option>
+                            <option value="fixed">Fissa</option>
+                            <option value="sticky">Sticky</option>
+                        </select>
+                    </div>
+                    <div class="prop-group">
+                        <label class="prop-label">Overflow</label>
+                        <select class="prop-input" id="propOverflow">
+                            <option value="visible">Visibile</option>
+                            <option value="hidden">Nascosto</option>
+                            <option value="scroll">Scroll</option>
+                            <option value="auto">Auto</option>
+                        </select>
+                    </div>
+                    <hr class="prop-divider">
+                    <div class="prop-group">
+                        <button class="prop-btn-danger" id="btnDeleteElement">
+                            <i class="fa-solid fa-trash"></i> Elimina elemento
+                        </button>
+                    </div>
+                    <div class="prop-group">
+                        <button class="prop-btn-secondary" id="btnDuplicateElement">
+                            <i class="fa-solid fa-clone"></i> Duplica elemento</button>
+                    </div>
+                </div>
+            </div>
+        </aside>
+    </div>
+
+    <div class="layers-panel" id="layersPanel">
+        <div class="panel-header">
+            <h3>Livelli</h3>
+            <button class="close-btn" id="closeLayers"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div class="layers-tree" id="layersTree"></div>
+    </div>
+    <button class="layers-toggle" id="btnLayers" title="Mostra livelli">
+        <i class="fa-solid fa-layer-group"></i>
+    </button>
+
+    <div class="modal-overlay" id="previewModal">
+        <div class="modal-content modal-fullscreen">
+            <div class="modal-header">
+                <h3>Anteprima</h3>
+                <button class="close-btn" id="closePreview"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <iframe id="previewFrame" class="preview-frame"></iframe>
+        </div>
+    </div>
+    <div class="modal-overlay" id="exportModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Esporta il tuo sito</h3>
+                <button class="close-btn" id="closeExport"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body">
+                <div class="export-tabs">
+                    <button class="export-tab active" data-export="html">HTML</button>
+                    <button class="export-tab" data-export="css">CSS</button>
+                    <button class="export-tab" data-export="full">Completo</button>
+                </div>
+                <pre class="code-output" id="codeOutput"></pre>
+                <div class="export-actions">
+                    <button class="toolbar-btn" id="btnCopyCode"><i class="fa-solid fa-copy"></i>Copia</button>
+                    <button class="toolbar-btn btn-primary" id="btnDownloadZip"><i class="fa-solid fa-download"></i> Scarica ZIP</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="context-menu" id="contextMenu">
+        <button class="context-item" data-action="duplicate"><i class="fa-solid fa-clone"></i> Duplica</button>
+        <button class="context-item" data-action="copy"><i class="fa-solid fa-copy"></i> Copia</button>
+        <button class="context-item" data-action="paste"><i class="fa-solid fa-paste"></i> Incolla</button>
+        <button class="context-item" data-action="moveup"><i class="fa-solid fa-arrow-up"></i> Sposta su</button>
+        <button class="context-item" data-action="movedown"><i class="fa-solid fa-arrow-down"></i> Sposta giu</button>
+        <hr class="context-divider">
+        <button class="context-item context-danger" data-action="delete"><i class="fa-solid fa-trash"></i> Elimina</button>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
