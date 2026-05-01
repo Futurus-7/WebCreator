@@ -713,3 +713,131 @@ select.prop-input {
     color: var(--text-primary);
 }
 
+.layer-item.active {
+    background: var(--accent-light);
+    color: var(--accent);
+}
+
+.layer-item i {
+    font-size: 11px;
+    width: 10px;
+    text-align: center;
+}
+
+.layer-indent {
+    padding-left: 20px;
+}
+
+.layer-indent-2 {
+    padding-left: 40px;
+}
+
+.layer-toggle {
+    position: fixed;
+    bottom: 16px;
+    left: calc(var(--panel-width) + 16px);
+    width: 40px;
+    height: 40px;
+    background: var(--bg-panel);
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 14px;
+    z-index: 89;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--transition);
+    box-shadow: var(--shadow-md);
+}
+
+.layers-toggle:hover {
+    background: var(--accent);
+    border-color: var(--accent);
+}
+
+.close.btn {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    font-size: 14px;
+    padding: 4px;
+    transition: var(--transition);
+}
+
+.close-btn:hover {
+    color: var(--text-primary);
+}
+
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.7);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 200;
+    backdrop-filter: blur(4px);
+}
+
+.modal-overlay.visible {
+    display: flex;
+}
+
+.modal-content {
+    background: var(--bg-panel);
+    border-radius: var(--radius-lg);
+    width: 90%;
+    max-width: 700px;
+    max-height: 85vh;
+    overflow: hidden;
+    box-shadow: var(--shadow-lg);
+    display: flex;
+    flex-direction: column;
+}
+
+.modal-fullscreen {
+    width: 95%;
+    max-width: none;
+    height: 90vh;
+    max-height: 90vh;
+}
+
+.modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.model-header h3 {
+    font-size: 15px;
+    font-weight: 600;
+}
+
+.model-body {
+    padding: 20px;
+    overflow-y: auto;
+    flex: 1;
+}
+
+.preview-frame {
+    flex: 1;
+    width: 100%;
+    border: none;
+    background: white;
+}
+
+.export-tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+}
+
+.export-tab {
+    padding: 6px 16px;
+    background: var(--bg-input);
+    border: 1px solid var(--border-color);
+    color: var(--text-secondary);
+    border-radius: var
