@@ -1,4 +1,4 @@
-'{
+*{
     margin: 0;
     padding: 0;
     box-sizing: border-box;
@@ -26,7 +26,7 @@
     --shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.4);
     --radius-sm: 4px;
     --radius-md: 8px;
-    --redius-lg: 12px;
+    --radius-lg: 12px;
     --toolbar-height: 48px;
     --panel-width: 260px;
     --transition: 0.2s ease;
@@ -35,7 +35,7 @@
 html, body {
     height: 100%;
     overflow: hidden;
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sens-serif;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     font-size: 13px;
     color: var(--text-primary);
     background: var(--bg-dark);
@@ -47,9 +47,9 @@ html, body {
     justify-content: space-between;
     height: var(--toolbar-height);
     padding: 0 16px;
-    background: bar(--bg-panel);
-    border-bottom: ipx solid var(--border-color);
-    z-indix: 100;
+    background: var(--bg-panel);
+    border-bottom: 1px solid var(--border-color);
+    z-index: 100;
     position: relative;
 }
 
@@ -80,7 +80,7 @@ html, body {
     border-radius: var(--radius-sm);
     cursor: pointer;
     font-size: 12px;
-    transition: var(--transition):
+    transition: var(--transition);
 }
 
 .toolbar-btn:hover {
@@ -102,7 +102,7 @@ html, body {
     background: transparent;
     border: 1px solid transparent;
     color: var(--text-secondary);
-    border-radius: bar(--radius-sm);
+    border-radius: var(--radius-sm);
     cursor: pointer;
     font-size: 14px;
     transition: var(--transition);
@@ -127,12 +127,12 @@ html, body {
     width: var(--panel-width);
     min-width: var(--panel-width);
     background: var(--bg-panel);
-    border-right: 1px solid var(--border.color);
+    border-right: 1px solid var(--border-color);
     overflow-y: auto;
     overflow-x: hidden;
 }
 
-.panel-left::webkit-scrollbar {
+.panel-left::-webkit-scrollbar {
     width: 5px;
 }
 
@@ -140,14 +140,14 @@ html, body {
     background: transparent;
 }
 
-.panel-left::webkit-scrollbar-thumb {
+.panel-left::-webkit-scrollbar-thumb {
     background: rgba(255, 255, 255, 0.1);
     border-radius: 10px;
 }
 
 .panel-header {
     padding: 14px 16px;
-    border-bottom; 1px solid var(--border-color):
+    border-bottom: 1px solid var(--border-color);
 }
 
 .panel-header h3 {
@@ -184,9 +184,9 @@ html, body {
 
 .section-title:after {
     content: '\f078';
-    font-family: 'Font awesome 6 Free';
+    font-family: 'Font Awesome 6 Free';
     font-size: 9px;
-    transition: transofrm 0.2s ease;
+    transition: transform 0.2s ease;
 }
 
 .section-title.collapsed:after {
@@ -194,7 +194,7 @@ html, body {
 }
 .section-content {
     display: grid;
-    grid-template-columns: ifr ifr;
+    grid-template-columns: 1fr 1fr;
     gap: 6px;
     padding: 6px 10px 12px;
 }
@@ -225,7 +225,7 @@ html, body {
 }
 
 .draggable-item:active {
-    cursod: grabbing;
+    cursor: grabbing;
     transform: scale(0.95);
 }
 
@@ -234,7 +234,7 @@ html, body {
     color: var(--accent);
 }
 
-.draggable.item span {
+.draggable-item span {
     font-size: 10px;
     color: var(--text-secondary);
     text-align: center;
@@ -242,7 +242,7 @@ html, body {
 
 .canvas-area {
     flex: 1;
-    background; var(--bg-canvas);
+    background: var(--bg-canvas);
     overflow: auto;
     display: flex;
     justify-content: center;
@@ -252,14 +252,14 @@ html, body {
 .canvas-wrapper {
     width: 100%;
     max-width: 1200px;
-    transitition: max-width 0.3s ease;
+    transition: max-width 0.3s ease;
 }
 
 .canvas-wrapper.tablet {
     max-width: 768px;
 }
 .canvas-wrapper.mobile {
-    max-width: 375px:
+    max-width: 375px;
 }
 
 .canvas {
@@ -281,10 +281,10 @@ html, body {
     gap: 12px;
 }
 
-.canvas-empty 1 {
+.canvas-empty i {
     font-size: 48px;
     color: #ccc;
-)
+}
 
 .canvas-empty p {
     font-size: 16px;
@@ -292,7 +292,7 @@ html, body {
 }
 
 .canvas-empty .hint {
-    font-size; 13px;
+    font-size: 13px;
     color: #bbb;
 }
 
@@ -374,7 +374,7 @@ html, body {
     border-radius: 2px;
     margin: 2px 0;
     pointer-events: none;
-    animation: pulse-indicator is infinite;
+    animation: pulse-indicator 1s infinite;
 }
 
 @keyframes pulse-indicator {
@@ -387,11 +387,11 @@ html, body {
     min-width: 300px;
     background: var(--bg-panel);
     border-left: 1px solid var(--border-color);
-    overflox-y: auto;
+    overflow-y: auto;
     overflow-x: hidden;
 }
 
-.panel-right::webkit-scrollbar {
+.panel-right::-webkit-scrollbar {
     width: 5px;
 }
 
@@ -416,7 +416,8 @@ html, body {
 }
 
 .panel-empty i {
-    font-size: 12px;
+    font-size: 32px;
+    opacity: 0.3;
     line-height: 1.5;
 }
 
@@ -466,13 +467,13 @@ html, body {
     font-size: 11px;
     font-weight: 500;
     color: var(--text-secondary);
-    margin-botton: 5px;
+    margin-bottom: 5px;
     text-transform: uppercase;
     letter-spacing: 0.3px;
 }
 
 .prop-input {
-    width: 100px;
+    width: 100%;
     padding: 7px 10px;
     background: var(--bg-input);
     border: 1px solid var(--border-color);
@@ -481,7 +482,7 @@ html, body {
     font-size: 12px;
     transition: var(--transition);
     outline: none;
-    font.-family:inherit;
+    font-family: inherit;
 }
 
 .prop-input:focus {
@@ -496,7 +497,7 @@ html, body {
 
 select.prop-input {
     cursor: pointer;
-    appaerance: none;
+    appearance: none;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23a0a0b8'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
     background-position: right 10px center;
@@ -509,7 +510,7 @@ select.prop-input {
 }
 
 .prop-code {
-    font-family: 'Courier New'. monospace;
+    font-family: 'Courier New', monospace;
     font-size: 11px;
     line-height: 1.5;
 }
@@ -556,7 +557,7 @@ select.prop-input {
 
 .spacing-inputs {
     display: grid;
-    grid-templat-columns: ifr ifr ifr ifr;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
     gap: 4px;
 }
 
@@ -575,7 +576,7 @@ select.prop-input {
     flex: 1;
     padding: 7px;
     background: var(--bg-input);
-    border: ipx solid var(--border-color);
+    border: 1px solid var(--border-color);
     color: var(--text-secondary);
     border-radius: var(--radius-sm);
     cursor: pointer;
@@ -597,17 +598,17 @@ select.prop-input {
 .prop-range {
     width: 100%;
     margin: 4px 0;
-    accent-color: var(--accent)
+    accent-color: var(--accent);
 }
 
 .range-value {
     font-size: 11px;
-    color: var(--test-secondary);
+    color: var(--text-secondary);
 }
 
-.prp-btn-small{
+.prp-btn-small {
     margin-top: 6px;
-    padding 5px 10px;
+    padding: 5px 10px;
     background: var(--bg-input);
     border: 1px solid var(--border-color);
     color: var(--text-primary);
@@ -627,7 +628,7 @@ select.prop-input {
     background: transparent;
     border: 1px solid var(--danger);
     color: var(--danger);
-    border-radius= var(--radius-sm);
+    border-radius: var(--radius-sm);
     cursor: pointer;
     font-size: 12px;
     display: flex;
@@ -690,18 +691,18 @@ select.prop-input {
     display: flex;
 }
 
-.layers-panel .panel-header {
+.layers-tree {
     overflow-y: auto;
-    padding; 8px;
+    padding: 8px;
     flex: 1;
 }
 
-.layer.item {
+.layer-item {
     display: flex;
     align-items: center;
     gap: 8px;
     padding: 6px 8px;
-    border-radius; var(--radius-sm);
+    border-radius: var(--radius-sm);
     cursor: pointer;
     font-size: 12px;
     color: var(--text-secondary);
@@ -732,13 +733,14 @@ select.prop-input {
     padding-left: 40px;
 }
 
-.layer-toggle {
+.layers-toggle {
     position: fixed;
     bottom: 16px;
     left: calc(var(--panel-width) + 16px);
     width: 40px;
     height: 40px;
     background: var(--bg-panel);
+    border: 1px solid var(--border-color);
     border-radius: 50%;
     cursor: pointer;
     font-size: 14px;
@@ -755,7 +757,7 @@ select.prop-input {
     border-color: var(--accent);
 }
 
-.close.btn {
+.close-btn {
     background: none;
     border: none;
     color: var(--text-secondary);
@@ -811,12 +813,12 @@ select.prop-input {
     border-bottom: 1px solid var(--border-color);
 }
 
-.model-header h3 {
+.modal-header h3 {
     font-size: 15px;
     font-weight: 600;
 }
 
-.model-body {
+.modal-body {
     padding: 20px;
     overflow-y: auto;
     flex: 1;
@@ -927,13 +929,13 @@ select.prop-input {
 
 .context-divider {
     border: none;
-    border-top; 1px solid var(--border-color;
-    marigin: 4px 0;
+    border-top: 1px solid var(--border-color);
+    margin: 4px 0;
 }
 
 .canvas .wb-section {
     padding: 60px 20px;
-    min-height: 100;
+    min-height: 100px;
 }
 
 .canvas .wb-container {
@@ -949,7 +951,7 @@ select.prop-input {
     min-height: 60px;
 }
 
-.canvas .wb-columns {
+.canvas .wb-column {
     flex: 1;
     padding: 15px;
     min-height: 50px;
@@ -992,7 +994,7 @@ select.prop-input {
     border-radius: var(--radius-sm);
 }
 
--canvas .wb-image-placeholder {
+.canvas .wb-image-placeholder {
     width: 100%;
     height: 200px;
     background: #f0f0f0;
@@ -1006,7 +1008,7 @@ select.prop-input {
 
 .canvas .wb-button {
     display: inline-block;
-    padding: 12px 28;
+    padding: 12px 28px;
     background: var(--accent);
     color: white;
     border: none;
@@ -1025,13 +1027,13 @@ select.prop-input {
     display: inline-block;
 }
 
-.canvas -wb-divider {
+.canvas .wb-divider {
     border: none;
     border-top: 1px solid #ddd;
     margin: 15px 0;
 }
 
-.canvas ,wb-spacer {
+.canvas .wb-spacer {
     height: 40px;
 }
 
@@ -1061,7 +1063,7 @@ select.prop-input {
     align-items: center;
     justify-content: center;
     color: #999;
-    border-radius: car(--radius-sm);
+    border-radius: var(--radius-sm);
 }
 
 .canvas .wb-form {
@@ -1080,7 +1082,7 @@ select.prop-input {
     margin: 4px 0;
 }
 
-.canvas .wb-textarea-e1 {
+.canvas .wb-textarea-el {
     width: 100%;
     padding: 10px 14px;
     border: 1px solid #ddd;
@@ -1105,7 +1107,7 @@ select.prop-input {
     align-items: center;
     gap: 8px;
     padding: 5px;
-    font-size; 14px;
+    font-size: 14px;
     color: var(--text-dark);
 }
 
@@ -1238,5 +1240,112 @@ select.prop-input {
     font-size: 42px;
     font-weight: 800;
     color: var(--accent);
-    margin:bottom: 20px;
+    margin-bottom: 20px;
+}
+
+.canvas .wb-pricing .pricing-price span {
+    font-size: 16px;
+    font-weight: 400;
+    color: #999;
+}
+
+.canvas .wb-pricing .pricing-features {
+    list-style: none;
+    margin-bottom: 24px;
+    text-align: left;
+}
+
+.canvas .wb-pricing .pricing-features li {
+    padding: 8px 0;
+    font-size: 14px;
+    color: #555;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.canvas .wb-testimonial {
+    background: #f8f9fa;
+    border-radius: var(--radius-lg);
+    padding: 30px;
+    max-width: 500px;
+}
+
+.canvas .wb-testimonial .testimonial-quote {
+    font-size: 16px;
+    line-height: 1.6;
+    color: #555;
+    font-style: italic;
+    margin-bottom: 16px;
+}
+
+.canvas .wb-testimonial .testimonial-author {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.canvas .wb-testimonial .testimonial-avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: #ddd;
+}
+
+ .canvas .wb-testimonial .testimonial-name {
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--text-dark);
+}
+
+.canvas .wb-testimonial .testimonial-role {
+    font-size: 12px;
+    color: #999;
+}
+
+.hidden {
+    display: none !important;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: scale(0.95); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+.modal-overlay.visible .modal-content {
+    animation: fadeIn 0.2s ease;
+}
+
+@media (max-width: 1200px) {
+    .panel-left {
+        width: 220px;
+        min-width: 220px;
+    }
+    .panel-right {
+        width: 260px;
+        min-width: 260px;
+    }
+}
+
+@media (max-width: 900px) {
+    .panel-left,
+    .panel-right {
+        position: fixed;
+        top: var(--toolbar-height);
+        height: calc(100vh - var(--toolbar-height));
+        z-index: 80;
+        box-shadow: var(--shadow-lg);
+    }
+    .panel-left {
+        left: -260px;
+        transition: left 0.3s ease;
+    }
+    .panel-left.open {
+        left: 0;
+    }
+    .panel-right {
+        right: -300px;
+        transition: right 0.3s ease;
+    }
+    .panel-right.open {
+        right: 0;
+    }
 }
