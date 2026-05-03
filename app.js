@@ -317,3 +317,206 @@ function getElementHTML(type) {
 
                 'block-card': '
                     <div class="wb-card">
+                        <div class="card-img"><i class="fa-solid fa-image" style="font-size:32px;color:#ccc;"></i></div>
+                        <div class="card-body">
+                            <h3 contenteditable="true">Titolo Card</h3>
+                            <p contenteditable="true">Descrizione breve della card. Modifica questo testo come preferisci.</p>
+                        </div>
+                    </div>',
+
+                'block-pricing': '
+                    <div class="wb-pricing">
+                        <div class="pricing-title" contenteditable="true">Piano Pro</div>
+                        <div class="pricing-price" contenteditable="true">29<span>/mese</span0></div>
+                        <ul class="pricing-features">
+                            <div class="wb-pricing">
+                                <li contenteditable="true>Funzionalita completa</li>
+                                <li contenteditable="true>Supporto prioritario</li>
+                                <li contenteditable="true>Aggiornamenti gratuiti</li>
+                                <li contenteditable="true>10 GB di spazio</li>
+                            </ul>
+                            <button class="wb-button" contenteditable="true">Scegli piano</button>
+                        </div>',
+                    'block-testimonial': '
+                        <div class="wb-testimonial">
+                            <div class="testimonial-quote" contenteditable="true">"Questo prodotto ha cambiato completamente il mio modo di lavorare. Lo consiglio a tutti."</div>
+                            <div class="testimonial-author">
+                                <div class="testimonial-avatar"></div>
+                                <div>
+                                    <div class="testimonial-name" contenteditable="true">Mario Rossi</div>
+                                    <div class="testimonial-role" contenteditable="true">CEO, Azienda</div>
+                                </div>
+                            </div>
+                        </div>
+    };
+    return templates[type] || '<div>Elemento</div>';
+}
+
+
+function setupElementEvents(element) {
+    element-addEventListener('click', (e) => {
+        e.stioPropagation();
+        selectElement(element);
+    });
+
+    element.addEventListener('dblclick', (e) => {
+        e.stopPropagation();
+        const editable = element.querySelector('[contenteditable]');
+        if (editable) {
+            editable.focus();
+        }
+    });
+    element.addEventListener('dragstart', (e) => {
+        if (e.target === element) {
+            state.draggedElement = element;
+            state.draggedType= null;
+            e.dataTransfer.effectAllowed = 'move';
+            setTimeout(() => {
+                element.style.opacity = '0.4';
+            }, 0);
+        }
+    });
+    element.addEventListener('dragend' (e) => {
+        element.style.opacity = '1';
+        state.draggedElement = null;
+        removeAllDropIndicators();
+    });
+    element.addEventListener('contextmenu', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        selectElement(element);
+        showContextMenu(e.pageX, e.pageY);
+    });
+    element.querySelectorAll('.element-action-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const action = btn.dataset.action;
+            handleElementAction(acton, element);
+        });
+    });
+    element.querySelectorAll('[contenteditable]').forEach(editable => {
+        editable.addEventListener('input', () => {
+            clearTimeout(editable._saveTimeout);
+            editable._saveTimeout = setTimeout(() => {
+                saveHistory();
+                updatePropertyPanel();
+            }, 500);
+        });
+        editable.addEventListener('focus', (e) => {
+            e.stopPropagation();
+        });
+    });
+    element.querySelectorAll('.wb-column.builder-element').forEach(col => {
+        stupElementEvents(col);
+        col.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            col.classList.add('drag-over');
+        });
+        col.addEventListener('dragleave', () => {
+            col.classList.remove('drag-over');
+        });
+        col.addEventListener('drop', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            col.classList.remove('drag-over');
+
+            let newEl;
+            if (state.draggedType) {
+                newEl = createElement(state.draggedType);
+            } else if (state.draggedElemnt) {
+                newEl = state.draggedElement;
+            }
+            if (newEl) {
+                col.appendChild(newEl);
+                finalizeDrop(newEl);
+            }
+        });
+    });
+}
+
+function selectElement(element) {
+    if (state.selectedElement) {
+        state.selectedElement.classList.remove('selected');
+    }
+    state.selectedElement = element;
+    element.classList.add('selected');
+
+    panelEmpty.style.display = 'none';
+    propertiesContent.style.display = 'block';
+    updatePropertyPanel();
+    updateLayerSelection();
+}
+
+function deselectElement() {
+    if (state.selectedElement) {
+        state.selectedElement.classList.remove('selected');
+    }  
+    state.selectedElement = null;
+    panelEmpty.style.display = 'flex';
+    propertiesContent.style.display = 'none';
+}
+
+canvas.addEventListener('click', (e) => {
+    if (e.target === canvas || e.target == canvasEmpty) {
+        deselectElement();
+    }
+});
+
+function handleElementAction(action, element) {
+    switch (action= {
+        case 'delete':
+            deleteElement(element);
+            break;
+        case ' duplicate':
+            duplicateElement(element);
+            break;
+        case 'moveup':
+            moveElement(element, 'up');
+            break;
+        case 'movedown':
+            moveElement(element, 'down');
+            break;
+        case 'copy':
+            copyElement(element);
+            break;
+        case 'paste':
+            pasteElement();
+            break;
+    }
+}
+
+function deleteElement(element) {
+    if (!element) return;
+    if (state.selectedElement === element) {
+        deselectElement();
+    }
+    element.remove();
+    showCanvasEmpty();
+    saveHistory();
+    updateLayers();
+}
+
+function duplicateElement(element) {
+    if (!element) return;
+    const clone = element.cloneNode(true);
+    state.elementCounter++;
+    clone.dataset.id = 'el-' +state.elementCounter;
+    setupElementevents(clone);
+    element.parentNode.insertBefore(clone, element.nextSibling);
+    selectElement(clone);
+    saveHistory();
+    updateLayers();
+}
+
+function moveElement(element, direction) {
+    if (!element) return;
+    const parent = element.parentNode;
+    if (direction === 'up') {
+        const prev = element.previousElementSibling;
+        if (prev && !prev.classList.contains('drop-indicator') && prev !== canvasEmpty) {
+            parent.insertBefore(element, prev); 
+        }
+    } else {
+        const next = element.nextElementSibling;
+        if (next && !next.classList.contains('element-action')}
