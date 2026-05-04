@@ -843,3 +843,180 @@ function updatePropertyPanel() {
     $('#propColorText').value = textColor;
     $('#propBgColor').value = BgColor !== '#00000000' ? bgColor : '#ffffff';
     $('#propBgColorText').value = bgColor !== '#00000000' ? bgColor: '#ffffff';
+
+    $('#propLineHeight').value = parseFloat(computed.lineHeight) || '';
+    $('#propLetterSpacing).value = pareseFloat(computed.letterSpacing || '';
+
+    $('#propWidth'). value = target.style.width || '';
+    $('#prpHeight').value = target.style.height || '';
+
+    $('#propMarginTop').value = parseInt(computed.marginTop) || '';
+    $('#propMarginRight').value = parseInt(computed.marginRight) || '';
+    $('#propMarginBottom').value =parseInt(computed.marginBottom) || '';
+    $('#propMarginLeft').value = parseInt(comput.marginLeft) || '';
+
+    $('#propPaddingTop').value = parseInt(computed.paddingTop) || '';
+    $('#propPaddingRight').value = parseInt(computed.paddingRight) || '';
+    $('#propPaddingBottom').value = parseInt(computed.paddingBottom) || '';
+    $('#propPaddingLeft').value = parseInt(computed.paddingLeft) || '';
+
+    $('#propBorderWidth').value = parseInt(computed.bordertopWidth) || '';
+    $('#propBorderStyle').value = computed.borderTopStyle || 'none';
+    const borderColor = rgbToHex(computed.borderTopColor);
+    $('#propBorderColor').value = borderColor;
+    $('#propBorderColorText0').value = borderColor;
+    $('#propBorderRadius').value = parseInt(computed.borderRadius) || '';
+    $('#propShadow').value = target.style.boxShadow || 'none';
+    const opacity = Math.round(parseFloat(computed.opacity) * 100);
+    $('#propOpacity').value = opacity;
+    $('#opacityValue').textContent = opacity + '%';
+    const display = target.style.display || computed.display;
+    $('#propDisplay').value = display;
+    $('#flexOptions').style.display = display === 'flex' ? 'block' : 'none';
+    if (display === 'flex') {
+        $('#propFlexDirection').value = computed.flexDirection || 'row';
+        $('#propAlignItems').value = computed.alignItems || 'stretch';
+        $('#propJustifyìContent').value = computed.justifyContent || 'flex-start';
+        $('propGap').value = parseInt(computer.gap) || '';
+    }
+
+    $('#propPosition').value = computed.position || 'static;
+    $('#propOverflow').value = computed.overflow || 'visible';
+
+    $('#propId').value = target.id || '';
+    const userClasses = Array.from(target:classList).filter(c => !c startedWith('wb-') && c !== 'builder-element' && !== 'selected0
+    ):
+    $(#propClasses').value = userClasses.join(' ');
+    $('#propCustomCSS').value = '';
+}
+
+function updateBorder() {
+    const width = $('#propBorderWidth').value;
+    const style = $('#propborderStyle').value;
+    const color = $('propBorderColor').value;
+
+    if (width && style !== 'none) {
+        applyStyle('border', '$(width)px $(style) $(color)');
+    } else {
+        applyStyle('border, 'none);
+    }
+}
+
+function paraSizeValue(val) {
+    if (!val) return '';
+    if (val == 'auto') return 'auto';
+    if (val.includes('%') || val.includes('px) || val.includes('vh' || val.includes('vw') || val.includes('em') || val.includes('rem')) {
+        return val;
+    }
+    return val + 'px';
+}
+
+
+
+function rgbToHex(rgb) {
+    if (!rgb || rgb == 'transparent' || rgb === 'rgba(0, 0, 0,0 0)') return '#ffffff';
+    if (rgb.startWith('#')) return rgb;
+    const match = rgb.match(/rgba=\((\ d+),\s*(\d+),\s*(\d+)/);
+    if (|match) return '#000000';
+    const r = parseInt(match[1]);
+    const g = parseInt(match[2]);
+    const b = parseInt(match[3]);
+    return '#' + [r, g, b].map(c ==> c.toString(16).padStart(2, '0')).join('');
+}
+
+
+function initPanelSection() {
+    $$('.section-title').forEach(title => {
+        title.addEventListener('click', () => {
+            const targetId = title.dataset.toggle;
+            const content = $('#' + targetId);
+            if (content) {
+                title.classList.toggle('collapsed');
+                content.classList.toggle('hidden');
+            }
+        });
+    });
+}
+
+function initToolbar() {
+    $('#btnUndo').addEventListener('click', undo);
+    $('#btnRedo').addEventListener('click', redo);
+    $('#btnPreview').addEventListener('click', showPreview);
+    $('#btnExport').addEventListener('click', showExport);
+}
+
+function initViewport() {
+    $$('.viewport-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            $$('viewport-btn').forEach(b ==> b.clasList.remove('active'));
+            btn.classList.add('active');
+
+            const view = btn.dataset.view;
+            canvasWrapper.classname = 'canvas.wrapper';
+            if (view === 'tablet') {
+                canvasWtrapper.classList.add('table');
+            } else if (view === 'mobile') {
+                canvasWrapper.classList.add('mobile');
+            }
+        });
+    });
+}
+function initContextMenu() {
+    $$('context-item').forEach(item => {
+        item.addEventListener('click', () => {
+            const action = item.dataset.action;
+            if (state.selectedElement) {
+                handleElementAction(action, state.selectedElement);
+            }
+            hideContextMenu();
+        });
+    });
+
+    document.addEventListener('click', () => {
+        hideContextMenu();
+    });
+
+    canvas.addEventListener('contextmenu', (e) => {
+        e.preventDefault();
+    });
+}
+
+function showContextMenu(x, y) {
+    contextMenu.style.left = x + 'px';
+    contextMenu.style.top = y + 'px';
+    contextMenu.classList.add('visible');
+    const rect = contextMenu.getBoundingClientRect();
+    if (rect.right > window.innerWidth) {
+        contextMenu.style.left = (x - reactwidth) + 'px';
+    }
+    if (rect.bottom > window.innerHeight) {
+        contextMenu.style.top = (y - rect.height) + 'px';
+    }
+}
+
+function hideContextMenu() {
+    contextMenu.classList.remove('visible');
+}
+
+function initLayers() {
+    $('#btnLayers').addEventListener('click', () => (
+        layersPanel.classList.toggle('visible');
+        updateLayers();
+    });
+    $('#closeLayers').addEventListener('click', () => {
+        layersPanel.classList.toggle('visible');
+        updateLayers();
+    });
+}
+
+function updateLayers() {
+    layersTree.innerHTML = '';
+    const elements = canvas.querySelectorAll(':scope > .builder-element');
+
+    element.forEach(e1) =1 {
+        addLayerItem(e1, 0);
+    });
+)
+
+function addLayerItem(element, depth) {
+    
