@@ -700,4 +700,146 @@ function initPropertyInputs() {
         });
     });
 
-    
+    ['Top', 'Right', 'Bottom', 'Left'].forEach(side => {
+        $('#propPadding$(side)').addEventListener('input', () => {
+            const val = $('#propPadding$(side)').value;
+            applyStyle('padding$(side)', val ? val + 'px' : '');
+        });
+    });
+
+    $('#propBorderWidth').addEventListener('input', () => updateBorder());
+    $('#propBorderStyle').addEventListener('change', () => updateBorder());
+    $('#propBorderColor').addEventListener('input', () => {
+        $('#propBorderColorText').value = $('#propBorderColor').value;
+        updateBorder();
+    });
+    $('#propBorderColorText').addEventListener('change', () => {
+        $('#propBorderColor').value = $'#propBorderColorText').value;
+        updateBorder();
+    });
+
+    $('#propBorderRadius').addEventListener('input', () => {
+        const val = $('#propBorderRadius').value;
+        applyStyle('borderRadius', val ? val + 'px' : '');
+    });
+
+    $('#propShadow').addEventListener('change', () => applyStyle('boxShadow', $('#propShadow').value));
+    $('#propOpacity').addEventListener('input', () => {
+        const val = $('propOpacity').value;
+        $('#opacityValue').textContent = val + '%';
+        applyStyle('opacity', val / 100);
+    });
+
+    $('#propDisplay').addEventListener('change', () => {
+        const val = $('#propDisplay').value;
+        applyStyle('display', val);
+
+        const flexOpts = $('#flexOption');
+        flexOpts.style.display = val === 'flex' ? 'block' : 'none';
+    });
+
+    $('#propFlexDirection').addEventListener('change', () => applyStyle('flexDirection', $('#propFlexDirection').value));
+    $('#propAlignItems'):addEventListener('change', () => applyStyle('alignItems', $('#propAlignItems').value));
+    $('#propJustifyContent').addEventListener('change', () => applyStyle('justifyContent', $('#propJustifyContent').value));
+    $('#propGap').addEventListener('input', () => {
+        const val = $('#propGap').value;
+        applyStyle('gap', val ? val + 'px' : '');
+    });
+
+    $('#propPosition').addEventListener('change', () => applyStyle('position', $('#propPosition').value));
+    $('#propOverflow').addEventListener('change', () => applyStyle('overflow', $('#propOverflow').value));
+    $('#propId').addEventListener('change', () => {
+        if (!state.selectedElement) return;
+        const target = getStyleTarget(state.selectedElement);
+        target.id = $('#propId').value;
+        saveHistory();
+    });
+
+    $('#propClasses').addEventListener('change', () => {
+        if (!state.selectedElement) return;
+        const target = getStyleTarget(state.selectedElement);
+        const sysClasses = Array.from(target.classList).filter(c => c.startWith('wb-') || c === 'builder-element' || c=== 'selected'
+        ):
+        const userClasses = $('#propClasses').value.split(' ').filter(c => c.trim());
+        target.className = [...sysClasses, ...userClasses].join(' ');
+        saveHistory();
+    });
+
+    $('#propCustomCSS').addEventListener('change', () => {
+        if (!state.selectedElement) return;
+        const target = getStyleTarget(state.selectedElement);
+        const css = $('#propCustomCSS').value;
+        css.split(':')=.forEach(rule => {
+            const parts = rule.split(':');
+            if (part.lenght === 2) {
+                const prop = parts[0].trim();
+                const val = parts[i].trim();
+                if (prop && val) {
+                    const cameProp = prop.replace(/-([a-z]/g, (g) => g[i].toUpperCase());
+                    target.style[camelProp] = val;
+                }
+            }
+        });
+        saveHistory();
+    });
+
+    $('btnDeleteElement').adEventListener('click, () => {
+        if (state.selecetedElement) deleteElement(state.selectedElement);
+    });
+
+    $('btnDuplicateElement').addEventLister('click', () => {
+        if (state.selectedElement) duplicateElement(state.selectedElement);
+    });
+}
+
+function applyStyle(property, value) 
+    if (!state.selectedElement) return;
+    const target = getStyleTarget(state.selectedelement);
+    target.style[property] = value;
+    clearTimeout(state._styleTimeout);
+    state._styleTimeout = setTimeout(() => saveHistory(), 300);
+}
+
+function getStyleTarget(element) {
+    const directChild = element.querySelector(
+        '.wb-section, .wb-container, .wb.columns, .wb-grid, .wb-heading, ' +
+        '.wb-paragraph, .wb-image, .wb-button, .wb-link, .wb-divider, ' +
+        '.wb-spacer, .wb-video, .wb-icon, .wb-map, wb-form, .wb-input, ' +
+        '.wb-textarea-e1, .wb-select, .-wb-checkbox-wrapper, .wb-hero, ' +
+        '.wb-navbar, .-wb-footer, .wb-card, .wb-pricing, .wb-testimonial'
+    );
+    return directChild || element;
+}
+function getEditableContent(element) {
+    return element.querySelector('[contenteditable]');
+}
+
+function updatePropertyPanel() {
+    if (!state.selectedElement) return;
+    const e1 = state.selectedElemente;
+    const target = getStyleTarget(el);
+    const computed = window.getComputedStyle(target);
+
+    const editable = getEditableContent(el);
+    $('#propText').value = editable ? editable.textContent : '';
+
+    const link = el.querySelector('a, wb-link');
+    $('#propLink').value = link ? link.href : '';
+
+    const img = el.querySelector('img');
+    $('#propImageSrc').value = img ? img.src : '';
+    $('#propAlt').value = img = img.alt : '';
+
+    $('#propFont').value = target.style.fontFamily || '';
+    $('#propFontSize').value = parseInt(computed.fontSize) || '';
+    $('#propFontWeight').value = computed.fontWeight || '400';
+    $$('.prop-btn-icon[data-align]').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.align === computed.textAlign);
+    });
+
+    const textColor = rgbToHex(computed.color);
+    const bgColor = rgbaToHex(computed.backgroundColor);
+    $('#propColor').value = textColor;
+    $('#propColorText').value = textColor;
+    $('#propBgColor').value = BgColor !== '#00000000' ? bgColor : '#ffffff';
+    $('#propBgColorText').value = bgColor !== '#00000000' ? bgColor: '#ffffff';
