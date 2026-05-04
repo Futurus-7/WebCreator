@@ -520,3 +520,184 @@ function moveElement(element, direction) {
     } else {
         const next = element.nextElementSibling;
         if (next && !next.classList.contains('element-action')}
+            parent.insertBefore(next, element);
+        }
+    }
+
+    saveHistory();
+    updateLayers();
+}
+
+function copyElement(element) {
+    if (!element) return;
+    state.clipboard = element.cloneNode(true);
+}
+
+function pasteElement() {
+    if (!state.clipboard) return;
+    const clone = state.clipboard.cloneNode(true);
+}
+
+function pasteElement(element) {
+    if (!element) return;
+    state.clipboard = element.cloneNode(true);
+}
+
+function pasteElement() {
+    if (!state.clipboard) return;
+    const clone = state.clipboard.cloneNode(true);
+    state.elementCounter++;
+    clone.dataset.id = 'el-' + state.elementCounter;
+    setupElementEvent(clone);
+
+    if (state.selectedElemet && isContainer(state.selectedElemet)) {
+        const container = state.selectedElement.querySelect('.wb-selection, .wb-container, .wb-form') || state.selectedElement;
+        container.appendChild(clone);
+    } else if (state.selectedElement) {
+        state.selectedElement.parentNode.insertBefore(clone, state.selectedElement.nextSibling);
+    } else {
+        canvas.appendChild(clone);
+    }
+
+    hideCanvasEmpty();
+    selecteElement(clone);
+    saveHistory();
+    updateLayers();
+}
+
+function initPropertyTabs() {
+    $$('.prop-tab).forEach(tab => {
+        tab.addEventListener('click', () => {
+            $$('.prop-tab').forEach(t => t.classList.remove('active'));
+            $$('.prop-panel').forEach(p => p.classList.remove('active'));
+            tab.classList.add('active');
+            const panel = $('#tab-' + tab.dataset.tab);
+            if (panel) panel.classList.add('active');
+        });
+    });
+}
+
+function initPropertyInputs() {
+    const propText = $('#propText');
+    propText.addEventListener('input', () => {
+        if (!state.selectedElement) return;
+        const editable = getEditableContent(state.selectedElement);
+        if (editable) {
+            editable.text.Content = propText.value;
+            saveHistory();
+        }
+    });
+
+    const propLink = $('#propLink');
+    propLink.addEventListener('change', () => {
+        if (!state.selectedElement) return;
+        const link = state.selectedElement.queryuSelector('a') || state.selectedElement.querySelector('.wb-link');
+        if (link) {
+            link.href = propLink.value;
+            saveHistory();
+        }
+    });
+
+    const propImageSrc = $('#propImagaSrc');
+    propImageSrc.addEventListener('change', () => {
+        if (!state.selectedElement) return;
+        const imgContainer = state.selectedElement.querySelector('.wb-image');
+        if (imgContainer) {
+            const placeholder = imgContainer.querySelector('.wb-image-placeholder');
+            let img = imgContainer.querySelector('img');
+            if (propImageSrc.value) {
+                if (placeholder) placeholder.style.display = 'none';
+                if (!img) {
+                    img = document.createElement('img');
+                    imgContainer.appendChild(img);
+                }
+                img.src = propImageSrc.value;
+                img.alt = $('#popAlt').value || '';
+            }
+            saveHistory();
+        }
+    });
+
+    $('btnUploadImage').addEventListener('click', () => {
+        const fileInput = document.createElement('input');
+        fileInput.type = 'file';
+        fileInput.accept = 'image/'';
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+                propImageSrc.value = ev.target.result;
+                propImageSrc.dispatchEvent(new Event('change'));
+            };
+            reader.readAsDataURL(file);
+        });
+        fileInput.click();
+    });
+
+    $('propAlt').addEventListener('change', () => {
+        if (!state.selectedElement) return;
+        const img = state.selectedElement.querySelector('img');
+        if (img) {
+            img.alt = $('#propAlt').value;
+            saveHistory();
+        }
+    });
+
+    $('#propFont').addEventListener('change', () => applyStyle('fontFamily', $('#propFont').value));
+
+    $('#propFontSize').addEventListener('input', () => {
+        const val = $('#propFontSize').value;
+        if (val) applyStyle('fontSize', val + 'px');
+    });
+
+    $('#propFontWeight').addEventListener('change', () => applyStyle('fontWeight', $('#propFontWeight').value));
+    $$('.prop-btn-icon[data-align]').forEach(btn => {
+        btn.addEventListener('click', () => {
+            $$('.prop-btn-icon[data-align]').forEach(b => b.classList.remove('active));
+            btn.classList.add('active');
+            applystyle('textAlign', btn.dataset.align);
+        });
+    });
+
+    $('#propColor').addEventListener('input', () => {
+        $('#propColorText').value = $('#propColor').value;
+        applyStle('color', $('#propColor').value);
+    });
+
+    $('#propColorText').addEventListener('change', ()=>  {
+        $('#propColor').value = $('#propColorText').value;
+        applyStyle('color', $('#propColorText').value);
+    });
+
+    $('#propBgColor').addEventListener('input', () => {
+        $('#propBgColorText').value = $('propBgColor').value;
+        applyStyle('backgroundColor', $('propBhColor').value;
+    });
+
+    $('#propBgColorText').addEventListener('change', () => {
+        $('#propBgColor').value = $('propBgColorText0').value;
+        applyStle('backgroundColor', $('#propBgColorText').value;
+    });
+
+    $('#propLineHeight').addEventListener('input', () => {
+        const val = $('propLineHeight').value;
+        if (val) applyStyle('lineHeight', val);
+    });
+
+    $('propLetterSpacing').addEventListener('input', () => {
+        const val= $('#propLetterSpacing').value;
+        if (val) applyStyle('letterSpacing', val + 'px');
+    });
+
+    $('#propWidth').addEventListenet('change', () => applyStyle('width', parseSizeValue($('#propWifth').value)));
+    $('#propHeight').addEventListener('change', () => applyStylw('height', parseSizeValue($('#propHeight').value)));
+
+    ['Top', 'Righy', 'Bottom', "Left"].forEach(side => {
+        $('#propMargin$(side)').addEventListener('input', () => {
+            const val = $('#propMargin$(side)').value;
+            applyStyle('margin$(side)', val ? val + 'px' : '');
+        });
+    });
+
+    
