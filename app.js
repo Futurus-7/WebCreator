@@ -249,9 +249,9 @@ function getElementHTML(type) {
         'columns-2': `
             <div class="wb-columns">
                 <div class="wb-column builder-element" data-type="column" data-label="Colonna 1" draggable="true"></div>
-                <div class="wb-column builder-element" data-type="columns" data-label="Colonna 2" draggable="true"></div>
+                <div class="wb-column builder-element" data-type="column" data-label="Colonna 2" draggable="true"></div>
             </div>`,
-        'columns-3':
+        'columns-3': `
             <div class="wb-columns">
                 <div class="wb-column builder-element" data-type="column" data-label="Colonna 1" draggable="true"></div>
                 <div class="wb-column builder-element" data-type="column" data-label="Colonna 2" draggable="true"></div>
@@ -288,17 +288,17 @@ function getElementHTML(type) {
                         <option>Opzione 2</option>
                         <option>Opzione 3</option>
                     </select>`,
-                'checkbox': '
+                'checkbox': `
                     <label class="wb-checkbox-wrapper">
                         <input type="checkbox">Accetto i termini
-                    </label>',
-                'block-hero': '
+                    </label>`,
+                'block-hero': `
                     <div class="wb-hero">
                         <h1 contenteditable="true">Il tuo titolo principale</h1>
                         <p contenteditable="true">Una descrizione breve e convincente del tuo progetto o della tua attivita.</p>
                         <button class="hero-btn" contenteditable="true">Inizia ora</button>
-                    </div>',
-                'block-navbar': '
+                    </div>`,
+                'block-navbar': `
                     <nav class="wb-navbar">
                         <span class="nav-brand" contenteditable="true">Il Tuo Brand</span>
                         <ul class="nav-links">
@@ -307,24 +307,24 @@ function getElementHTML(type) {
                             <li><a href="#" contenteditable="true">Servizi</a></li>
                             <li><a href="#" contenteditable="true">Contatti</a></li>
                         </ul>
-                    </nav>',
+                    </nav>`,
 
-                'block-footer': '
+                'block-footer': `
                     <footer class="wb-footer">
                         <p contenteditable="true">Il Tuo brand - Tutti i diritti riservati </p>
                         <p contenteditable="true">info@esempio.com</p>
-                    </footer>',
+                    </footer>`,
 
-                'block-card': '
+                'block-card': `
                     <div class="wb-card">
                         <div class="card-img"><i class="fa-solid fa-image" style="font-size:32px;color:#ccc;"></i></div>
                         <div class="card-body">
                             <h3 contenteditable="true">Titolo Card</h3>
                             <p contenteditable="true">Descrizione breve della card. Modifica questo testo come preferisci.</p>
                         </div>
-                    </div>',
+                    </div>`,
 
-                'block-pricing': '
+                'block-pricing': `
                     <div class="wb-pricing">
                         <div class="pricing-title" contenteditable="true">Piano Pro</div>
                         <div class="pricing-price" contenteditable="true">29<span>/mese</span></div>
@@ -335,8 +335,8 @@ function getElementHTML(type) {
                             <li contenteditable="true">10 GB di spazio</li>
                         </ul>
                             <button class="wb-button" contenteditable="true">Scegli piano</button>
-                        </div>',
-                    'block-testimonial': '
+                        </div>`,
+                                        'block-testimonial': `
                         <div class="wb-testimonial">
                             <div class="testimonial-quote" contenteditable="true">"Questo prodotto ha cambiato completamente il mio modo di lavorare. Lo consiglio a tutti."</div>
                             <div class="testimonial-author">
@@ -354,7 +354,7 @@ function getElementHTML(type) {
 
 function setupElementEvents(element) {
     element.addEventListener('click', (e) => {
-        e.stioPropagation();
+        e.stopPropagation();
         selectElement(element);
     });
 
@@ -375,7 +375,7 @@ function setupElementEvents(element) {
             }, 0);
         }
     });
-    element.addEventListener('dragend' (e) => {
+    element.addEventListener('dragend', (e) => {
         element.style.opacity = '1';
         state.draggedElement = null;
         removeAllDropIndicators();
@@ -390,7 +390,7 @@ function setupElementEvents(element) {
         btn.addEventListener('click', (e) => {
             e.stopPropagation();
             const action = btn.dataset.action;
-            handleElementAction(acton, element);
+            handleElementAction(action, element);
         });
     });
     element.querySelectorAll('[contenteditable]').forEach(editable => {
@@ -406,7 +406,7 @@ function setupElementEvents(element) {
         });
     });
     element.querySelectorAll('.wb-column.builder-element').forEach(col => {
-        stupElementEvents(col);
+        setupElementEvents(col);
         col.addEventListener('dragover', (e) => {
             e.preventDefault();
             e.stopPropagation();
@@ -423,7 +423,7 @@ function setupElementEvents(element) {
             let newEl;
             if (state.draggedType) {
                 newEl = createElement(state.draggedType);
-            } else if (state.draggedElemnt) {
+            } else if (state.draggedElement) {
                 newEl = state.draggedElement;
             }
             if (newEl) {
@@ -463,11 +463,11 @@ canvas.addEventListener('click', (e) => {
 });
 
 function handleElementAction(action, element) {
-    switch (action= {
+    switch (action) {
         case 'delete':
             deleteElement(element);
             break;
-        case ' duplicate':
+        case 'duplicate':
             duplicateElement(element);
             break;
         case 'moveup':
@@ -501,7 +501,7 @@ function duplicateElement(element) {
     const clone = element.cloneNode(true);
     state.elementCounter++;
     clone.dataset.id = 'el-' +state.elementCounter;
-    setupElementevents(clone);
+    setupElementEvents(clone);
     element.parentNode.insertBefore(clone, element.nextSibling);
     selectElement(clone);
     saveHistory();
@@ -518,7 +518,7 @@ function moveElement(element, direction) {
         }
     } else {
         const next = element.nextElementSibling;
-        if (next && !next.classList.contains('element-action')}
+        if (next && !next.classList.contains('element-actions')) {
             parent.insertBefore(next, element);
         }
     }
@@ -535,22 +535,12 @@ function copyElement(element) {
 function pasteElement() {
     if (!state.clipboard) return;
     const clone = state.clipboard.cloneNode(true);
-}
-
-function pasteElement(element) {
-    if (!element) return;
-    state.clipboard = element.cloneNode(true);
-}
-
-function pasteElement() {
-    if (!state.clipboard) return;
-    const clone = state.clipboard.cloneNode(true);
     state.elementCounter++;
     clone.dataset.id = 'el-' + state.elementCounter;
-    setupElementEvent(clone);
+    setupElementEvents(clone);
 
-    if (state.selectedElemet && isContainer(state.selectedElemet)) {
-        const container = state.selectedElement.querySelect('.wb-selection, .wb-container, .wb-form') || state.selectedElement;
+    if (state.selectedElement && isContainer(state.selectedElement)) {
+        const container = state.selectedElement.querySelector('.wb-section, .wb-container, .wb-form') || state.selectedElement;
         container.appendChild(clone);
     } else if (state.selectedElement) {
         state.selectedElement.parentNode.insertBefore(clone, state.selectedElement.nextSibling);
@@ -559,13 +549,13 @@ function pasteElement() {
     }
 
     hideCanvasEmpty();
-    selecteElement(clone);
+    selectElement(clone);
     saveHistory();
     updateLayers();
 }
 
 function initPropertyTabs() {
-    $$('.prop-tab).forEach(tab => {
+    $$('.prop-tab').forEach(tab => {
         tab.addEventListener('click', () => {
             $$('.prop-tab').forEach(t => t.classList.remove('active'));
             $$('.prop-panel').forEach(p => p.classList.remove('active'));
@@ -582,7 +572,7 @@ function initPropertyInputs() {
         if (!state.selectedElement) return;
         const editable = getEditableContent(state.selectedElement);
         if (editable) {
-            editable.text.Content = propText.value;
+            editable.textContent = propText.value;
             saveHistory();
         }
     });
@@ -590,14 +580,14 @@ function initPropertyInputs() {
     const propLink = $('#propLink');
     propLink.addEventListener('change', () => {
         if (!state.selectedElement) return;
-        const link = state.selectedElement.queryuSelector('a') || state.selectedElement.querySelector('.wb-link');
+        const link = state.selectedElement.querySelector('a') || state.selectedElement.querySelector('.wb-link');
         if (link) {
             link.href = propLink.value;
             saveHistory();
         }
     });
 
-    const propImageSrc = $('#propImagaSrc');
+    const propImageSrc = $('#propImageSrc');
     propImageSrc.addEventListener('change', () => {
         if (!state.selectedElement) return;
         const imgContainer = state.selectedElement.querySelector('.wb-image');
@@ -611,16 +601,16 @@ function initPropertyInputs() {
                     imgContainer.appendChild(img);
                 }
                 img.src = propImageSrc.value;
-                img.alt = $('#popAlt').value || '';
+                img.alt = $('#propAlt').value || '';
             }
             saveHistory();
         }
     });
 
-    $('btnUploadImage').addEventListener('click', () => {
+    $('#btnUploadImage').addEventListener('click', () => {
         const fileInput = document.createElement('input');
         fileInput.type = 'file';
-        fileInput.accept = 'image/'';
+        fileInput.accept = 'image/*';
         fileInput.addEventListener('change', (e) => {
             const file = e.target.files[0];
             if (!file) return;
@@ -634,7 +624,7 @@ function initPropertyInputs() {
         fileInput.click();
     });
 
-    $('propAlt').addEventListener('change', () => {
+    $('#propAlt').addEventListener('change', () => {
         if (!state.selectedElement) return;
         const img = state.selectedElement.querySelector('img');
         if (img) {
@@ -653,15 +643,15 @@ function initPropertyInputs() {
     $('#propFontWeight').addEventListener('change', () => applyStyle('fontWeight', $('#propFontWeight').value));
     $$('.prop-btn-icon[data-align]').forEach(btn => {
         btn.addEventListener('click', () => {
-            $$('.prop-btn-icon[data-align]').forEach(b => b.classList.remove('active));
+            $$('.prop-btn-icon[data-align]').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
-            applystyle('textAlign', btn.dataset.align);
+            applyStyle('textAlign', btn.dataset.align);
         });
     });
 
     $('#propColor').addEventListener('input', () => {
         $('#propColorText').value = $('#propColor').value;
-        applyStle('color', $('#propColor').value);
+        applyStyle('color', $('#propColor').value);
     });
 
     $('#propColorText').addEventListener('change', ()=>  {
@@ -670,39 +660,39 @@ function initPropertyInputs() {
     });
 
     $('#propBgColor').addEventListener('input', () => {
-        $('#propBgColorText').value = $('propBgColor').value;
-        applyStyle('backgroundColor', $('propBhColor').value;
+        $('#propBgColorText').value = $('#propBgColor').value;
+        applyStyle('backgroundColor', $('#propBgColor').value);
     });
 
     $('#propBgColorText').addEventListener('change', () => {
-        $('#propBgColor').value = $('propBgColorText0').value;
-        applyStle('backgroundColor', $('#propBgColorText').value;
+        $('#propBgColor').value = $('#propBgColorText').value;
+        applyStyle('backgroundColor', $('#propBgColorText').value);
     });
 
     $('#propLineHeight').addEventListener('input', () => {
-        const val = $('propLineHeight').value;
+        const val = $('#propLineHeight').value;
         if (val) applyStyle('lineHeight', val);
     });
 
-    $('propLetterSpacing').addEventListener('input', () => {
+    $('#propLetterSpacing').addEventListener('input', () => {
         const val= $('#propLetterSpacing').value;
         if (val) applyStyle('letterSpacing', val + 'px');
     });
 
-    $('#propWidth').addEventListenet('change', () => applyStyle('width', parseSizeValue($('#propWifth').value)));
-    $('#propHeight').addEventListener('change', () => applyStylw('height', parseSizeValue($('#propHeight').value)));
+    $('#propWidth').addEventListener('change', () => applyStyle('width', parseSizeValue($('#propWidth').value)));
+    $('#propHeight').addEventListener('change', () => applyStyle('height', parseSizeValue($('#propHeight').value)));
 
-    ['Top', 'Righy', 'Bottom', "Left"].forEach(side => {
-        $('#propMargin$(side)').addEventListener('input', () => {
-            const val = $('#propMargin$(side)').value;
-            applyStyle('margin$(side)', val ? val + 'px' : '');
+    ['Top', 'Right', 'Bottom', 'Left'].forEach(side => {
+        $(`#propMargin${side}`).addEventListener('input', () => {
+            const val = $(`#propMargin${side}`).value;
+            applyStyle(`margin${side}`, val ? val + 'px' : '');
         });
     });
 
     ['Top', 'Right', 'Bottom', 'Left'].forEach(side => {
-        $('#propPadding$(side)').addEventListener('input', () => {
-            const val = $('#propPadding$(side)').value;
-            applyStyle('padding$(side)', val ? val + 'px' : '');
+        $(`#propPadding${side}`).addEventListener('input', () => {
+            const val = $(`#propPadding${side}`).value;
+            applyStyle(`padding${side}`, val ? val + 'px' : '');
         });
     });
 
@@ -713,7 +703,7 @@ function initPropertyInputs() {
         updateBorder();
     });
     $('#propBorderColorText').addEventListener('change', () => {
-        $('#propBorderColor').value = $'#propBorderColorText').value;
+        $('#propBorderColor').value = $('#propBorderColorText').value;
         updateBorder();
     });
 
@@ -724,7 +714,7 @@ function initPropertyInputs() {
 
     $('#propShadow').addEventListener('change', () => applyStyle('boxShadow', $('#propShadow').value));
     $('#propOpacity').addEventListener('input', () => {
-        const val = $('propOpacity').value;
+        const val = $('#propOpacity').value;
         $('#opacityValue').textContent = val + '%';
         applyStyle('opacity', val / 100);
     });
@@ -733,12 +723,12 @@ function initPropertyInputs() {
         const val = $('#propDisplay').value;
         applyStyle('display', val);
 
-        const flexOpts = $('#flexOption');
+        const flexOpts = $('#flexOptions');
         flexOpts.style.display = val === 'flex' ? 'block' : 'none';
     });
 
     $('#propFlexDirection').addEventListener('change', () => applyStyle('flexDirection', $('#propFlexDirection').value));
-    $('#propAlignItems'):addEventListener('change', () => applyStyle('alignItems', $('#propAlignItems').value));
+    $('#propAlignItems').addEventListener('change', () => applyStyle('alignItems', $('#propAlignItems').value));
     $('#propJustifyContent').addEventListener('change', () => applyStyle('justifyContent', $('#propJustifyContent').value));
     $('#propGap').addEventListener('input', () => {
         const val = $('#propGap').value;
@@ -757,8 +747,7 @@ function initPropertyInputs() {
     $('#propClasses').addEventListener('change', () => {
         if (!state.selectedElement) return;
         const target = getStyleTarget(state.selectedElement);
-        const sysClasses = Array.from(target.classList).filter(c => c.startWith('wb-') || c === 'builder-element' || c=== 'selected'
-        ):
+        const sysClasses = Array.from(target.classList).filter(c => c.startsWith('wb-') || c === 'builder-element' || c=== 'selected' );
         const userClasses = $('#propClasses').value.split(' ').filter(c => c.trim());
         target.className = [...sysClasses, ...userClasses].join(' ');
         saveHistory();
@@ -770,11 +759,11 @@ function initPropertyInputs() {
         const css = $('#propCustomCSS').value;
         css.split(';').forEach(rule => {
             const parts = rule.split(':');
-            if (part.lenght === 2) {
+            if (parts.length === 2) {
                 const prop = parts[0].trim();
-                const val = parts[i].trim();
+                const val = parts[1].trim();
                 if (prop && val) {
-                    const cameProp = prop.replace(/-([a-z]/g, (g) => g[i].toUpperCase());
+                    const camelProp = prop.replace(/-([a-z])/g, (g) => g[1].toUpperCase());
                     target.style[camelProp] = val;
                 }
             }
@@ -793,7 +782,7 @@ function initPropertyInputs() {
 
 function applyStyle(property, value) {
     if (!state.selectedElement) return;
-    const target = getStyleTarget(state.selectedelement);
+    const target = getStyleTarget(state.selectedElement);
     target.style[property] = value;
     clearTimeout(state._styleTimeout);
     state._styleTimeout = setTimeout(() => saveHistory(), 300);
@@ -801,11 +790,11 @@ function applyStyle(property, value) {
 
 function getStyleTarget(element) {
     const directChild = element.querySelector(
-        '.wb-section, .wb-container, .wb.columns, .wb-grid, .wb-heading, ' +
+        '.wb-section, .wb-container, .wb-columns, .wb-grid, .wb-heading, ' +
         '.wb-paragraph, .wb-image, .wb-button, .wb-link, .wb-divider, ' +
-        '.wb-spacer, .wb-video, .wb-icon, .wb-map, wb-form, .wb-input, ' +
-        '.wb-textarea-e1, .wb-select, .-wb-checkbox-wrapper, .wb-hero, ' +
-        '.wb-navbar, .-wb-footer, .wb-card, .wb-pricing, .wb-testimonial'
+        '.wb-spacer, .wb-video, .wb-icon, .wb-map, .wb-form, .wb-input, ' +
+        '.wb-textarea-el, .wb-select, .wb-checkbox-wrapper, .wb-hero, ' +
+        '.wb-navbar, .wb-footer, .wb-card, .wb-pricing, .wb-testimonial'
     );
     return directChild || element;
 }
@@ -1004,6 +993,7 @@ function hideContextMenu() {
     $('#closeLayers').addEventListener('click', () => {
         layersPanel.classList.remove('visible');
     });
+}
 
 function updateLayers() {
     layersTree.innerHTML = '';
@@ -1012,7 +1002,7 @@ function updateLayers() {
     elements.forEach(el => {
         addLayerItem(el, 0);
     });
-)
+}
 
 function addLayerItem(element, depth) {
     const item = document.createElement('div');
@@ -1034,18 +1024,16 @@ function addLayerItem(element, depth) {
     });
     layersTree.appendChild(item);
 
-    const children = element.querySelectorAll(':scope > ' > .builder-element, :scope > .builder-element');
-    const directChilren = [];
-
-    children.forEach(child => {
-        if (child.parentElement === element || child.parentElement.parentElement === element {
+    const directChildren = [];
+    element.querySelectorAll('.builder-element').forEach(child => {
+        if (child.parentElement === element || child.parentElement.parentElement === element) {
             if (!directChildren.includes(child)) {
-                directionChildren.push(child);
+                directChildren.push(child);
             }
         }
     });
 
-    directionChildren.forEach(child => {
+    directChildren.forEach(child => {
         if (child.classList.contains('builder-element')) {
             addLayerItem(child, depth + 1);
         }
@@ -1090,17 +1078,17 @@ const icons = {
 }
 
 function saveHistory() {
-    if (state.hystoryIndex < state.history.length -1) {
+    if (state.historyIndex < state.history.length -1) {
         state.history = state.history.slice(0, state.historyIndex +1);
     }
 
     const snapshot = canvas.innerHTML;
     state.history.push(snapshot);
 
-    if (state.history.lenght > state.maxHistory) {
+    if (state.history.length > state.maxHistory) {
         state.history.shift();
     }
-    state.historyindex = state.history.lenght -1;
+    state.historyIndex = state.history.length -1;
 }
 
 function undo() {
@@ -1215,7 +1203,7 @@ function generateCleanCSS() {
     elements.forEach((el, i) => {
      const target = getStyleTarget(el);
      if (target.style.cssText) {
-         css += '.element-$(i + 1) {\n';
+         css += `.element-${i + 1} {\n`;
          target.style.cssText.split(';').forEach(rule => {
                const trimmed = rule.trim();
                 if (trimmed) {
@@ -1242,21 +1230,23 @@ function generateFullHTML() {
         * {margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif; }
         img { max-width: 100%; height: auto; }
-$(styles)
+${styles}
     </style>
 </head>
 <body>
+${bodyContent}
+</body>
 </html>`;
 }
 function generateInlineStyles() {
-    return '
+    return `
         .wb-section { padding: 60px 20px; }
         .wb-container { max-width: 1100px; margin: 0 auto; padding: 20px; }
         .wb-columns { display: flex; gap: 20px; }
         .wb-column { flex: 1; padding: 15px; }
         .wb-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; padding: 15px; }
         .wb-heading { font-size: 32px; font-weight: 700; color: #333; }
-        .wb-paragraph { font-size: 16px; line-height: 700; color: #555 }
+        .wb-paragraph { font-size: 16px; line-height: 1.6; color: #555 }
         .wb-button { display: inline-block; padding: 12px 28px; background: #4361ee; color: white; border: none; border-radius: 4px; font-size: 14px; font-size: 14px; font-weight: 600; cursor: pointer; text-decoration: none; }
         .wb-link { color: #4361ee; text-decoration: underline; }
         .wb-divider { border: none; border-top: 1px solid #ddd; margin: 15px 0; }
@@ -1264,7 +1254,7 @@ function generateInlineStyles() {
         .wb-hero { text-align: center; padding: 80px 40px; background: linear-gradient(135deg, #1a1a2e, #16213e); color: white; }
         .wb-hero h1 { font-size: 42px; font-weight: 800; margin-bottom: 16px; }
         .wb-hero p { font-size: 18px; opacity: 0.85; margin-bottom: 30px; max-width: 600px; margin-left: auto; }
-        .hero-btn { display: inline-block; padding: 14px 36px; background: #4361ee; color: white; border: none; border-radius: 4px; font.size: 16px; font-weight: 600; cursor: pointer; }
+        .hero-btn { display: inline-block; padding: 14px 36px; background: #4361ee; color: white; border: none; border-radius: 4px; font-size: 16px; font-weight: 600; cursor: pointer; }
         .wb-navbar {display: flex; align-items: center; justify-content: space-between; padding: 14px 30px; background: white; border-bottom: 1px solid #eee; }
         .nav-brand { font-size: 20px; font-weight: 700; color: #333; }
         .nav-links { display: flex; gap: 24px; list-style: none; }
