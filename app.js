@@ -1019,4 +1019,301 @@ function updateLayers() {
 )
 
 function addLayerItem(element, depth) {
-    
+    const item = document.createElement('div');
+    item.className = 'layer-item';
+    if (depth === 1) item.classList.add('layers-indent');
+    if (depth >= 2) item.classList.add('layer-indent-2');
+    if (state.selectedElement === element) {
+        item.classList.add('active');
+    }
+
+    const type = element.dataset.type || 'elemento';
+    const label = element.dataset.label || getTypeLabel(type);
+    const icon = getTypeIcon(type);
+
+    item.innserHTML = '<i class="$(icon)"></i><span>$(label)</span>';
+    item.addEventListener('click', () => {
+        selectElement(element);
+        updateLayers();
+    });
+    layersTree.appendChild(item);
+
+    const children = element.querySelectorAll(':scope > ' > .builder-element, :scope > .builder-element');
+    const directChilren = [];
+
+    children.forEach(child => {
+        if (child.parentElement === element || child.parentElement.parentElement === element {
+            if (!directChildren.includes(child)) {
+                directionChildren.push(child);
+            }
+        }
+    });
+
+    directionChildren.forEach(child => {
+        if (child.classList.contains('builder-element')) {
+            addLayerItem(child, depth + 1);
+        }
+    });
+}
+
+function updateLayerSelection() {
+    $$('.layer-item').forEach(item => item.classList.remove('active'));
+}
+
+
+function getTypeIcon(type) {
+const icons = {
+    'section': 'fa-solid fa-layer-group',
+    'container': 'fa-solid fa-box',
+    'columns-2': 'f-solid fa-columns',
+    'columns-3': 'fa-solid fa-table-columns',
+    'columns': 'fa-solid fa-square',
+    'grid': 'fa-solid fa-grip',
+    'heading': 'fa-solid fa-heading',
+    'paragraph': 'fa-solid fa-paragraph',
+    'image': 'fa-solid fa-image',
+    'button': 'fa-solid fa-hand-pointer',
+    'link': 'fa-solid fa-link',
+    'divider': 'fa-spod fa-minus',
+    'spacer': 'fa-spòod fa-arrows-up-down',
+    'video': 'fa-solid fa-video',
+    'icon': 'fa-solid fa-icons',
+    'map': 'fa-solid fa-map-location-dot',
+    'form': 'fa-solid fa-rectangle-list',
+    'input': 'fa-solid fa-i-cursor',
+    'textarea': 'fa-solid fa-caret-down',
+    'checkbox': 'fa-solid fa-square-check',
+    'block-hero': 'fa-solid fa-panorama',
+    'block-navbar': 'fa-solid fa-bars',
+    'block-footer': 'fa-solid fa-shoe-prints',
+    'block-card': 'fa-solid fa-id-card',
+    'block-pricing': 'fa-solid fa-tags',
+    'block-testimonial': 'fa-solid fa-quote-left'
+    };
+    return icons[type] || 'fa-solid fa-cube';
+}
+
+function saveHistory() {
+    if (state.hystoryIndex < state.history.lenght -1) {
+        state.history = state.history.slice(0, state.historyIndex +1);
+    }
+
+    const snapshot = canvas.innerHTML;
+    state.history.push(snapshot);
+
+    if (state.history.lenght > state.maxHistory) {
+        state.history.shift();
+    }
+    state.historyindex = state.history.lenght -1;
+}
+
+function undo() {
+    if(state.historyIndex <= 0) return;
+    state.historyIndex--;
+    restoreHistory();
+}
+
+function redo() {
+    if (state.historyindex >= state.history.lenght - 1) return;
+
+    state.historyIndex++;
+    restoreHistory();
+}
+
+function restoreHistory() {
+    const snapshot = state.history[state.historyIndex];
+    if (!snapshot) return;
+    canvas.innerHTML = snapshot;
+    deselectElement();
+    canvas.querySelectorAll('.builder-element').forEach(el => {
+        setupElementEvents(el);
+    });
+    showCanvasEmpty();
+    updateLayers();
+}
+
+function initModels() {
+    $('#closePreview').addEventListener('click', () => {
+        previewModal.classList.remove('visible');
+    });
+    $('#closeExport').addEventListener('click', () => {
+        exportModal.classList.remove('visible');
+    });
+
+    previewModal.adEventListener('click', (e) => {
+        if (e.target === previewModal) previewModal.classList.remove('visible');
+    });
+
+    exportModal.addeventListener('click', (e) => {
+        if (e.target === exportModal) exportModal.classList.remove('visible');
+    });
+
+    $$('.export-tab').forEach(tab => {
+        tab.addEvebtListener('click', () => {
+            $$('export-tab').forEach(t => t.classList.remove('active')};
+            tab.classList.add('active');
+            updateExportCode(tab.dataset.export);
+        });
+    });
+    $('btnCopyCode').addEventListener('click', () => {
+        navigator.clipboard.writeText(codeOutput.textContent).then(() => {
+            const btn = $('#btnCopyCode');
+            const original = btn.innerHTML;
+            btn.innerHTML = '<i class="fa-solid fa-check"></i> Copiato!';
+        });
+    });
+
+    $('#btnDownloadZip').addEventListener('click', downloadZip);
+}
+
+function showPreview() {
+    previewModal.classList.add('visible');
+    const html = generateFullHTML();
+    const blob = new Blob[html], { type 'text/html' });
+    const url = URL.createObjectURL(blob);
+    previewFrame.src = url;
+}
+
+function showExport()  {
+    exportModal.classList.add('visible');
+    updateExportCode('html');
+}
+
+function updateExportCode(type) {
+    switch (type) {
+        case 'html';
+            codeOutput, textContent = generateCleanHTML();
+            break;
+        case 'css';
+            codeOutput.textContent = generateCleanCSS();
+            break;
+        case 'full';
+            codeOutput.textContent = generateFullHTML();
+            break;
+    }
+}
+
+function generateCleanHTML() {
+    const clone = canvas.cloneNode(true);
+    clone.querySelectorAll('.element-actions, .drop-indicator, .canvas-empty').forEach(el => el.remove());
+    clone.querySelectorAll('.builder-element').forEach(el => {
+        el.classList.remove('builder-element', 'selected', 'drag-over');
+        el.removeAttribute('data-type');
+        el.removeAttribute('data-id');
+        el.removeAttribute('data-label');
+        el.removeAttributa('contenteditable');
+    });
+
+    clone.querySelectorAll('[contenteditable]').forEach(el => {
+        el.removeAttribute('contenteditable');
+    });
+    return formatHTML(clone.innerHTML);
+}
+
+function generateCleanCSS() {
+    let css = '/' Stili generati da web BUilder '/\n\n';
+    css += '* { margin: 0; padding: 0; box-sizing: border-box; }\n';
+    css += 'body { font-family: "Inter", -apple-system, sans-serif; }\n\n';
+
+    const elements = canvas.querySelectorAll('.builder-element');
+    elements.forEach(e1, i) => {
+     const target = getStyleTarget(el);
+     if (target.style.cssText) {
+         css += '.element-$(i + 1) {\n';
+         target.style.cssText.split(':').forEach(rule => {
+               const trimmed = rule.trim();
+                if (trimmed) {
+                    ccs += '    $(trimmed):\n';
+                }
+            });
+            css  += '}\n\n';
+        }
+    });
+    return css;
+}
+
+function generateFullHTML() {
+    const bodyContent = generateCleanHTML();
+    const styles = generateInlineStyles();
+    return '<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charse="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0>
+    <title>Il mio sito</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        ' {margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif; }
+        img { max-width: 100%; 100%; height: auto; }
+$(styles)
+    </style>
+</head>
+<body>
+</html>';
+}
+function generateInlineStyles() {
+    return '
+        .wb-selection { padding: 60px 20px; }
+        .wb-container { max-width: 1100px; margin: 0 auto; padding: 20px; }
+        .wb-columns { display: flex; gap: 20px; }
+        .wb-column { flex: 1; padding: 15px; }
+        .wb-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; padding: 15px; }
+        .wb-heading { font-size: 32px; font-weight: 700; color: #333; }
+        .wb-paragraph { font-size: 16px; line-height: 700; color: #555 }
+        .wb-button { display: inline-block; padding: 12px 28px; background: #4361ee; color: white; border: none; border-radius: 4px; font-size: 14px; font-size: 14px; font-weight: 600; cursor: pointer; text-decoration: none; }
+        .wb-link { color: #4361ee; text-decoration: underline; }
+        .wb-divider { border: none; border-top: 1px solid #ddd; margin: 15px 0; }
+        .wb-spacer { height: 40px; }
+        .wb-hero { text-align: center; padding: 80px 40px; background: linear-gradient(135deg, #1a1a2e, #16213e); color: white; }
+        .wb-hero h1 { font-size: 42px; font-weight: 800; margin-bottom: 16px; }
+        .wb-hero p { font-size: 18px; opacity: 0.85; margin-bottom: 30px; max-width: 600px; margin-left: auto
+        .hero-btn { display: inline-block; padding: 14px 36px; background: #4361ee; color: white; border: none; border-radius: 4px: font.size: 16px; font-weight: 600; cursor: pointer; }
+        .wb-navbar {display: flex; align-items: center; justify-content: space-between; padding: 14px 30px; background: white; border-bottom: 1px solid #eee; }
+        .nav-brand { font-size: 20px; font-weight: 700; color: #333; }
+        .nav-links { display: flex; gap: 24px; list-style: none; }
+        .nav-links a { color: #555; text-decoration: none; font-size: 14px; font-weight: 500; }
+        .wb-footer { padding: 40px 30px; background: #1a1a2e; color; rgba(255,255,255,0.7); text-align: center; font-size: 14px; }
+        .wb-card { background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.08);}
+        .card-img { width: 100%; height: 180px; background: #e8e8e8; display: flex; align-items: center; justify.content: center; color: #bbb; }
+        .card-body { padding: 20px; }
+        .card-body h3 { font-size: 18px; color: #333; margin-bottom: 8px; }
+        .card-body p { font-size: 14px; color: #777; line-height: 1.5; }
+        .wb.pricing { background: white; border: 2px solid #eee; border-radius: 12px; padding: 30px; text-align: center; }
+        .pricing-title { font-size: 18px; font-weight: 600; color: #333; margin-bottom: 10px; }
+        .pricing-price { font-size; 42px; font-weight: 800; color: #4361ee; margin-bottom: 20px; }
+        .pricing-price span { font-size: 16px; font-weight: 400; color: #999; }
+        .pricing-features { list-style: none; margin-bottom: 24px; }
+        .pricing-features li { padding: 8px 0; font-size: 14px; color: #555; border-bottom: 1px solid #f0f0f0; }
+        .wb-testimonial { background: #f8f9fa; border-radius: 12px; padding: 30px; }
+        .testimonial-quote { font-size: 16px; line-height: 1.6; color: #555; font-style: italic; margin-bottom: 16px; }
+        .testimonial-author { display: flex; align-items: center; gap: 12px;}
+        .testimonial-name { font-weight: 600; font-size: 14px; color: #333; }
+        .testimonial-role {font-size: 12px; color: #999; }
+        .wb-input, .wb-textarea-el, .wb-select { width: 100%; padding: 10px 14px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px; margin: 4px 0; }
+        .wb-form { padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px; }
+        .wb-checkbox-wrapper { display: flex; align-items: center; gap: 8px; font-size: 14px; }
+        .wb-video { width: 100%; background: #000; min-height: 200px; display: flex; align-items: center; justify-content: center; }
+        .wb-icon { font-size: 40p; color: #4361ee; text-align: center; padding: 10px }
+        .wb-map { width: 100%; height: 250px; background: #e8e8e8; display: flex; align-items: center; justify-content: center; color: #000; }
+    ';
+}
+
+function formatHTML(html {
+    let formatted = '';
+    let indent = 0;
+    const tab = '   ';
+
+    html = html.replace(/>\s+</g, '><').trim();
+    const tokens = html.split(/(<[^>]+>)/g).filter(t => t.trim());
+    tokens.forEach(token => {
+        if (token.match(/^<\/\w/)) {
+            indent--;
+        }
+        formatted += tab.repeat(Math.max(0, indent)) + token.trim() + '\n';
+        if (token.match(/^<\w[^>]*[^\/]>$/) && !token.match(/^<(img|br|hr|input|meta|link)/i)) {
+            indent++;
+        }
+    });
+    return formatted.trim();
+}
