@@ -1,7 +1,7 @@
-const stats= {
+const state = {
     selectedElement: null,
     clipboard: null,
-    history: []
+    history: [],
     historyIndex: -1,
     maxHistory: 50,
     draggedType: null,
@@ -14,22 +14,22 @@ const $$ = (sel) => document.querySelectorAll(sel);
 
 const canvas = $('#canvas');
 const canvasEmpty = $('#canvasEmpty');
-const canvasWrapper = ('#CanvasWrapper');
-const panelEmpty = ('#panelEmpty');
+const canvasWrapper = $('#canvasWrapper');
+const panelEmpty = $('#panelEmpty');
 const propertiesContent = $('#propertiesContent');
 const contextMenu = $('#contextMenu');
 const layersPanel = $('#layersPanel');
 const layersTree = $('#layersTree');
-const previewModal = $('#layersTree');
-const exportModal = $('exportModal');
+const previewModal = $('#previewModal');
+const exportModal = $('#exportModal');
 const previewFrame = $('#previewFrame');
-const codeOutput = $('codeOutput');
+const codeOutput = $('#codeOutput');
 
 document.addEventListener('DOMContentLoaded', () => {
-    initDragandDrop();
+    initDragAndDrop();
     initToolbar();
     initViewport();
-    initPanelSelections();
+    initPanelSections();
     initPropertyTabs();
     initPropertyInputs();
     initContextMenu();
@@ -39,12 +39,12 @@ document.addEventListener('DOMContentLoaded', () => {
     saveHistory();
 });
 
-function initDragAndDrop() (
+function initDragAndDrop() {
     $$('.draggable-item').forEach(item => {
         item.addEventListener('dragstart', (e) => {
-            state.draggableType = item.dataset.type;
-            state.draggedElemen t = null;
-            e.dataTransfer.effectAllowed = 'copy':
+            state.draggedType = item.dataset.type;
+            state.draggedElement = null;
+            e.dataTransfer.effectAllowed = 'copy';
             item.style.opacity = '0.5';
         });
 
@@ -71,7 +71,7 @@ function handleCanvasDragOver(e) {
     if (target) {
         const rect = target.getBoundingClientRect();
         const midY = rect.top + rect.height / 2;
-        const position = e.client.Y  < midY ? 'before' : 'after';
+        const position = e.clientY  < midY ? 'before' : 'after';
         const indicator = document.createElement('div');
         indicator.className = 'drop-indicator';
 
@@ -93,7 +93,7 @@ function handleCanvasDragOver(e) {
 
 function handleCanvasDragLeave(e) {
     if (!canvas.contains(e.relatedTarget)) {
-        removeAllDropIndicators():
+        removeAllDropIndicators();
     }
 }
 
@@ -116,7 +116,7 @@ function handleCanvasDrop(e) {
 
         if (isContainer(target)) {
             const innerZone = rect.height * 0.3;
-            if (e.clientY > rect.top + innerZone && e.clientY < rect.bottom - innerZone {
+            if (e.clientY > rect.top + innerZone && e.clientY < rect.bottom - innerZone) {
                 target.appendChild(newElement);
                 finalizeDrop(newElement);
                 return;
@@ -124,7 +124,7 @@ function handleCanvasDrop(e) {
         }
 
         if (e.clientY < midY) {
-            target.parentnode.insertBefore(newElement, target);
+            target.parentNode.insertBefore(newElement, target);
         } else {
             target.parentNode.insertBefore(newElement, target.nextSibling);
         }
@@ -178,7 +178,7 @@ function hideCanvasEmpty() {
 }
 
 function showCanvasEmpty() {
-    const elements = canvas.querySelectorAll('builder-element');
+    const elements = canvas.querySelectorAll('.builder-element');
     if (elements.length === 0 && canvasEmpty) {
         canvasEmpty.style.display = 'flex';
     }
@@ -197,14 +197,14 @@ function createElement(type) {
 
     wrapper.innerHTML = getElementHTML(type);
 
-    const action = document.createElement('div');
-    action.className = 'element-action';
-    action.innerHTML = '
+    const actions = document.createElement('div');
+    actions.className = 'element-actions';
+    actions.innerHTML = `
         <button class="element-action-btn" data-action="moveup" title="Sposta su"><i class="fa-solid fa-arrow-up"></i></button>
         <button class="element-action-btn" data-action="movedown" title="Sposta giu"><i class="fa-solid fa-arrow-down"></i></button>
         <button class="element-action-btn" data-action="duplicate" title="Duplica"><i class="fa-solid fa-clone"></i></button>
         <button class="element-action-btn action-delete" data-action="delete" title="Elimina"><i class="fa-solid fa-trash"></i></button>
-    ';
+        `;
     wrapper.appendChild(actions);
     setupElementEvents(wrapper);
     return wrapper;
@@ -213,16 +213,16 @@ function createElement(type) {
 function getTypeLabel(type) {
     const labels = {
         'section': 'Sezione',
-        'container': 'Contanitore',
+        'container': 'Contenitore',
         'columns-2': '2 Colonne',
-        'columns.3': '3 colonne',
+        'columns-3': '3 Colonne',
         'grid': 'Griglia',
         'heading': 'Titolo',
         'paragraph': 'Paragrafo',
         'image': 'Immagine',
         'button': 'Bottone',
         'link': 'Link',
-        'divider': 'Divisore'
+        'divider': 'Divisore',
         'spacer': 'Spazio',
         'video': 'Video',
         'icon': 'Icona',
@@ -235,7 +235,7 @@ function getTypeLabel(type) {
         'block-hero': 'Hero',
         'block-navbar': 'Navbar',
         'block-footer': 'Footer',
-        'block-card': 'Card'
+        'block-card': 'Card',
         'block-pricing': 'Pricing',
         'block-testimonial': 'Testimonial'
     };
@@ -244,50 +244,50 @@ function getTypeLabel(type) {
 
 function getElementHTML(type) {
     const templates = {
-        'section': '<div class= "wbsection></div>',
-        'container': <div class="wb.container"></div>',
-        'columns-2': '
+        'section': '<div class="wb-section"></div>',
+        'container': '<div class="wb-container"></div>',
+        'columns-2': `
             <div class="wb-columns">
-                <div class="wb-column builder-element" data-type="columns" data-label="Colonna 1" draggable="true"></div>
+                <div class="wb-column builder-element" data-type="column" data-label="Colonna 1" draggable="true"></div>
                 <div class="wb-column builder-element" data-type="columns" data-label="Colonna 2" draggable="true"></div>
-            </div>',
-        'columns-3': '
-            <div class="wb.columns">
+            </div>`,
+        'columns-3':
+            <div class="wb-columns">
                 <div class="wb-column builder-element" data-type="column" data-label="Colonna 1" draggable="true"></div>
                 <div class="wb-column builder-element" data-type="column" data-label="Colonna 2" draggable="true"></div>
                 <div class="wb-column builder-element" data-type="column" data-label="Colonna 3" draggable="true"></div>
-            </div>',
+            </div>`,
 
             'grid': '<div class="wb-grid"></div>',
             'heading': '<h2 class="wb-heading" contenteditable="true">Scrivi il tuo titolo</h2>',
             'paragraph': '<p class="wb-paragraph" contenteditable="true">Scrivi il tuo paragrafo qui. Clicca per modificare il testo direttamente.</p>',
 
-            'image': '
+            'image': `
                     <div class="wb-image">
                         <div class="wb-image-placeholder">
                             <span><i class="fa-solid fa-image"></i> Clicca per aggiungere un\'immagine</span>
-                        </dir>
-                    </dir>',
+                        </div>
+                    </div>`,
 
                 'button': '<button class="wb-button" contenteditable="true">Clicca qui</button>',
-                'link': '<a class="wb-link" contenteditable="true" href="#*>Il tuo link</a>',
-                'divider: '<hr class="wb class="wb-divider">',
+                'link': '<a class="wb-link" contenteditable="true" href="#">Il tuo link</a>',
+                'divider': '<hr class="wb-divider">',
                 'spacer': '<div class="wb-spacer"></div>',
-                'video': '
+                'video': `
                     <div class="wb-video">
                         <span><i class="fa-solid fa-play-circle" style="font-size:48px;color:#666;"></i></span>
-                    </div>,
+                    </div>`,
                 'icon': '<div class="wb-icon"><i class="fa-solid fa-star"></i></div>',
-                'map': '<div class="wb-map"<span><i class="fa-solid fa-map-location-dot"></i>Mappa</span></div>',
+                'map': '<div class="wb-map"><span><i class="fa-solid fa-map-location-dot"></i>Mappa</span></div>',
                 'form': '<form class="wb-form" onsubmit="return false;"></form>',
-                'input': '<input type="text" class="wb-input" placeholder="Inserisci testo...">'.
-                'textarea': '<textarea class="wb-textarea-e1" placeholder="Scrivi qui..."></textarea>',
-                'select': '
+                'input': '<input type="text" class="wb-input" placeholder="Inserisci testo...">',
+                'textarea': '<textarea class="wb-textarea-el" placeholder="Scrivi qui..."></textarea>',
+                'select': `
                     <select class="wb-select">
                         <option>Opzione 1</option>
                         <option>Opzione 2</option>
                         <option>Opzione 3</option>
-                    </select>',
+                    </select>`,
                 'checkbox': '
                     <label class="wb-checkbox-wrapper">
                         <input type="checkbox">Accetto i termini
@@ -327,14 +327,13 @@ function getElementHTML(type) {
                 'block-pricing': '
                     <div class="wb-pricing">
                         <div class="pricing-title" contenteditable="true">Piano Pro</div>
-                        <div class="pricing-price" contenteditable="true">29<span>/mese</span0></div>
+                        <div class="pricing-price" contenteditable="true">29<span>/mese</span></div>
                         <ul class="pricing-features">
-                            <div class="wb-pricing">
-                                <li contenteditable="true>Funzionalita completa</li>
-                                <li contenteditable="true>Supporto prioritario</li>
-                                <li contenteditable="true>Aggiornamenti gratuiti</li>
-                                <li contenteditable="true>10 GB di spazio</li>
-                            </ul>
+                            <li contenteditable="true">Funzionalita completa</li>
+                            <li contenteditable="true">Supporto prioritario</li>
+                            <li contenteditable="true">Aggiornamenti gratuiti</li>
+                            <li contenteditable="true">10 GB di spazio</li>
+                        </ul>
                             <button class="wb-button" contenteditable="true">Scegli piano</button>
                         </div>',
                     'block-testimonial': '
@@ -347,14 +346,14 @@ function getElementHTML(type) {
                                     <div class="testimonial-role" contenteditable="true">CEO, Azienda</div>
                                 </div>
                             </div>
-                        </div>
+                        </div>`
     };
     return templates[type] || '<div>Elemento</div>';
 }
 
 
 function setupElementEvents(element) {
-    element-addEventListener('click', (e) => {
+    element.addEventListener('click', (e) => {
         e.stioPropagation();
         selectElement(element);
     });
@@ -769,7 +768,7 @@ function initPropertyInputs() {
         if (!state.selectedElement) return;
         const target = getStyleTarget(state.selectedElement);
         const css = $('#propCustomCSS').value;
-        css.split(':')=.forEach(rule => {
+        css.split(';').forEach(rule => {
             const parts = rule.split(':');
             if (part.lenght === 2) {
                 const prop = parts[0].trim();
@@ -783,16 +782,16 @@ function initPropertyInputs() {
         saveHistory();
     });
 
-    $('btnDeleteElement').adEventListener('click, () => {
-        if (state.selecetedElement) deleteElement(state.selectedElement);
+    $('#btnDeleteElement').addEventListener('click', () => {
+        if (state.selectedElement) deleteElement(state.selectedElement);
     });
 
-    $('btnDuplicateElement').addEventLister('click', () => {
+    $('#btnDuplicateElement').addEventListener('click', () => {
         if (state.selectedElement) duplicateElement(state.selectedElement);
     });
 }
 
-function applyStyle(property, value) 
+function applyStyle(property, value) {
     if (!state.selectedElement) return;
     const target = getStyleTarget(state.selectedelement);
     target.style[property] = value;
@@ -816,19 +815,19 @@ function getEditableContent(element) {
 
 function updatePropertyPanel() {
     if (!state.selectedElement) return;
-    const e1 = state.selectedElemente;
+    const el = state.selectedElement;
     const target = getStyleTarget(el);
     const computed = window.getComputedStyle(target);
 
     const editable = getEditableContent(el);
     $('#propText').value = editable ? editable.textContent : '';
 
-    const link = el.querySelector('a, wb-link');
+    const link = el.querySelector('a, .wb-link');
     $('#propLink').value = link ? link.href : '';
 
     const img = el.querySelector('img');
     $('#propImageSrc').value = img ? img.src : '';
-    $('#propAlt').value = img = img.alt : '';
+    $('#propAlt').value = img ? img.alt : '';
 
     $('#propFont').value = target.style.fontFamily || '';
     $('#propFontSize').value = parseInt(computed.fontSize) || '';
@@ -838,33 +837,33 @@ function updatePropertyPanel() {
     });
 
     const textColor = rgbToHex(computed.color);
-    const bgColor = rgbaToHex(computed.backgroundColor);
+    const bgColor = rgbToHex(computed.backgroundColor);
     $('#propColor').value = textColor;
     $('#propColorText').value = textColor;
-    $('#propBgColor').value = BgColor !== '#00000000' ? bgColor : '#ffffff';
+    $('#propBgColor').value = bgColor !== '#00000000' ? bgColor : '#ffffff';
     $('#propBgColorText').value = bgColor !== '#00000000' ? bgColor: '#ffffff';
 
     $('#propLineHeight').value = parseFloat(computed.lineHeight) || '';
-    $('#propLetterSpacing).value = pareseFloat(computed.letterSpacing || '';
+    $('#propLetterSpacing').value = parseFloat(computed.letterSpacing) || '';
 
-    $('#propWidth'). value = target.style.width || '';
-    $('#prpHeight').value = target.style.height || '';
+    $('#propWidth').value = target.style.width || '';
+    $('#propHeight').value = target.style.height || '';
 
     $('#propMarginTop').value = parseInt(computed.marginTop) || '';
     $('#propMarginRight').value = parseInt(computed.marginRight) || '';
     $('#propMarginBottom').value =parseInt(computed.marginBottom) || '';
-    $('#propMarginLeft').value = parseInt(comput.marginLeft) || '';
+    $('#propMarginLeft').value = parseInt(computed.marginLeft) || '';
 
     $('#propPaddingTop').value = parseInt(computed.paddingTop) || '';
     $('#propPaddingRight').value = parseInt(computed.paddingRight) || '';
     $('#propPaddingBottom').value = parseInt(computed.paddingBottom) || '';
     $('#propPaddingLeft').value = parseInt(computed.paddingLeft) || '';
 
-    $('#propBorderWidth').value = parseInt(computed.bordertopWidth) || '';
+    $('#propBorderWidth').value = parseInt(computed.borderTopWidth) || '';
     $('#propBorderStyle').value = computed.borderTopStyle || 'none';
     const borderColor = rgbToHex(computed.borderTopColor);
     $('#propBorderColor').value = borderColor;
-    $('#propBorderColorText0').value = borderColor;
+    $('#propBorderColorText').value = borderColor;
     $('#propBorderRadius').value = parseInt(computed.borderRadius) || '';
     $('#propShadow').value = target.style.boxShadow || 'none';
     const opacity = Math.round(parseFloat(computed.opacity) * 100);
@@ -876,36 +875,35 @@ function updatePropertyPanel() {
     if (display === 'flex') {
         $('#propFlexDirection').value = computed.flexDirection || 'row';
         $('#propAlignItems').value = computed.alignItems || 'stretch';
-        $('#propJustifyìContent').value = computed.justifyContent || 'flex-start';
-        $('propGap').value = parseInt(computer.gap) || '';
+        $('#propJustifyContent').value = computed.justifyContent || 'flex-start';
+        $('#propGap').value = parseInt(computed.gap) || '';
     }
 
-    $('#propPosition').value = computed.position || 'static;
+    $('#propPosition').value = computed.position || 'static';
     $('#propOverflow').value = computed.overflow || 'visible';
 
     $('#propId').value = target.id || '';
-    const userClasses = Array.from(target:classList).filter(c => !c startedWith('wb-') && c !== 'builder-element' && !== 'selected0
-    ):
-    $(#propClasses').value = userClasses.join(' ');
+    const userClasses = Array.from(target.classList).filter(c => !c.startsWith('wb-') && c !== 'builder-element' && c !== 'selected');
+    $('#propClasses').value = userClasses.join(' ');
     $('#propCustomCSS').value = '';
 }
 
 function updateBorder() {
     const width = $('#propBorderWidth').value;
-    const style = $('#propborderStyle').value;
-    const color = $('propBorderColor').value;
+    const style = $('#propBorderStyle').value;
+    const color = $('#propBorderColor').value;
 
-    if (width && style !== 'none) {
-        applyStyle('border', '$(width)px $(style) $(color)');
+    if (width && style !== 'none') {
+        applyStyle('border', `${width}px ${style} ${color}`);
     } else {
-        applyStyle('border, 'none);
+        applyStyle('border', 'none');
     }
 }
 
-function paraSizeValue(val) {
+function parseSizeValue(val) {
     if (!val) return '';
     if (val == 'auto') return 'auto';
-    if (val.includes('%') || val.includes('px) || val.includes('vh' || val.includes('vw') || val.includes('em') || val.includes('rem')) {
+    if (val.includes('%') || val.includes('px') || val.includes('vh') || val.includes('vw') || val.includes('em') || val.includes('rem')) {
         return val;
     }
     return val + 'px';
@@ -914,18 +912,18 @@ function paraSizeValue(val) {
 
 
 function rgbToHex(rgb) {
-    if (!rgb || rgb == 'transparent' || rgb === 'rgba(0, 0, 0,0 0)') return '#ffffff';
-    if (rgb.startWith('#')) return rgb;
-    const match = rgb.match(/rgba=\((\ d+),\s*(\d+),\s*(\d+)/);
-    if (|match) return '#000000';
+    if (!rgb || rgb === 'transparent' || rgb === 'rgba(0, 0, 0, 0)') return '#ffffff';
+    if (rgb.startsWith('#')) return rgb;
+    const match = rgb.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
+    if (!match) return '#000000';
     const r = parseInt(match[1]);
     const g = parseInt(match[2]);
     const b = parseInt(match[3]);
-    return '#' + [r, g, b].map(c ==> c.toString(16).padStart(2, '0')).join('');
+    return '#' + [r, g, b].map(c => c.toString(16).padStart(2, '0')).join('');
 }
 
 
-function initPanelSection() {
+function initPanelSections() {
     $$('.section-title').forEach(title => {
         title.addEventListener('click', () => {
             const targetId = title.dataset.toggle;
@@ -948,13 +946,13 @@ function initToolbar() {
 function initViewport() {
     $$('.viewport-btn').forEach(btn => {
         btn.addEventListener('click', () => {
-            $$('viewport-btn').forEach(b ==> b.clasList.remove('active'));
+            $$('.viewport-btn').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
 
             const view = btn.dataset.view;
-            canvasWrapper.classname = 'canvas.wrapper';
+            canvasWrapper.className = 'canvas-wrapper';
             if (view === 'tablet') {
-                canvasWtrapper.classList.add('table');
+                canvasWrapper.classList.add('tablet');
             } else if (view === 'mobile') {
                 canvasWrapper.classList.add('mobile');
             }
@@ -962,7 +960,7 @@ function initViewport() {
     });
 }
 function initContextMenu() {
-    $$('context-item').forEach(item => {
+    $$('.context-item').forEach(item => {
         item.addEventListener('click', () => {
             const action = item.dataset.action;
             if (state.selectedElement) {
@@ -987,7 +985,7 @@ function showContextMenu(x, y) {
     contextMenu.classList.add('visible');
     const rect = contextMenu.getBoundingClientRect();
     if (rect.right > window.innerWidth) {
-        contextMenu.style.left = (x - reactwidth) + 'px';
+        contextMenu.style.left = (x - rect.width) + 'px';
     }
     if (rect.bottom > window.innerHeight) {
         contextMenu.style.top = (y - rect.height) + 'px';
@@ -998,30 +996,28 @@ function hideContextMenu() {
     contextMenu.classList.remove('visible');
 }
 
-function initLayers() {
-    $('#btnLayers').addEventListener('click', () => (
-        layersPanel.classList.toggle('visible');
-        updateLayers();
-    });
+    function initLayers() {
+        $('#btnLayers').addEventListener('click', () => {
+            layersPanel.classList.toggle('visible');
+            updateLayers();
+        });
     $('#closeLayers').addEventListener('click', () => {
-        layersPanel.classList.toggle('visible');
-        updateLayers();
+        layersPanel.classList.remove('visible');
     });
-}
 
 function updateLayers() {
     layersTree.innerHTML = '';
     const elements = canvas.querySelectorAll(':scope > .builder-element');
 
-    element.forEach(e1) =1 {
-        addLayerItem(e1, 0);
+    elements.forEach(el => {
+        addLayerItem(el, 0);
     });
 )
 
 function addLayerItem(element, depth) {
     const item = document.createElement('div');
     item.className = 'layer-item';
-    if (depth === 1) item.classList.add('layers-indent');
+    if (depth === 1) item.classList.add('layer-indent');
     if (depth >= 2) item.classList.add('layer-indent-2');
     if (state.selectedElement === element) {
         item.classList.add('active');
@@ -1031,7 +1027,7 @@ function addLayerItem(element, depth) {
     const label = element.dataset.label || getTypeLabel(type);
     const icon = getTypeIcon(type);
 
-    item.innserHTML = '<i class="$(icon)"></i><span>$(label)</span>';
+    item.innerHTML = `<i class="${icon}"></i><span>${label}</span>`;
     item.addEventListener('click', () => {
         selectElement(element);
         updateLayers();
@@ -1065,7 +1061,7 @@ function getTypeIcon(type) {
 const icons = {
     'section': 'fa-solid fa-layer-group',
     'container': 'fa-solid fa-box',
-    'columns-2': 'f-solid fa-columns',
+    'columns-2': 'fa-solid fa-columns',
     'columns-3': 'fa-solid fa-table-columns',
     'columns': 'fa-solid fa-square',
     'grid': 'fa-solid fa-grip',
@@ -1074,8 +1070,8 @@ const icons = {
     'image': 'fa-solid fa-image',
     'button': 'fa-solid fa-hand-pointer',
     'link': 'fa-solid fa-link',
-    'divider': 'fa-spod fa-minus',
-    'spacer': 'fa-spòod fa-arrows-up-down',
+    'divider': 'fa-solid fa-minus',
+    'spacer': 'fa-solid fa-arrows-up-down',
     'video': 'fa-solid fa-video',
     'icon': 'fa-solid fa-icons',
     'map': 'fa-solid fa-map-location-dot',
@@ -1094,7 +1090,7 @@ const icons = {
 }
 
 function saveHistory() {
-    if (state.hystoryIndex < state.history.lenght -1) {
+    if (state.hystoryIndex < state.history.length -1) {
         state.history = state.history.slice(0, state.historyIndex +1);
     }
 
@@ -1114,7 +1110,7 @@ function undo() {
 }
 
 function redo() {
-    if (state.historyindex >= state.history.lenght - 1) return;
+    if (state.historyIndex >= state.history.length - 1) return;
 
     state.historyIndex++;
     restoreHistory();
@@ -1132,7 +1128,7 @@ function restoreHistory() {
     updateLayers();
 }
 
-function initModels() {
+function initModals() {
     $('#closePreview').addEventListener('click', () => {
         previewModal.classList.remove('visible');
     });
@@ -1140,22 +1136,22 @@ function initModels() {
         exportModal.classList.remove('visible');
     });
 
-    previewModal.adEventListener('click', (e) => {
+    previewModal.addEventListener('click', (e) => {
         if (e.target === previewModal) previewModal.classList.remove('visible');
     });
 
-    exportModal.addeventListener('click', (e) => {
+    exportModal.addEventListener('click', (e) => {
         if (e.target === exportModal) exportModal.classList.remove('visible');
     });
 
     $$('.export-tab').forEach(tab => {
-        tab.addEvebtListener('click', () => {
-            $$('export-tab').forEach(t => t.classList.remove('active')};
+        tab.addEventListener('click', () => {
+            $$('.export-tab').forEach(t => t.classList.remove('active'));
             tab.classList.add('active');
             updateExportCode(tab.dataset.export);
         });
     });
-    $('btnCopyCode').addEventListener('click', () => {
+    $('#btnCopyCode').addEventListener('click', () => {
         navigator.clipboard.writeText(codeOutput.textContent).then(() => {
             const btn = $('#btnCopyCode');
             const original = btn.innerHTML;
@@ -1169,7 +1165,7 @@ function initModels() {
 function showPreview() {
     previewModal.classList.add('visible');
     const html = generateFullHTML();
-    const blob = new Blob[html], { type 'text/html' });
+    const blob = new Blob([html], { type: 'text/html' });
     const url = URL.createObjectURL(blob);
     previewFrame.src = url;
 }
@@ -1181,13 +1177,13 @@ function showExport()  {
 
 function updateExportCode(type) {
     switch (type) {
-        case 'html';
-            codeOutput, textContent = generateCleanHTML();
+        case 'html':
+            codeOutput.textContent = generateCleanHTML();
             break;
-        case 'css';
+        case 'css':
             codeOutput.textContent = generateCleanCSS();
             break;
-        case 'full';
+        case 'full':
             codeOutput.textContent = generateFullHTML();
             break;
     }
@@ -1201,7 +1197,7 @@ function generateCleanHTML() {
         el.removeAttribute('data-type');
         el.removeAttribute('data-id');
         el.removeAttribute('data-label');
-        el.removeAttributa('contenteditable');
+        el.removeAttribute('draggable');
     });
 
     clone.querySelectorAll('[contenteditable]').forEach(el => {
@@ -1211,19 +1207,19 @@ function generateCleanHTML() {
 }
 
 function generateCleanCSS() {
-    let css = '/' Stili generati da web BUilder '/\n\n';
+    let css = '/* Stili generati da Web Builder */\n\n';
     css += '* { margin: 0; padding: 0; box-sizing: border-box; }\n';
     css += 'body { font-family: "Inter", -apple-system, sans-serif; }\n\n';
 
     const elements = canvas.querySelectorAll('.builder-element');
-    elements.forEach(e1, i) => {
+    elements.forEach((el, i) => {
      const target = getStyleTarget(el);
      if (target.style.cssText) {
          css += '.element-$(i + 1) {\n';
-         target.style.cssText.split(':').forEach(rule => {
+         target.style.cssText.split(';').forEach(rule => {
                const trimmed = rule.trim();
                 if (trimmed) {
-                    ccs += '    $(trimmed):\n';
+                    css += `    ${trimmed};\n`;
                 }
             });
             css  += '}\n\n';
@@ -1235,26 +1231,26 @@ function generateCleanCSS() {
 function generateFullHTML() {
     const bodyContent = generateCleanHTML();
     const styles = generateInlineStyles();
-    return '<!DOCTYPE html>
+    return `<!DOCTYPE html>
 <html lang="it">
 <head>
-    <meta charse="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Il mio sito</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        ' {margin: 0; padding: 0; box-sizing: border-box; }
+        * {margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif; }
-        img { max-width: 100%; 100%; height: auto; }
+        img { max-width: 100%; height: auto; }
 $(styles)
     </style>
 </head>
 <body>
-</html>';
+</html>`;
 }
 function generateInlineStyles() {
     return '
-        .wb-selection { padding: 60px 20px; }
+        .wb-section { padding: 60px 20px; }
         .wb-container { max-width: 1100px; margin: 0 auto; padding: 20px; }
         .wb-columns { display: flex; gap: 20px; }
         .wb-column { flex: 1; padding: 15px; }
@@ -1267,21 +1263,21 @@ function generateInlineStyles() {
         .wb-spacer { height: 40px; }
         .wb-hero { text-align: center; padding: 80px 40px; background: linear-gradient(135deg, #1a1a2e, #16213e); color: white; }
         .wb-hero h1 { font-size: 42px; font-weight: 800; margin-bottom: 16px; }
-        .wb-hero p { font-size: 18px; opacity: 0.85; margin-bottom: 30px; max-width: 600px; margin-left: auto
-        .hero-btn { display: inline-block; padding: 14px 36px; background: #4361ee; color: white; border: none; border-radius: 4px: font.size: 16px; font-weight: 600; cursor: pointer; }
+        .wb-hero p { font-size: 18px; opacity: 0.85; margin-bottom: 30px; max-width: 600px; margin-left: auto; }
+        .hero-btn { display: inline-block; padding: 14px 36px; background: #4361ee; color: white; border: none; border-radius: 4px; font.size: 16px; font-weight: 600; cursor: pointer; }
         .wb-navbar {display: flex; align-items: center; justify-content: space-between; padding: 14px 30px; background: white; border-bottom: 1px solid #eee; }
         .nav-brand { font-size: 20px; font-weight: 700; color: #333; }
         .nav-links { display: flex; gap: 24px; list-style: none; }
         .nav-links a { color: #555; text-decoration: none; font-size: 14px; font-weight: 500; }
-        .wb-footer { padding: 40px 30px; background: #1a1a2e; color; rgba(255,255,255,0.7); text-align: center; font-size: 14px; }
+        .wb-footer { padding: 40px 30px; background: #1a1a2e; color: rgba(255,255,255,0.7); text-align: center; font-size: 14px; }
         .wb-card { background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.08);}
-        .card-img { width: 100%; height: 180px; background: #e8e8e8; display: flex; align-items: center; justify.content: center; color: #bbb; }
+        .card-img { width: 100%; height: 180px; background: #e8e8e8; display: flex; align-items: center; justify-content: center; color: #bbb; }
         .card-body { padding: 20px; }
         .card-body h3 { font-size: 18px; color: #333; margin-bottom: 8px; }
         .card-body p { font-size: 14px; color: #777; line-height: 1.5; }
-        .wb.pricing { background: white; border: 2px solid #eee; border-radius: 12px; padding: 30px; text-align: center; }
+        .wb-pricing { background: white; border: 2px solid #eee; border-radius: 12px; padding: 30px; text-align: center; }
         .pricing-title { font-size: 18px; font-weight: 600; color: #333; margin-bottom: 10px; }
-        .pricing-price { font-size; 42px; font-weight: 800; color: #4361ee; margin-bottom: 20px; }
+        .pricing-price { font-size: 42px; font-weight: 800; color: #4361ee; margin-bottom: 20px; }
         .pricing-price span { font-size: 16px; font-weight: 400; color: #999; }
         .pricing-features { list-style: none; margin-bottom: 24px; }
         .pricing-features li { padding: 8px 0; font-size: 14px; color: #555; border-bottom: 1px solid #f0f0f0; }
@@ -1294,12 +1290,12 @@ function generateInlineStyles() {
         .wb-form { padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px; }
         .wb-checkbox-wrapper { display: flex; align-items: center; gap: 8px; font-size: 14px; }
         .wb-video { width: 100%; background: #000; min-height: 200px; display: flex; align-items: center; justify-content: center; }
-        .wb-icon { font-size: 40p; color: #4361ee; text-align: center; padding: 10px }
+        .wb-icon { font-size: 40px; color: #4361ee; text-align: center; padding: 10px }
         .wb-map { width: 100%; height: 250px; background: #e8e8e8; display: flex; align-items: center; justify-content: center; color: #000; }
-    ';
+        `;
 }
 
-function formatHTML(html {
+function formatHTML(html) {
     let formatted = '';
     let indent = 0;
     const tab = '   ';
@@ -1317,3 +1313,110 @@ function formatHTML(html {
     });
     return formatted.trim();
 }
+
+function downloadZip() {
+    const html = generateFullHTML();
+    const blob = new Blob([html], { type: 'text/html' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'sito-web.html';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+}
+
+function initKeyboard() {
+    document.addEventListener('keydown', (e) => {
+        const tag = document.activeElement.tagName;
+        const isEditing = tag === 'INPUT' || tag === 'TEXTAREA' || document.activeElement.isContentEditable;
+        if ((e.key === 'Delete' || e.key === 'Backspace') && !isEditing) {
+            e.preventDefault();
+            if (state.selectedElement) deleteElement(state.selectedElement);
+        }
+
+        if (e.ctrlKey && e.key === 'z' && !e.shiftKey) {
+            e.preventDefault();
+            undo();
+        }
+
+        if ((e.ctrlKey && e.shiftKey && e.key === 'z') || (e.ctrlKey && e.key === 'y')) {
+            e.preventDefault();
+            redo();
+        }
+
+        if (e.ctrlKey && e.key === 'd') {
+            e.preventDefault();
+            if (state.selectedElement) duplicateElement(state.selectedElement);
+        }
+
+        if (e.ctrlKey && e.key === 'c' && !isEditing) {
+            if (state.selectedElement) copyElement(state.selectedElement);
+        }
+
+        if (e.ctrlKey && e.key === 'v' && !isEditing) {
+            pasteElement();
+        }
+
+        if (e.key === 'Escape') {
+            if (previewModal.classList.contains('visible')) {
+                previewModal.classList.remove('visible');
+            } else if (exportModal.classList.contains('visible')) {
+                exportModal.classList.remove('visible');
+            } else if (contextMenu.classList.contains('visible')) {
+                hideContextMenu();
+            } else {
+                deselectElement();
+            }
+        }
+
+        if(e.altKey && e.key === 'ArrowUp' && state.selectedElement) {
+            e.preventDefault();
+            moveElement(state.selectedElement, 'up');
+        }
+        if (e.altKey && e.key === 'ArrowDown' && state.selectedElement) {
+            e.preventDefault();
+            moveElement(state.selectedElement, 'down');
+        }
+    });
+}
+
+function autoSave() {
+    try {
+        const data = {
+            html: canvas.innerHTML,
+            counter: state.elementCounter,
+            timestamp: Date.now()
+        };
+        localStorage.setItem('webbuilder-autosave', JSON.stringify(data));
+    } catch (e) {
+    }
+}
+
+function autoLoad() {
+    try {
+        const saved = localStorage.getItem('webbuilder-autosave');
+        if (!saved) return false;
+        const data = JSON.parse(saved);
+        if (!data.html) return false;
+        canvas.innerHTML = data.html;
+        state.elementCounter = data.counter || 0;
+        canvas.querySelectorAll('.builder-element').forEach(el => {
+            setupElementEvents(el);
+        });
+        hideCanvasEmpty();
+        return true;
+    } catch (e) {
+        return false;
+    }
+}
+
+setInterval(autoSave, 5000);
+document.addEventListener('DOMContentLoaded', () => {
+    const loaded = autoLoad();
+    if(loaded) {
+        saveHistory();
+        updateLayers();
+    }
+});
