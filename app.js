@@ -1088,7 +1088,7 @@ function saveHistory() {
     if (state.history.length > state.maxHistory) {
         state.history.shift();
     }
-    state.historyIndex = state.history.length -1;
+    state.historyIndex = state.history.length  -1;
 }
 
 function undo() {

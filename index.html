@@ -18,7 +18,11 @@
             <button class="viewport-btn active" data-view="desktop" title="Desktop"><i class="fa-solid fa-desktop"></i></button>
             <button class="viewport-btn" data-view="tablet" title="Tablet"><i class="fa-solid fa-tablet-screen-button"></i></button>
             <button class="viewport-btn" data-view="mobile" title="Telefono"><i class="fa-solid fa-mobile-screen-button"></i></button>
-        </div>
+            <div class="toolbar-modes">
+                <button class="mode-btn active" data-mode="structure" title="Modalita Strutture"><i class="fa-solid fa-layer-group"></i> Struttura</button>
+                <button class="mode-btn" data-mode="free" title="Modalita Libera"><i class="fa-solid fa-arrows-up-down-left-right"></i> Libero</button>
+            </div>        
+            </div>
         <div class="toolbar-right">
             <button class="toolbar-btn" id="btnPreview" title="Anteprima"><i class="fa-solid fa-eye"></i>Anteprima</button>
             <button class="toolbar-btn btn-primary" id="btnExport" title="Esporta"><i class="fa-solid fa-download"></i> Esporta</button>
@@ -167,6 +171,44 @@
     <main class="canvas-area">
         <div class="canvas-wrapper" id="canvasWrapper">
             <div class="canvas" id="canvas">
+                
+                <div class="free-toolbar" id="freeToolbar" style="display:none;">
+                    <div class="ft-group">
+                        <label class="ft-label">Testo</label>
+                        <input type="number" class="ft-input" id="ftFontSize" placeholder="16" min="8" max="200" title="Dimensione testo">
+                        <input type="color" class="ft-color" value="#333333" title="Colore testo">
+                        <input type="color" class="ft-color" id="ftBgColor" value="#ffffff" title="Colore sfondo">
+                    </div>
+                    <div class="ft-group">
+                        <button class="ft-btn" id="ftBold" title="Grassetto"><i class="fa-solid fa-bold"></i></button>
+                        <button class="ft-btn" id="ftItalic" title="Corsivo"><i class="fa-solid fa-italic"></i></button>
+                        <button class="ft-btn" id="ftAlignLeft" title="Sinistra"><i clas="fa-solid fa-align-left"></i></button>
+                        <button class="ft-btn" id="ftAlignCenter" title="Centro"><i clas="fa-solid fa-right"></i></button>
+                        <button class="ft-btn" id="ftAlignRight" title="Destra"><i clas="fa-solid fa-align-right"></i></button>
+                    </div>
+                    <div class="ft-group">
+                        <label class="ft-label">Dimensione</label>
+                        <input type="number" class="ft-input" id="ftWidth" placeholder="W" title="Larghezza">
+                        <span class="ft-separator">x</span>
+                        <input type="number" class="ft-input" id="ftHeight" placeHolder="H" title="Altezza">
+                    </div>
+                    <div class="ft-group">
+                        <label class="ft-label">Posizione</label>
+                        <input type="number" class="ft-input" id="ftPosX" placeholder="X" title="Posizione X">
+                        <input type="number" class="ft-input" id="ftPosY" placeholder="Y" title="Posizione Y">
+                    </div>
+                    <div class="ft-group">
+                        <input type="number" class="ft-input" id="ftRotation" placeholder="0" title="Rotazione" min="-360" max="360">
+                        <span class="ft-unit">deg</span>
+                        <input type="number" class="ft-input" id="ftOpacity" placeholder="100" title="Opacita" min="0" max="100">
+                        <span class="ft-unit">%</span>
+                    </div>
+                    <div class="ft-group">
+                        <input type="number" class="ft-input" id="ftBorderRadius" placeholder="0" title="Raggio bordo" min="0">
+                        <span class="ft.unit">px</span>
+                        <button class="ft-btn ft-danger" id="ftDelete" title="Elimina"><i class="fa-solid fa-trash"></i></button>
+                    </div>
+                </div>
                 <div class="canvas-empty" id="canvasEmpty">
                     <i class="fa-solid fa-plus-circle"></i>
                     <p>Trascina un elemento qui per iniziare</p>
