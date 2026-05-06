@@ -1354,7 +1354,7 @@ select.prop-input {
     display: flex;
     gap: 4px;
     background: rgba(255, 255, 255, 0.05);
-    border.radius: var(--radius-sm);
+    border-radius: var(--radius-sm);
     padding: 2px;
 }
 
@@ -1376,7 +1376,7 @@ select.prop-input {
     color: var(--text-primary);
 }
 
-.mode-btn:active {
+.mode-btn.active {
     background: var(--accent);
     color: white;
 }
@@ -1415,7 +1415,8 @@ select.prop-input {
     width: 52px;
     padding: 4px 6px;
     background: var(--bg-input);
-    border-radius: var(--border-color);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
     color: var(--text-primary);
     font-size: 11px;
     text-align: center;
@@ -1433,7 +1434,7 @@ select.prop-input {
     border-radius: var(--radius-sm);
     cursor: pointer;
     padding: 1px;
-    background: var(bg--input);
+    background: var(--bg-input);
 }
 
 .ft-color::-webkit-color-swatch-wrapper {
@@ -1461,7 +1462,7 @@ select.prop-input {
     border-color: var(--accent);
 }
 
-.ft-btn-active {
+.ft-btn.active {
     background: var(--accent);
     border-color: var(--accent);
     color: white;
@@ -1480,7 +1481,7 @@ select.prop-input {
 
 .ft-unit {
     color: var(--text-secondary);
-    font.size: 10px;
+    font-size: 10px;
 }
 
 .canvas.free-mode {
@@ -1488,3 +1489,92 @@ select.prop-input {
     min-height: 600px;
 }
 
+.canvas.free-mode .builder-element {
+    position: absolute;
+    cursor: move;
+    min-width: 30px;
+    min-height: 20px;
+}
+
+.resize-handle {
+    position: absolute;
+    background: var(--accent);
+    border: 2px solid white;
+    border-radius: 50%;
+    width: 10px;
+    height: 10px;
+    z-index: 20;
+    display: none;
+}
+
+.builder-element.selected .resize-handle {
+    display: block;
+}
+
+.resize-handle.top-left {
+    top: -5px;
+    left: -5px;
+    cursor: nw-resize;
+}
+
+.resize-handle.top-right {
+    top: -5px;
+    right: -5px;
+    cursor: ne-resize;
+}
+
+.resize-handle.bottom-left {
+    bottom: -5px;
+    left: -5px;
+    cursor: sw-resize;
+}
+
+.resize-handle.bottom-right {
+    bottom: -5px;
+    right: -5px;
+    cursor: se-resize;
+}
+
+
+.resize-handle.top-center {
+    top: -5px;
+    left: 50%;
+    transform: translateX(-50%);
+    cursor: n-resize;
+}
+
+.resize-handle.middle-left {
+    top: 50%;
+    left: -5px;
+    transform: translateY(-50%);
+    cursor: w-resize;
+}
+
+.resize-handle.middle-right {
+    top: 50%;
+    right: -5px;
+    transform: translateY(-50%);
+    cursor: e-resize;
+}
+
+.canvas.free-mode::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+        linear-gradient(rgba(0, 0, 0, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 0, 0, 0.03) 1px, transparent 1px);
+    background-size: 20px 20px;
+    pointer-events: none;
+    z-index: 0;
+}
+
+.canvas.free-mode .builder-element {
+    z-index: 1;
+}
+
+.canvas.free-mode .canvas-empty {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+}

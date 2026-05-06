@@ -1410,3 +1410,295 @@ document.addEventListener('DOMContentLoaded', () => {
         updateLayers();
     }
 });
+
+let currentMode = 'structure';
+function initModes() {
+    $$('.mode-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            $$('.mode-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            switchMode(btn.dataset.mode);    
+        });
+    });
+}
+
+function switchMode(mode) {
+    currentMode = mode;
+    if (mode === 'free') {
+        canvas.classList.add('free-mode');
+        $('#freeToolbar').style.display = 'flex';
+        canvas.querySelectorAll('.builder-element').forEach(el => {
+            convertToFreeMode(el);
+        });
+    } else {
+        canvas.classList.remove('free-mode');
+        $('#freeToolbar').style.display = 'none';
+        canvas.querySelectorAll('.builder-element').forEach(el => {
+            convertToStructureMode(el);
+        });
+    }
+    deselectElement();
+    saveHistory();
+}
+
+function convertToFreeMode(el) {
+    const rect = el.getBoundingClientRect();
+    const canvasRect = canvas.getBoundingClientRect();
+
+    el.style.position = 'absolute';
+    el.style.left = (rect.left - canvasRect.left) + 'px';
+    el.style.top = (rect.top - canvasRect.top) +'px';
+    el.style.width = rect.width + 'px';
+
+    addResizeHandles(el);
+    addFreeDrag(el);
+}
+
+function convertToStructureMode(el) {
+    el.style.position = '';
+    el.style.left = '';
+    el.style.top = '';
+    el.style.width = '';
+    el.style.transform = '';
+
+    el.querySelectorAll('.resize-handle').forEach(h => h.remove());
+    el.onmousedown = null;
+}
+
+function addResizeHandles(el) {
+    if (el.querySelector('.resize-handle')) return;
+    const positions = [
+        'top-left', 'top-center', 'top-right',
+        'middle-left', 'middle-right',
+        'bottom-left', 'bottom-center',  'bottom-right'
+    ];
+    positions.forEach(pos => {
+        const handle = document.createElement('div');
+        handle.className = 'resize-handle ' + pos;
+        handle.dataset.handle = pos;
+        el.appendChild(handle);
+
+        handle.addEventListener('mousedown', (e) => {
+            e.stopPropagation();
+            e.preventDefault();
+            startResize(el, pos, e);
+        });
+    });
+}
+
+function startResize(el, handle, startEvent) {
+    const startX = startEvent.clientX;
+    const startY = startEvent.clientY;
+    const startWidth = el.offsetWidth;
+    const startHeight = el.offsetHeight;
+    const startLeft = parseInt(el.style.left) || 0;
+    const startTop = parseInt(el.style.top) || 0;
+
+    function onMouseMove(e) {
+        const dx = e.clientX - startX;
+        const dy = e.clientY - startY;
+
+        let newWidth = startWidth;
+        let newHeight = startHeight;
+        let newLeft = startLeft;
+        let newTop = startTop;
+
+        if (handle.includes('right')) {
+            newWidth = Math.max(30, startWidth + dx);
+        }
+        if (handle.includes('left')) {
+            newWidth = Math.max(30, startWidth - dx);
+            newLeft =  startLeft + dx;
+        }
+        if (handle.includes('bottom')) {
+            newHeight = Math.max(20, startHeight + dy);
+        }
+        if (handle.includes('top') && handle !== 'top-center' || handle === 'top-center') {
+            if (handle.includes('top')) {
+                newHeight = Math.max(20, startHeight - dy);
+                newTop = startTop + dy;
+            }
+        }
+        el.style.width = newWidth + 'px';
+        el.style.height = newHeight + 'px';
+        el.style.left = newLeft + 'px';
+        el.style.top = newTop + 'px';
+        updateFreeToolbarValues(el);
+    }
+    function onMouseUp() {
+        document.removeEventListener('mousemove', onMouseMove);
+        document.removeEventListener('mouseup', onMouseUp);
+        saveHistory();
+    }
+    document.addEventListener('mousemove', onMouseMove);
+    document.addEventListener('mouseup', onMouseUp);
+}
+
+
+
+function addFreeDrag(el) {
+    el.addEventListener('mousedown', function(e) {
+        if (currentMode !== 'free') return;
+        if (e.target.classList.contains('resize-handle')) return;
+        if (e.target.closest('.element-actions')) return;
+        if (e.target.isContentEditable) return;
+        e.preventDefault();
+        selectElement(el);
+        const startX = e.clientX;
+        const startY = e.clientY;
+        const startLeft = parseInt(el.style.left) || 0;
+        const startTop = parseInt(el.style.top) || 0;
+
+        function onMouseMove(ev) {
+            const dx = ev.clientX - startX;
+            const dy = ev.clientY - startY;
+            el.style.left = (startLeft + dx) + 'px';
+            el.style.top = (startTop + dy) + 'px';
+            updateFreeToolbarValues(el);
+        }
+        function onMouseUp() {
+            document.removeEventListener('mousemove', onMouseMove);
+            document.removeEventListener('mouseup', onMouseUp);
+            saveHistory();
+        }
+
+        document.addEventListener('mousemove', onMouseMove);
+        document.addEventListener('mouseup', onMouseUp);
+    });
+}
+
+function initFreeToolbar() {
+    $('#ftFontSize').addEventListener('input', () => {
+        if (!state.selectedElement) return;
+        const target = getStyleTarget(state.selectedElement);
+        target.style.fontSize = $('#ftFontSize').value + 'px';
+    });
+
+    $('#ftColor').addEventListener('input', () => {
+        if (!state.selectedElement) return;
+        const target = getStyleTarget(state.selectedElement);
+        target.style.color = $('#ftColor').value;
+    });
+
+    $('#ftBgColor').addEventListener('input', () => {
+        if (!state.selectedElement) return;
+        const target = getStyleTarget(state.selectedElement);
+        target.style.backgroundColor = $('#ftBgColor').value;
+    });
+
+    $('#ftBold').addEventListener('click', () => {
+        if (!state.selectedElement) return;
+        const target = getStyleTarget(state.selectedElement);
+        const current = window.getComputedStyle(target).fontWeight;
+        target.style.fontWeight = (current === '700' || current === 'bold') ? '400' : '700';
+        $('#ftBold').classList.toggle('active');
+    });
+
+    $('#ftItalic').addEventListener('click', () => {
+        if (!state.selectedElement) return;
+        const target = getStyleTarget(state.selectedElement);
+        const current = window.getComputedStyle(target).fontStyle;
+        target.style.fontStyle = current === 'italic' ? 'normal' : 'italic';
+        $('#ftItalic').classList.toggle('active');
+    });
+
+    ['Left', 'Center', 'Right'].forEach(align => {
+        $(`#ftAlign${align}`).addEventListener('click', () => {
+            if (!state.selectedElement) return;
+            const target= getStyleTarget(state.selectedElement);
+            target.style.textAlign = align.toLowerCase();
+            ['Left', 'Center', 'Right'].forEach(a => {
+                $(`#ftAlign${a}`).classList.remove('active');
+            });
+            $(`#ftAlign${align}`).classList.add('active');
+        });
+    });
+    $('#ftWidth').addEventListener('input', () => {
+        if (!state.selectedElement) return;
+        state.selectedElement.style.width = $('#ftWidth').value + 'px';
+    });
+
+    $('#ftHeight').addEventListener('input', () => {
+        if (!state.selectedElement) return;
+        state.selectedElement.style.height = $('#ftHeight').value + 'px';    
+    });
+
+    $('#ftPosX').addEventListener('input', () => {
+        if (!state.selectedElement) return;
+        state.selectedElement.style.left = $('#ftPosX').value + 'px';
+    });
+
+    $('#ftPosY').addEventListener('input', () => {
+        if (!state.selectedElement) return;
+        state.selectedElement.style.top = $('#ftPosY').value + 'px';
+    });
+
+    $('#ftRotation').addEventListener('input', () => {
+        if (!state.selectedElement) return;
+        state.selectedElement.style.transform = `rotate(${$('#ftRotation').value}deg)`;
+    });
+
+    $('#ftOpacity').addEventListener('input', () => {
+        if (!state.selectedElement) return;
+        state.selectedElement.style.opacity =$('#ftOpacity').value / 100;
+    });
+
+    $('#ftBorderRadius').addEventListener('input', () => {
+        if (!state.selectedElement) return;
+        const target = getStyleTarget(state.selectedElement);
+        target.style.borderRadius = $('#ftBorderRadius').value + 'px';
+    });
+
+    $('#ftDelete').addEventListener('click', () => {
+        if (state.selectedElement) deleteElement(state.selectedElement);
+    });
+}
+
+function updateFreeToolbarValues(el) {
+    if (!el) return;
+    const target = getStyleTarget(el);
+    const computed = window.getComputedStyle(target);
+    $('#ftFontSize').value = parseInt(computed.fontSize) || '';
+    $('#ftColor').value = rgbToHex(computed.color);
+    $('#ftBgColor').value = rgbToHex(computed.backgroundColor);
+    $('#ftWidth').value = parseInt(el.style.width) || el.offsetWidth;
+    $('#ftHeight').value = parseInt(el.style.height) || el.offsetHeight;
+    $('#ftPosX').value = parseInt(el.style.left) || 0;
+    $('#ftPosY').value = parseInt(el.style.top) || 0;
+
+    const transform = el.style.transform || '';
+    const rotateMatch = transform.match(/rotate\((-?\d+)deg\)/);
+    $('#ftRotation').value = rotateMatch ? rotateMatch[1] : 0;
+    $('#ftOpacity').value = Math.round(parseFloat(computed.opacity) * 100);
+    $('#ftBorderRadius').value = parseInt(computed.borderRadius) || 0;
+    const fw = computed.fontWeight;
+    $('#ftBold').classList.toggle('active', fw === '700' || fw === 'bold');
+    $('#ftItalic').classList.toggle('active', computed.fontStyle === 'italic');
+    ['Left', 'Center', 'Right'].forEach(a => {
+        $(`#ftAlign${a}`).classList.toggle('active', computed.textAlign === a.toLowerCase());
+    });
+}
+const originalSelectElement = selectElement;
+selectElement = function(element) {
+    originalSelectElement(element);
+    if (currentMode === 'free') {
+        updateFreeToolbarValues(element);
+    }
+};
+
+const originalCreateElement = createElement;
+createElement = function(type) {
+    const el = originalCreateElement(type);
+    if (currentMode === 'free') {
+        el.style.position = 'absolute';
+        el.style.left = '50px';
+        el.style.top = '50px';
+        addResizeHandles(el);
+        addFreeDrag(el);
+    }
+    return el;
+};
+document.addEventListener('DOMContentLoaded', () => {
+    initModes();
+    initFreeToolbar();
+});
