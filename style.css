@@ -606,7 +606,7 @@ select.prop-input {
     color: var(--text-secondary);
 }
 
-.prp-btn-small {
+.prop-btn-small {
     margin-top: 6px;
     padding: 5px 10px;
     background: var(--bg-input);
@@ -989,7 +989,7 @@ select.prop-input {
 
 .canvas .wb-image img {
     width: 100%;
-    height: auto;
+    height: 100%;
     display: block;
     border-radius: var(--radius-sm);
 }
@@ -1555,6 +1555,12 @@ select.prop-input {
     right: -5px;
     transform: translateY(-50%);
     cursor: e-resize;
+}
+.resize-handle.bottom-center {
+    bottom: -5px;
+    left: 50%;
+    transform: translateX(-50%);
+    cursor: s-resize;
 }
 
 .canvas.free-mode::before {

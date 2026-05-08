@@ -172,15 +172,17 @@ function removeAllDropIndicators() {
 }
 
 function hideCanvasEmpty() {
-    if (canvasEmpty) {
-        canvasEmpty.style.display = 'none';
+    const empty = canvas.querySelector('.canvas-empty');
+    if (empty) {
+        empty.style.display = 'none';
     }
 }
 
 function showCanvasEmpty() {
     const elements = canvas.querySelectorAll('.builder-element');
-    if (elements.length === 0 && canvasEmpty) {
-        canvasEmpty.style.display = 'flex';
+    const empty = canvas.querySelector('.canvas-empty');
+    if (elements.length === 0 && empty) {
+        empty.style.display = 'flex';
     }
 }
 
@@ -1569,7 +1571,7 @@ function startResize(el, handle, startEvent) {
         const img = el.querySelector('img');
         if (img) {
             img.style.width = '100%';
-            img.style.height = 'auto';
+            img.style.height = '100%';
             img.style.objectFit = 'cover';
         }
         const placeholder = el.querySelector('.wb-image-placeholder');
@@ -1601,8 +1603,8 @@ function addFreeDrag(el) {
         if (currentMode !== 'free') return;
         if (e.target.classList.contains('resize-handle')) return;
         if (e.target.closest('.element-actions')) return;
-        if (e.target.isContentEditable) return;
         if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') return;
+        if (e.target.isContentEditable && document.activeElement === e.target) return;
         e.preventDefault();
         selectElement(el);
         const startX = e.clientX;
