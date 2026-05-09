@@ -13,7 +13,7 @@
             <span class="logo">WebBuilder</span>
             <button class="toolbar-btn" id="btnUndo" title="Annulla"><i class="fa-solid fa-rotate-left"></i></button>
             <button class="toolbar-btn" id="btnRedo" title="Ripeti"><i class="fa-solid fa-rotate-right"></i></button>
-            <button class="toolbar-btn btn-reset" id="btnReset" title="Resetta progetto"><i class="fa-solid fa-triangle-exclamation"></i></button>
+            <button class="toolbar-btn btn-reset" id="btnReset" title="Resetta progetto"><i class="fa-solid fa-triangle-exclamation"></i> Reset</button>
         </div>
         <div class="toolbar-center">
             <button class="viewport-btn active" data-view="desktop" title="Desktop"><i class="fa-solid fa-desktop"></i></button>
@@ -540,6 +540,17 @@
         <button class="context-item context-danger" data-action="delete"><i class="fa-solid fa-trash"></i> Elimina</button>
     </div>
 
+    <div class="reset-overlay" id="resetOverlay">
+        <div class="reset-dialog">
+            <div class="reset-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
+            <div class="reset-title">Cancellare tutto?</div>
+            <div class="reset-text">Stai per eliminare tutti gli elementi del progetto attuale. Questa azione sarà irreversibile.</div>
+            <div class="reset-buttons">
+                <button class="reset-btn-cancel" id="resetCancel">Annulla</button>
+                <button class="reset-btn-confirm" id="resetConfirm">Sì, cancella tutto</button>
+                </div>
+            </div>
+        </div>
     <script src="app.js"></script>
 </body>
 </html>

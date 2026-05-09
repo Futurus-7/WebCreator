@@ -932,6 +932,35 @@ function initToolbar() {
     $('#btnRedo').addEventListener('click', redo);
     $('#btnPreview').addEventListener('click', showPreview);
     $('#btnExport').addEventListener('click', showExport);
+    $('#btnReset').addEventListener('click', () => {
+        $('#resetOverlay').classList.add('visible');
+    });
+    $('#resetCancel').addEventListener('click', () => {
+        $('#resetOverlay').classList.remove('visible');
+    });
+    $('#resetConfirm').addEventListener('click', () => {
+        $('#resetOverlay').classList.remove('visible');
+        resetCurrentProject();
+    });
+    $('#resetOverlay').addEventListener('click', (e) => {
+        if (e.target === $('#resetOverlay')) {
+            $('#resetOverlay').classList.remove('visible');
+        }
+    });
+}
+function resetCurrentProject() {
+    if (currentMode === 'free') {
+        freeHTML = '';
+    } else {
+        structureHTML = '';
+    }
+    canvas.innerHTML = '<div class="canvas-empty"><i class="fa-solid fa-plus-circle"></i><p>Trascina un elemento qui per iniziare</p><p class="hint">oppure scegli un blocco pronto dal pannello a sinistra</p></div>';
+    deselectElement();
+    showCanvasEmpty();
+    state.history = [];
+    state.historyIndex = -1;
+    saveHistory();
+    updateLayers();
 }
 
 function initViewport() {
@@ -1495,6 +1524,11 @@ function convertToFreeMode(el) {
     el.style.top = top + 'px';
     el.style.width = rect.width + 'px';
     el.style.margin = '0';
+    const type = el.dataset.type;
+    if (type === 'columns-2' || type === 'columns-3' || type === 'grid' || type === 'section' || type === 'container') {
+        el.style.height = rect.height + 'px';
+        el.style.overflow = 'visible';
+    }
     addResizeHandles(el);
     addFreeDrag(el);
 }
@@ -1579,11 +1613,14 @@ function startResize(el, handle, startEvent) {
             placeholder.style.width = '100%';
             placeholder.style.height = '100%';
         }
-                const innerContent = el.querySelector('.wb-section, .wb-container, .wb-hero, .wb-navbar, .wb-footer, .wb-card, .wb-pricing, .wb-testimonial, .wb-video, .wb-map, .wb-image');
+        const innerContent = el.querySelector('.wb-section, .wb-container, .wb-hero, .wb-navbar, .wb-footer, .wb-card, .wb-pricing, .wb-testimonial, .wb-video, .wb-map, .wb-image');
         if (innerContent) {
             innerContent.style.width = '100%';
             innerContent.style.height = '100%';
-            innerContent.style.overflow = 'hidden';
+            const type = el.dataset.type;
+            if (type !== 'columns-2' && type !== 'columns-3' && type !== 'grid') {
+                innerContent.style.overflow = 'hidden';
+            }
         }
         updateFreeToolbarValues(el);
     }
@@ -1606,6 +1643,7 @@ function addFreeDrag(el) {
         if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') return;
         if (e.target.isContentEditable && document.activeElement === e.target) return;
         e.preventDefault();
+        e.stopPropagation();
         selectElement(el);
         const startX = e.clientX;
         const startY = e.clientY;
