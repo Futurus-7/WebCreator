@@ -1687,3 +1687,56 @@ select.prop-input {
     padding: 0;
     min-height: 0;
  }
+
+ .canvas.free-mode {
+    min-height: 600px;
+    overflow: visible;
+    height: auto;
+ }
+
+ .prop-action-group {
+    margin-bottom: 14px;
+ }
+ 
+ .prop-acttion-row {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    margin-bottom: 6px;
+ }
+
+ .prop-action-row select {
+    flex: 1;
+ }
+
+ .prop-action-row input {
+    flex: 2;
+ }
+
+ #selectOptionsGroup {
+    display: none;
+ }
+
+ .canvas-height-control {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 10px;
+    cursor: ns-resize;
+    color: var(--text-secondary);
+    font-size: 11px;
+    border-top: 2px dashed rgba(67, 97, 238, 0.3);
+    user-select: none;
+ }
+
+ .canvas-height-control:hover {
+    color: var(--accent);
+    border-color: var(--accent);
+    background: var(--accent-light);
+ }
+
+ .canvas.free-mode + .canvas-height-control {
+    display: flex;
+ }
+
+ 

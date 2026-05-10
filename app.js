@@ -780,6 +780,35 @@ function initPropertyInputs() {
     $('#btnDuplicateElement').addEventListener('click', () => {
         if (state.selectedElement) duplicateElement(state.selectedElement);
     });
+    $('#propSelectOptions').addEventListener('change', () => {
+        if (!state.selectedElement) return;
+        const select = state.selectedElement.querySelector('.wb-select');
+        if (!select) return;
+        const lines = $('#propSelectOptions').value.split('\n').filter(l => l.trim());
+        select.innerHTML = lines.map(l => `<option>${l.trim()}</option>`).join('');
+        saveHistory();
+    });
+    $('#propAction').addEventListener('change', () => {
+        const action = $('#propAction').value;
+        $('#actionValueRow').style.display = action === 'none' ? 'none' : 'flex';
+        $('#actionTargetRow').style.display = action === 'link' ? 'flex' : 'none';
+        if (action === 'link') $('#propActionValue').placeholder = 'https://...';
+        else if (action === 'scroll') $('#propActionValue').placeholder = 'ID elemento';
+        else if (action === 'show-hide') $('#propActionValue').placeholder = 'ID elemento';
+        if (!state.selectedElement) return;
+        state.selectedElement.dataset.action = action;
+        saveHistory();
+    });
+    $('#propActionValue').addEventListener('change', () => {
+        if (!state.selectedElement) return;
+        state.selectedElement.dataset.actionValue = $('#propActionValue').value;
+        saveHistory();
+    });
+    $('#propActionNewTab').addEventListener('change', () => {
+        if (!state.selectedElement) return;
+        state.selectedElement.dataset.actionNewTab = $('#propActionNewTab').checked ? 'true' : 'false';
+        saveHistory();
+    });
 }
 
 function applyStyle(property, value) {
@@ -877,8 +906,30 @@ function updatePropertyPanel() {
     const userClasses = Array.from(target.classList).filter(c => !c.startsWith('wb-') && c !== 'builder-element' && c !== 'selected');
     $('#propClasses').value = userClasses.join(' ');
     $('#propCustomCSS').value = '';
+    const selectEl = el.querySelector('.wb-select');
+    const selectGroup = $('#selectOptionsGroup');
+    if (selectEl) {
+        selectGroup.style.display = 'block';
+        const opts = Array.from(selectEl.options).map(o => o.text).join('\n');
+        $('#propSelectOptions').value = opts;
+    } else {
+        selectGroup.style.display = 'none';
+        $('#propSelectOptions').value = '';
+    }
+    const actionGroup = $('#actionGroup');
+    const elType = el.dataset.type;
+    if (elType) {
+        actionGroup.style.display = 'block';
+        $('#propAction').value = el.dataset.action || 'none';
+        $('#propActionValue').value = el.dataset.actionValue || '';
+        $('#propActionNewTab').checked = el.dataset.actionNewTab === 'true';
+        const act = el.dataset.action || 'none';
+        $('#actionValueRow').style.display = act === 'none' ? 'none' : 'flex';
+        $('#actionTargetRow').style.display = act === 'link' ? 'flex' : 'none';
+    } else {
+        actionGroup.style.display = 'none';
+    }
 }
-
 function updateBorder() {
     const width = $('#propBorderWidth').value;
     const style = $('#propBorderStyle').value;
@@ -1266,6 +1317,8 @@ ${styles}
 </head>
 <body>
 ${bodyContent}
+<script>
+
 </body>
 </html>`;
 }
@@ -1802,4 +1855,31 @@ createElement = function(type) {
 document.addEventListener('DOMContentLoaded', () => {
     initModes();
     initFreeToolbar();
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+    const heightControl = $('#canvasHeightControl');
+    if (!heightControl) return;
+    let isDragging = false;
+    let startY = 0;
+    let startHeight = 0;
+    heightControl.addEventListener('mousedown', (e) => {
+        if (currentMode !== 'free') return;
+        isDragging = true;
+        startY = e.clientY;
+        startHeight = canvas.offsetHeight;
+        e.preventDefault();
+    });
+    document.addEventListener('mousemove', (e) => {
+        if (!isDragging) return;
+        const dy = e.clientY - startY;
+        const newHeight = Math.max(400, startHeight + dy);
+        canvas.style.minHeight = newHeight + 'px';
+    });
+    document.addEventListener('mouseup', () => {
+        if (isDragging) {
+            isDragging = false;
+            saveHistory();
+        }
+    });
 });

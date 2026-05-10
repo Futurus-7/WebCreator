@@ -216,6 +216,10 @@
                     <p class="hint">oppure scegli un blocco pronto dal pannello a sinistra</p>
                 </div>
             </div>
+            <div class="canvas-height-control" id="canvasHeightControl">
+                <i class="fa-solid fa-arrows-up-down"></i>
+                <span style="margin-left:6px">Trascina per allungare il canvas</span>
+            </div>
         </div>
     </main>
 
@@ -254,7 +258,30 @@
                         <label class="prop-label">Testo alternativo</label>
                         <input type="text" class="prop-input" id="propAlt" placeholder="Descrizione immagine">
                     </div>
+                    <div class="prop-group" id="selectOptionsGroup">
+                        <label class="prop-label">Opzione menu (una per riga)</label>
+                        <textarea class="prop-input prop-textarea" id="propSelectOptions" rows="4" placeholder="Opzione 1&#10;Opzione 2&#10;Opzione 3"></textarea>
                     </div>
+                    <div class="prop-group" id="actionGroup" style="display:none;">
+                        <label class="prop-label">Azione al click</label>
+                        <div class="prop-action-row">
+                            <select class="prop-input" id="propAction">
+                                <option value="none">Nessuna</option>
+                                <option value="link">Vai a URL</option>
+                                <option value="scroll">Apri popup</option>
+                                <option value="show-hide">Mostra/Nascondi</option>
+                                <option value="submit">Invia form</option>
+                            </select>
+                        </div>
+                        <div class="prop-action-row" id="actionValueRow" style="display:none;">
+                            <input type="text" class="prop-input" id="propActionValue" placeholder="URL o ID elemento">
+                        </div>
+                        <div class="prop-action-row" id="actionTargetRow" style="display:none;">
+                            <label class="prop-label" style="margin:0;">Apri in nuova scheda</label>
+                            <input type="checkbox" id="propActionNewTab">
+                        </div>
+                    </div>
+
                     <div class="prop-panel" id="tab-style">
                         <div class="prop-group">
                             <label class="prop-label">Font</label>
