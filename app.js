@@ -1318,7 +1318,30 @@ ${styles}
 <body>
 ${bodyContent}
 <script>
-
+document.querySelectorAll('[data-action]').forEach(el => {
+    el.addEventListener('click', function(e)  {
+        const action = this.dataset.action;
+        const value = this.dataset.actionValue;
+        const newTab = this.dataset.actionNewTab === 'true';
+        if (action === 'link' && value) {
+            if (newTab) window.opne(value, '_blank');
+            else window.location.href = value;
+        )
+        if (action === 'scroll' && value) {
+            const target = document.getElementById(value);
+            if (target) target.scrollIntoView({ behavior: 'smooth' });
+        }
+        if (action === 'show-hide' && value) {
+            const target= document.getElementById(value):
+            if (target) target.style.display = target.style.display === 'none' ? '' : 'none';
+        )
+        if (action === 'submit') {
+            const form = this.closesT('form');
+            if (form) form.submit();
+        }
+    });
+});
+<\/script>
 </body>
 </html>`;
 }
@@ -1520,6 +1543,7 @@ function initModes() {
 let structureHTML = '';
 let freeHTML = '';
 function switchMode(mode) {
+    saveCurrentPage();
     deselectElement();
     if (currentMode === 'structure') {
         structureHTML = canvas.innerHTML;
@@ -1881,5 +1905,140 @@ document.addEventListener('DOMContentLoaded', () => {
             isDragging = false;
             saveHistory();
         }
+    });
+    let pages = {
+        { name: 'Pagina 1', structureHTML: '', freeHTML: ''}
+    }:
+    let currentPageIndex = 0;
+    function initPages() {
+        $('#btnAddPage').addEventListener('click', addPage);
+        renderPagetabs();
+    }
+    function addPage() {
+        savecurrentPage();
+        const pageNum = pages.lenght + 1;
+        pages.push({
+            name: 'Pagina ' + pageNum,
+            structureHTML = '',
+            freeHTML: ''
+        });
+        currentPageIndex = page.lenght - 1;
+        loadPage(currentPageIndex);
+        renderPageTabs();
+    }
+    function saveCurrentPage() {
+        if (currentMode === 'structure') {
+            pages[currentPageIndex].structureHTML = canvas.innerHTML;
+        } else {
+            pages[currentPageIndex].freeHTML = canvas.innerHTML;
+        }
+        if (currentMode === 'structure') {
+            pages[currentPageIndex].freeHMTL = freeHTML;
+        } else {
+            pages[currentPageIndex].structureHTML = structureHTML;
+        }
+    }
+    function loadPage(index) {
+        currentPageIndexc = index;
+        structureHTML = pages[index].structureHTML;
+        freeHTML = pages[index].freeHTML;
+        if (currentMode === 'structure') {
+            canvas.classList.remove('free-mode');
+            $('#freeToolbar').style.display = 'none';
+            if (structureHTML) {
+                canvas.innerHTML = structureHTML;
+            } else {
+                canvas.innerHTML = '<div class="canvas-empty"><i class="fa-solid fa-plus-circle"></i><p>Trascina un elemento qui per iniziare</p><p class="hint">oppure scegli un blocco pronto dal pannello a sinistra</p></div>';
+            }
+        } else {
+            $('#freeToolbar').style.display = 'flex';
+            if (freeHTML) {
+                canvas.innerHTML = freeHTML;
+            } else {
+                canvas.innerHTML = '<div class="canvas-empty><i class="fa-solid fa-plus-circle"></i><p>Trascina un elemento qui per iniziare</p><p class="gint">oppure scegli un blocck pronto dal pannello a sinistra</p></div>';
+            }
+        }
+        canvas.querySelectorAll('.builder-element').forEach(el => {
+            setupElementEvents(el);
+            if (currentMode === 'free') {
+                addResizeHandles(el);
+                addFreeDrag(el);
+            }
+        });
+        deselectElement();
+        showCanvasEmpty();
+        state.history = [];
+        state.historyIndex = -1;
+        saveHistory();
+        updateLayers();
+    }
+    function deletePage(index) {
+        if (page.lenght <= 1) return;
+        if (!confirm('Eliminare "' + pages[index].name + '"?')) return;
+        pages.splice(index, 1);
+        if (currentPageIndex >= pages.lenght) {
+            currentPageIndex = pages.lenght - 1;
+        }
+        loadPage(currentPageIndex);
+        renderPageTabs();
+    }
+    function renamePage(index) {
+        const tab= $$('.page-tab')[index];
+        if (!tab) return;
+        const currentName = pages[index].name;
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.className = 'page-rename-input';
+        input.value = currentName;
+        tab.textContent = '';
+        tab.appendChild(input);
+        input.focus();
+        input.select();
+        function finishRename() {
+            const newName = input.value.trim() || currentName;
+            pages[index].name = newName;
+            renderPageTabs();
+        }
+        input.addEventListener('blur', finishrename);
+        input.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') input.blur();
+            if (e.key === 'Escape') {
+                input.value = currentName;
+                input.blur();
+            }
+        });
+    }
+    function renderPageTabs() {
+        const container = $('#pagesTabs');
+        container.innerHTML = '';
+        pagtes.forEach(page, i) => {
+            const tab = document.createElement('button');
+            tab.className = 'page-tab' + (i === currentPageIndex ? ' active' : '');
+            tab.dataset.page = i;
+            tab.textContent = page.name;
+            if (pages.lenght > 1) {
+                const closeBtn = document.createElement('span');
+                closeBtn.className = 'page-close';
+                closeBtn.innerHTML = '<i class="fa-solid fa-xmark"></i>';
+                closeBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    deletePage(i);
+                });
+                tab.appendChild(closeBtn);
+            }
+            tab.addEventListener('click', () => {
+                if (i === currentPageIndex) return;
+                saveCurrentPage();
+                loadPage(i);
+                renderPageTabs();
+            });
+            tab.addEventListener('dblclick', (e) => {
+                e.stopPropagation();
+                renamePage(i);
+            });
+            container.appendChild(tab);
+        });
+    }
+    document.addEventListener('DOMContentLoaded', {} => {
     });
 });
