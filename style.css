@@ -148,6 +148,9 @@ html, body {
 .panel-header {
     padding: 14px 16px;
     border-bottom: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
 }
 
 .panel-header h3 {
@@ -1698,7 +1701,7 @@ select.prop-input {
     margin-bottom: 14px;
  }
  
- .prop-acttion-row {
+ .prop-action-row {
     display: flex;
     gap: 6px;
     align-items: center;
@@ -1816,7 +1819,7 @@ select.prop-input {
     align-items: center;
     justify-content: center;
     background: transparent;
-    border: 1px dashed var(--border-lightt);
+    border: 1px dashed var(--border-light);
     color: var(--text-secondary);
     border-radius: var(--radius-sm);
     cursor: pointer;

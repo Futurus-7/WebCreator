@@ -36,7 +36,13 @@ document.addEventListener('DOMContentLoaded', () => {
     initLayers();
     initModals();
     initKeyboard();
-    saveHistory();
+    initModes();
+    initFreeToolbar();
+    initPages();
+    const loaded= autoLoad();
+    if (!loaded) {
+        saveHistory();
+    }
 });
 
 function initDragAndDrop() {
@@ -505,6 +511,7 @@ function duplicateElement(element) {
     clone.dataset.id = 'el-' +state.elementCounter;
     setupElementEvents(clone);
     element.parentNode.insertBefore(clone, element.nextSibling);
+    setupElementEvents(clone);
     selectElement(clone);
     saveHistory();
     updateLayers();
@@ -519,8 +526,11 @@ function moveElement(element, direction) {
             parent.insertBefore(element, prev); 
         }
     } else {
-        const next = element.nextElementSibling;
-        if (next && !next.classList.contains('element-actions')) {
+        let next = element.nextElementSibling;
+        while (next && (next.classList.contains('drop-indicator') || next.classList.contains('resize-hangle'))) {
+            next = next.nextElementSibling;
+        }
+        if (next) {
             parent.insertBefore(next, element);
         }
     }
@@ -540,6 +550,7 @@ function pasteElement() {
     state.elementCounter++;
     clone.dataset.id = 'el-' + state.elementCounter;
     setupElementEvents(clone);
+    setupElementEventes(clone);
 
     if (state.selectedElement && isContainer(state.selectedElement)) {
         const container = state.selectedElement.querySelector('.wb-section, .wb-container, .wb-form') || state.selectedElement;
@@ -1262,8 +1273,9 @@ function updateExportCode(type) {
 function generateCleanHTML() {
     const clone = canvas.cloneNode(true);
     clone.querySelectorAll('.element-actions, .drop-indicator, .canvas-empty').forEach(el => el.remove());
-    clone.querySelectorAll('.builder-element').forEach(el => {
+    clone.querySelectorAll('.builder-element').forEach((el, i) => {
         el.classList.remove('builder-element', 'selected', 'drag-over');
+        element-(i + 1)
         el.removeAttribute('data-type');
         el.removeAttribute('data-id');
         el.removeAttribute('data-label');
@@ -1324,19 +1336,19 @@ document.querySelectorAll('[data-action]').forEach(el => {
         const value = this.dataset.actionValue;
         const newTab = this.dataset.actionNewTab === 'true';
         if (action === 'link' && value) {
-            if (newTab) window.opne(value, '_blank');
+            if (newTab) window.open(value, '_blank');
             else window.location.href = value;
-        )
+        }
         if (action === 'scroll' && value) {
             const target = document.getElementById(value);
             if (target) target.scrollIntoView({ behavior: 'smooth' });
         }
         if (action === 'show-hide' && value) {
-            const target= document.getElementById(value):
+            const target = document.getElementById(value);
             if (target) target.style.display = target.style.display === 'none' ? '' : 'none';
-        )
+}
         if (action === 'submit') {
-            const form = this.closesT('form');
+            const form = this.closest('form');
             if (form) form.submit();
         }
     });
@@ -1481,8 +1493,11 @@ function initKeyboard() {
 
 function autoSave() {
     try {
+        saveCurrentPage();
         const data = {
-            html: canvas.innerHTML,
+            pages: pages,
+            curretnPageIndex: currentPageIndex,
+            currentMode: currentMode,
             counter: state.elementCounter,
             timestamp: Date.now()
         };
@@ -1496,38 +1511,23 @@ function autoLoad() {
         const saved = localStorage.getItem('webbuilder-autosave');
         if (!saved) return false;
         const data = JSON.parse(saved);
-        if (!data.html) return false;
-        canvas.innerHTML = data.html;
+        if (!data.pages) return false;
+        page = data.pages;
+        currentPageIndex = data.currentPageIndex || 0;
         state.elementCounter = data.counter || 0;
-        canvas.classList.remove('free-mode');
-        canvas.querySelectorAll('.builder-element').forEach(el => {
-            el.style.position = '';
-            el.style.left = '';
-            el.style.top = '';
-            el.style.width = '';
-            el.style.transform = '';
-            el.style.margin = '';
-            delete el.dataset.freeX;
-            delete el.dataset.freeY;
-            delete el.dataset.freeW;
-            el.querySelectorAll('.resize-handle').forEach(h => h.remove());
-            setupElementEvents(el);
-        });
-        hideCanvasEmpty();
-        return true;
+        currentMode = data.currentMode || 'structure';
+        $$('.mode-btn').forEach(b => b.classList.remove('active'));
+        const modeBtn = document.querySelector('.mode-btn[data-mode="${currentMode}"]');
+        if (modeBtn) modeBtn.classList.add('active');
+        renderPageTabs();
+        loadPage(currentPageIndex);
+        return true
     } catch (e) {
         return false;
     }
 }
-
 setInterval(autoSave, 5000);
-document.addEventListener('DOMContentLoaded', () => {
-    const loaded = autoLoad();
-    if(loaded) {
-        saveHistory();
-        updateLayers();
-    }
-});
+
 
 let currentMode = 'structure';
 function initModes() {
@@ -1543,13 +1543,13 @@ function initModes() {
 let structureHTML = '';
 let freeHTML = '';
 function switchMode(mode) {
-    saveCurrentPage();
-    deselectElement();
     if (currentMode === 'structure') {
         structureHTML = canvas.innerHTML;
     } else {
         freeHTML = canvas.innerHTML;
     }
+    saveCurrentPage();
+    deselectElement();
     currentMode = mode;
     if (mode === 'free') {
         canvas.classList.add('free-mode');
@@ -1876,10 +1876,6 @@ createElement = function(type) {
     }
     return el;
 };
-document.addEventListener('DOMContentLoaded', () => {
-    initModes();
-    initFreeToolbar();
-});
 
 document.addEventListener('DOMContentLoaded', () => {
     const heightControl = $('#canvasHeightControl');
@@ -1906,58 +1902,57 @@ document.addEventListener('DOMContentLoaded', () => {
             saveHistory();
         }
     });
-    let pages = {
-        { name: 'Pagina 1', structureHTML: '', freeHTML: ''}
-    }:
+});
+    let pages = [
+        { name: 'Pagina 1', structureHTML: '', freeHTML: '' }
+    ];
     let currentPageIndex = 0;
-    function initPages() {
-        $('#btnAddPage').addEventListener('click', addPage);
-        renderPagetabs();
-    }
-    function addPage() {
-        savecurrentPage();
-        const pageNum = pages.lenght + 1;
-        pages.push({
-            name: 'Pagina ' + pageNum,
-            structureHTML = '',
-            freeHTML: ''
-        });
-        currentPageIndex = page.lenght - 1;
-        loadPage(currentPageIndex);
-        renderPageTabs();
-    }
+function initPages() {
+    $('#btnAddPage').addEventListener('click', addPage);
+    renderPageTabs();
+}
+function addPage() {
+    saveCurrentPage();
+    const pageNum = pages.length + 1;
+    pages.push({
+        name: 'Pagina ' + pageNum,
+        structureHTML: '',
+        freeHTML: ''
+    });
+    currentPageIndex = pages.length - 1;
+    loadPage(currentPageIndex);
+    renderPageTabs();
+}
     function saveCurrentPage() {
         if (currentMode === 'structure') {
             pages[currentPageIndex].structureHTML = canvas.innerHTML;
+            pages[currentPageIndex].freeHTML = freeHTML;
         } else {
             pages[currentPageIndex].freeHTML = canvas.innerHTML;
-        }
-        if (currentMode === 'structure') {
-            pages[currentPageIndex].freeHMTL = freeHTML;
-        } else {
             pages[currentPageIndex].structureHTML = structureHTML;
         }
     }
-    function loadPage(index) {
-        currentPageIndexc = index;
-        structureHTML = pages[index].structureHTML;
-        freeHTML = pages[index].freeHTML;
-        if (currentMode === 'structure') {
-            canvas.classList.remove('free-mode');
-            $('#freeToolbar').style.display = 'none';
-            if (structureHTML) {
-                canvas.innerHTML = structureHTML;
-            } else {
-                canvas.innerHTML = '<div class="canvas-empty"><i class="fa-solid fa-plus-circle"></i><p>Trascina un elemento qui per iniziare</p><p class="hint">oppure scegli un blocco pronto dal pannello a sinistra</p></div>';
-            }
+function loadPage(index) {
+    currentPageIndex = index;
+    structureHTML = pages[index].structureHTML;
+    freeHTML = pages[index].freeHTML;
+    if (currentMode === 'structure') {
+        canvas.classList.remove('free-mode');
+        $('#freeToolbar').style.display = 'none';
+        if (structureHTML) {
+            canvas.innerHTML = structureHTML;
         } else {
-            $('#freeToolbar').style.display = 'flex';
-            if (freeHTML) {
-                canvas.innerHTML = freeHTML;
-            } else {
-                canvas.innerHTML = '<div class="canvas-empty><i class="fa-solid fa-plus-circle"></i><p>Trascina un elemento qui per iniziare</p><p class="gint">oppure scegli un blocck pronto dal pannello a sinistra</p></div>';
-            }
+            canvas.innerHTML = '<div class="canvas-empty"><i class="fa-solid fa-plus-circle"></i><p>Trascina un elemento qui per iniziare</p><p class="hint">oppure scegli un blocco pronto dal pannello a sinistra</p></div>';
         }
+    } else {
+        canvas.classList.add('free-mode');
+        $('#freeToolbar').style.display = 'flex';
+        if (freeHTML) {
+            canvas.innerHTML = freeHTML;
+        } else {
+            canvas.innerHTML = '<div class="canvas-empty"><i class="fa-solid fa-plus-circle"></i><p>Trascina un elemento qui per iniziare</p><p class="hint">oppure scegli un blocco pronto dal pannello a sinistra</p></div>';
+        }
+    }
         canvas.querySelectorAll('.builder-element').forEach(el => {
             setupElementEvents(el);
             if (currentMode === 'free') {
@@ -1972,73 +1967,70 @@ document.addEventListener('DOMContentLoaded', () => {
         saveHistory();
         updateLayers();
     }
-    function deletePage(index) {
-        if (page.lenght <= 1) return;
-        if (!confirm('Eliminare "' + pages[index].name + '"?')) return;
-        pages.splice(index, 1);
-        if (currentPageIndex >= pages.lenght) {
-            currentPageIndex = pages.lenght - 1;
-        }
-        loadPage(currentPageIndex);
+function deletePage(index) {
+    if (pages.length <= 1) return;
+    if (!confirm('Eliminare "' + pages[index].name + '"?')) return;
+    pages.splice(index, 1);
+    if (currentPageIndex >= pages.length) {
+        currentPageIndex = pages.length - 1;
+    }
+    loadPage(currentPageIndex);
+    renderPageTabs();
+}
+function renamePage(index) {
+    const tab= $$('.page-tab')[index];
+    if (!tab) return;
+    const currentName = pages[index].name;
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.className = 'page-rename-input';
+    input.value = currentName;
+    tab.textContent = '';
+    tab.appendChild(input);
+    input.focus();
+    input.select();
+    function finishRename() {
+        const newName = input.value.trim() || currentName;
+        pages[index].name = newName;
         renderPageTabs();
     }
-    function renamePage(index) {
-        const tab= $$('.page-tab')[index];
-        if (!tab) return;
-        const currentName = pages[index].name;
-        const input = document.createElement('input');
-        input.type = 'text';
-        input.className = 'page-rename-input';
-        input.value = currentName;
-        tab.textContent = '';
-        tab.appendChild(input);
-        input.focus();
-        input.select();
-        function finishRename() {
-            const newName = input.value.trim() || currentName;
-            pages[index].name = newName;
-            renderPageTabs();
+    input.addEventListener('blur', finishRename);
+    input.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') input.blur();
+        if (e.key === 'Escape') {
+            input.value = currentName;
+            input.blur();
         }
-        input.addEventListener('blur', finishrename);
-        input.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') input.blur();
-            if (e.key === 'Escape') {
-                input.value = currentName;
-                input.blur();
-            }
-        });
-    }
-    function renderPageTabs() {
-        const container = $('#pagesTabs');
-        container.innerHTML = '';
-        pagtes.forEach(page, i) => {
-            const tab = document.createElement('button');
-            tab.className = 'page-tab' + (i === currentPageIndex ? ' active' : '');
-            tab.dataset.page = i;
-            tab.textContent = page.name;
-            if (pages.lenght > 1) {
-                const closeBtn = document.createElement('span');
-                closeBtn.className = 'page-close';
-                closeBtn.innerHTML = '<i class="fa-solid fa-xmark"></i>';
-                closeBtn.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    deletePage(i);
-                });
-                tab.appendChild(closeBtn);
-            }
-            tab.addEventListener('click', () => {
-                if (i === currentPageIndex) return;
-                saveCurrentPage();
-                loadPage(i);
-                renderPageTabs();
-            });
-            tab.addEventListener('dblclick', (e) => {
-                e.stopPropagation();
-                renamePage(i);
-            });
-            container.appendChild(tab);
-        });
-    }
-    document.addEventListener('DOMContentLoaded', {} => {
     });
-});
+}
+function renderPageTabs() {
+    const container = $('#pagesTabs');
+    container.innerHTML = '';
+    pages.forEach((page, i) => {
+        const tab = document.createElement('button');
+        tab.className = 'page-tab' + (i === currentPageIndex ? ' active' : '');
+        tab.dataset.page = i;
+        tab.textContent = page.name;
+        if (pages.length > 1) {
+            const closeBtn = document.createElement('span');
+            closeBtn.className = 'page-close';
+            closeBtn.innerHTML = '<i class="fa-solid fa-xmark"></i>';
+            closeBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                deletePage(i);
+            });
+            tab.appendChild(closeBtn);
+        }
+        tab.addEventListener('click', () => {
+            if (i === currentPageIndex) return;
+            saveCurrentPage();
+            loadPage(i);
+            renderPageTabs();
+        });
+        tab.addEventListener('dblclick', (e) => {
+            e.stopPropagation();
+            renamePage(i);
+        });
+        container.appendChild(tab);
+    });
+}
