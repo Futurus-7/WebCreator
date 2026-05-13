@@ -11,7 +11,7 @@
     <header class="toolbar">
         <div class="toolbar-left">
             <span class="logo">WebBuilder</span>
-            <button class="toolbar-btn" id="btnUndo" title="Annulla"><i class="fa-solid fa-rotate-left"></i></button>
+            <button class="toolbar-btn" id="btnUndo" title="Annulla" aria-label="Annulla"><i class="fa-solid fa-rotate-left"></i></button>
             <button class="toolbar-btn" id="btnRedo" title="Ripeti"><i class="fa-solid fa-rotate-right"></i></button>
             <button class="toolbar-btn btn-reset" id="btnReset" title="Resetta progetto"><i class="fa-solid fa-triangle-exclamation"></i> Reset</button>
         </div>
@@ -247,7 +247,7 @@
 
                 <div class="prop-panel active" id="tab-content">
                     <div class="prop-group">
-                        <label class="prop-label">Testo</label>
+                        <label class="prop-label" for="propText">Testo</label>
                         <textarea class="prop-input prop-textarea" id="propText" rows="3"></textarea>
                     </div>
                     <div class="prop-group">
@@ -274,7 +274,7 @@
                             <select class="prop-input" id="propAction">
                                 <option value="none">Nessuna</option>
                                 <option value="link">Vai a URL</option>
-                                <option value="scroll">Apri popup</option>
+                                <option value="scroll">Scorri a elemento</option>
                                 <option value="show-hide">Mostra/Nascondi</option>
                                 <option value="submit">Invia form</option>
                             </select>
@@ -439,7 +439,6 @@
                             <input type="range" class="prop-range" id="propOpacity" min="0" max="100" value="100">
                             <span class="range-value" id="opacityValue">100%</span>
                         </div>
-                        </div>
                     </div>
                     <div class="prop-panel" id="tab-advanced">
                         <div class="prop-group">
@@ -540,7 +539,7 @@
                 <h3>Anteprima</h3>
                 <button class="close-btn" id="closePreview"><i class="fa-solid fa-xmark"></i></button>
             </div>
-            <iframe id="previewFrame" class="preview-frame"></iframe>
+            <iframe id="previewFrame" class="preview-frame" title="Anteprima del sito"></iframe>
         </div>
     </div>
     <div class="modal-overlay" id="exportModal">
@@ -585,7 +584,7 @@
                 </div>
             </div>
         </div>
-    <script sc="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <script src="app.js"></script>
 </body>
 </html>

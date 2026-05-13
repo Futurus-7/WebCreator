@@ -116,6 +116,7 @@ function handleCanvasDrop(e) {
     }
 
     if (!newElement) return;
+    if (target && newElement.contains(target)) return;
     if (target && target !== newElement) {
         const rect = target.getBoundingClientRect();
         const midY = rect.top + rect.height / 2;
@@ -361,6 +362,8 @@ function getElementHTML(type) {
 
 
 function setupElementEvents(element) {
+    if (element._eventsBound) return;
+    element._eventsBound = true;
     element.addEventListener('click', (e) => {
         e.stopPropagation();
         selectElement(element);
@@ -435,6 +438,7 @@ function setupElementEvents(element) {
                 newEl = state.draggedElement;
             }
             if (newEl) {
+                if (newEl.contains(col)) return;
                 col.appendChild(newEl);
                 finalizeDrop(newEl);
             }
@@ -452,7 +456,7 @@ function selectElement(element) {
     panelEmpty.style.display = 'none';
     propertiesContent.style.display = 'block';
     updatePropertyPanel();
-    updateLayerSelection();
+    updateLayers();
 }
 
 function deselectElement() {
@@ -465,7 +469,7 @@ function deselectElement() {
 }
 
 canvas.addEventListener('click', (e) => {
-    if (e.target === canvas || e.target == canvasEmpty) {
+    if (e.target === canvas || e.target.closest('.canvasEmpty')) {
         deselectElement();
     }
 });
@@ -495,10 +499,11 @@ function handleElementAction(action, element) {
 
 function deleteElement(element) {
     if (!element) return;
+    element.remove();
     if (state.selectedElement === element) {
+        
         deselectElement();
     }
-    element.remove();
     showCanvasEmpty();
     saveHistory();
     updateLayers();
@@ -508,8 +513,7 @@ function duplicateElement(element) {
     if (!element) return;
     const clone = element.cloneNode(true);
     state.elementCounter++;
-    clone.dataset.id = 'el-' +state.elementCounter;
-    setupElementEvents(clone);
+    clone.dataset.id = 'el-' +state.elementCounter;;
     element.parentNode.insertBefore(clone, element.nextSibling);
     setupElementEvents(clone);
     selectElement(clone);
@@ -527,7 +531,7 @@ function moveElement(element, direction) {
         }
     } else {
         let next = element.nextElementSibling;
-        while (next && (next.classList.contains('drop-indicator') || next.classList.contains('resize-hangle'))) {
+        while (next && (next.classList.contains('drop-indicator') || next.classList.contains('resize-handle'))) {
             next = next.nextElementSibling;
         }
         if (next) {
@@ -550,7 +554,7 @@ function pasteElement() {
     state.elementCounter++;
     clone.dataset.id = 'el-' + state.elementCounter;
     setupElementEvents(clone);
-    setupElementEventes(clone);
+    clone.querySelectorAll('.builder-element').forEach(child => setupElementEvents(child));
 
     if (state.selectedElement && isContainer(state.selectedElement)) {
         const container = state.selectedElement.querySelector('.wb-section, .wb-container, .wb-form') || state.selectedElement;
@@ -796,7 +800,11 @@ function initPropertyInputs() {
         const select = state.selectedElement.querySelector('.wb-select');
         if (!select) return;
         const lines = $('#propSelectOptions').value.split('\n').filter(l => l.trim());
-        select.innerHTML = lines.map(l => `<option>${l.trim()}</option>`).join('');
+        select.replaceChildren(...lines.map(line => {
+            const option = document.createElement('option');
+            option.textContent = line.trim();
+            return option;
+        }));
         saveHistory();
     });
     $('#propAction').addEventListener('change', () => {
@@ -1011,6 +1019,10 @@ function initToolbar() {
     });
 }
 function resetCurrentProject() {
+    structureHTML = '';
+    freeHTML = '';
+    pages[currentPageIndex].structureHTML = '';
+    pages[currentPageIndex].freeHTML = '';
     if (currentMode === 'free') {
         freeHTML = '';
     } else {
@@ -1272,10 +1284,10 @@ function updateExportCode(type) {
 
 function generateCleanHTML() {
     const clone = canvas.cloneNode(true);
-    clone.querySelectorAll('.element-actions, .drop-indicator, .canvas-empty').forEach(el => el.remove());
+    clone.querySelectorAll('.element-actions, .drop-indicator, .canvas-empty, .resize-handle').forEach(el => el.remove());
     clone.querySelectorAll('.builder-element').forEach((el, i) => {
         el.classList.remove('builder-element', 'selected', 'drag-over');
-        element-(i + 1)
+        el.classList.add(`element-${i + 1}`);
         el.removeAttribute('data-type');
         el.removeAttribute('data-id');
         el.removeAttribute('data-label');
@@ -1424,16 +1436,64 @@ function formatHTML(html) {
 }
 
 function downloadZip() {
-    const html = generateFullHTML();
-    const blob = new Blob([html], { type: 'text/html' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'sito-web.html';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+    if (typeof JSZip === 'undefined') {
+        alert('JSZIP non è stato caricato. Controlla la connessione o usa una copia locale della libreria');
+        return;
+    }
+    const zip = new JSZip();
+    const cssContent = generateInlineStyles();
+    const fullCSS= '* { margin: 0; padding: 0; box-sizing: border-box; }\nbody { font-family: "Inter", -apple-system, sans-serif; }\nimg { max-width: 100%; height: auto; }\n' + cssContent;
+    const htmlContent = generateCleanHTML();
+    const htmlFile = `<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Il mio sito</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+${htmlContent}
+<script>
+document.querySelectorAll('[data-action]').forEach(el => {
+    el.addEventListener('click', function(e) {
+        const action = this.dataset.action;
+        const value = this.dataset.actionValue;
+        const newTab = this.dataset.actionNewTab === 'true';
+        if (action === 'link' && value) {
+            if (newTab) window.open(value, '_blank');
+            else window.location.href = value;
+        }
+        if (action === 'scroll' && value) {
+            const target = document.getElementById(value);
+            if (target) target.scrollIntoView({ behavior: 'smooth' });
+        }
+        if (action === 'show-hide' && value) {
+            const target = document.getElementById(value);
+            if (target) target.style.display = target.style.display === 'none' ? '' : 'none';
+        }
+        if (action === 'submit') {
+            const form = this.closest('form');
+            if (form) form.submit();
+        }
+    });
+});
+<\/script>
+</body>
+</html>`;
+    zip.file('index.html', htmlFile);
+    zip.file('style.css', fullCSS);
+    zip.generateAsync({ type: 'blob' }).then(function(content) {
+        const url = URL.createObjectURL(content);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'sito-web.zip';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    });
 }
 
 function initKeyboard() {
@@ -1496,13 +1556,14 @@ function autoSave() {
         saveCurrentPage();
         const data = {
             pages: pages,
-            curretnPageIndex: currentPageIndex,
+            currentPageIndex: currentPageIndex,
             currentMode: currentMode,
             counter: state.elementCounter,
             timestamp: Date.now()
         };
         localStorage.setItem('webbuilder-autosave', JSON.stringify(data));
     } catch (e) {
+        console.warn('Autosave fallito:', e);
     }
 }
 
@@ -1512,16 +1573,16 @@ function autoLoad() {
         if (!saved) return false;
         const data = JSON.parse(saved);
         if (!data.pages) return false;
-        page = data.pages;
+        pages = data.pages;
         currentPageIndex = data.currentPageIndex || 0;
         state.elementCounter = data.counter || 0;
         currentMode = data.currentMode || 'structure';
         $$('.mode-btn').forEach(b => b.classList.remove('active'));
-        const modeBtn = document.querySelector('.mode-btn[data-mode="${currentMode}"]');
+        const modeBtn = document.querySelector(`.mode-btn[data-mode="${currentMode}"]`);
         if (modeBtn) modeBtn.classList.add('active');
         renderPageTabs();
         loadPage(currentPageIndex);
-        return true
+        return true;
     } catch (e) {
         return false;
     }
@@ -1623,7 +1684,7 @@ function convertToStructureMode(el) {
     el.querySelectorAll('.resize-handle').forEach(h => h.remove());
 }
 function addResizeHandles(el) {
-    if (el.querySelector('.resize-handle')) return;
+    el.querySelectorAll('.resize-handle').forEach(h => h.remove());
     const positions = [
         'top-left', 'top-center', 'top-right',
         'middle-left', 'middle-right',
@@ -1903,10 +1964,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 });
-    let pages = [
-        { name: 'Pagina 1', structureHTML: '', freeHTML: '' }
-    ];
-    let currentPageIndex = 0;
+let pages = [
+    { name: 'Pagina 1', structureHTML: '', freeHTML: '' }
+];
+let currentPageIndex = 0;
 function initPages() {
     $('#btnAddPage').addEventListener('click', addPage);
     renderPageTabs();

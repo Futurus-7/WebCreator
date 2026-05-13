@@ -1329,27 +1329,22 @@ select.prop-input {
 }
 
 @media (max-width: 900px) {
+    html, body {
+        overflow: auto;
+    }
+    .main-wrapper {
+        flex-direction: column;
+        height: auto;
+    }
     .panel-left,
     .panel-right {
-        position: fixed;
-        top: var(--toolbar-height);
-        height: calc(100vh - var(--toolbar-height));
-        z-index: 80;
-        box-shadow: var(--shadow-lg);
+        position: static;
+        width: 100%
+        min-width: 0;
+        height: auto;
     }
-    .panel-left {
-        left: -260px;
-        transition: left 0.3s ease;
-    }
-    .panel-left.open {
-        left: 0;
-    }
-    .panel-right {
-        right: -300px;
-        transition: right 0.3s ease;
-    }
-    .panel-right.open {
-        right: 0;
+    .canvas-area {
+        padding: 16px;
     }
 }
 
