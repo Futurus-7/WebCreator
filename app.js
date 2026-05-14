@@ -39,11 +39,27 @@ document.addEventListener('DOMContentLoaded', () => {
     initModes();
     initFreeToolbar();
     initPages();
-    const loaded= autoLoad();
+    const loaded = autoLoad();
     if (!loaded) {
         saveHistory();
     }
 });
+    function fallbackCopy(text, onSuccess) {
+        const textarea = document.createElement('textarea');
+        textarea.value = text;
+        textarea.setAttribute('readonly', '');
+        textarea.style.position = 'fixed';
+        textarea.style.left = '-9999px';
+        document.body.appendChild(textarea);
+        textarea.select();
+    try {
+        document.execCommand('copy');
+        if (onSuccess) onSuccess();
+    } catch (e) {
+        alert('Copia automatica non riuscita. Seleziona il codice e copialo manualmente.');
+    }
+    document.body.removeChild(textarea)
+};
 
 function initDragAndDrop() {
     $$('.draggable-item').forEach(item => {
@@ -466,10 +482,16 @@ function deselectElement() {
     state.selectedElement = null;
     panelEmpty.style.display = 'flex';
     propertiesContent.style.display = 'none';
+    $$('.prop-tab').forEach(tab => tab.classList.remove('active'));
+    $$('.prop-panel').forEach(panel => panel.classList.remove('active'));
+    const firstTab = $('.prop-tab[data-tab="content"]');
+    const firstPanel = $('#tab-content');
+    if (firstTab) firstTab.classList.add('active');
+    if (firstPanel) firstPanel.classList.add('active');
 }
 
 canvas.addEventListener('click', (e) => {
-    if (e.target === canvas || e.target.closest('.canvasEmpty')) {
+    if (e.target === canvas || e.target.closest('.canvas-empty')) {
         deselectElement();
     }
 });
@@ -499,9 +521,11 @@ function handleElementAction(action, element) {
 
 function deleteElement(element) {
     if (!element) return;
+    const shouldDeselect =
+        state.selectedElement === element ||
+        element.contains(state.selectedElement);
     element.remove();
-    if (state.selectedElement === element) {
-        
+    if (shouldDeselect) {
         deselectElement();
     }
     showCanvasEmpty();
@@ -513,9 +537,14 @@ function duplicateElement(element) {
     if (!element) return;
     const clone = element.cloneNode(true);
     state.elementCounter++;
-    clone.dataset.id = 'el-' +state.elementCounter;;
+    clone.dataset.id = 'el-' +state.elementCounter;
     element.parentNode.insertBefore(clone, element.nextSibling);
     setupElementEvents(clone);
+    clone.querySelectorAll('.builder-element').forEach(child => setupElementEvents(child));
+    if (currentMode === 'free') {
+        addResizeHandles(clone);
+        addFreeDrag(clone);
+    }
     selectElement(clone);
     saveHistory();
     updateLayers();
@@ -556,6 +585,10 @@ function pasteElement() {
     setupElementEvents(clone);
     clone.querySelectorAll('.builder-element').forEach(child => setupElementEvents(child));
 
+    if (currentMode === 'free') {
+        addResizeGandles(clone);
+        addFreeDrag(clone);
+    }
     if (state.selectedElement && isContainer(state.selectedElement)) {
         const container = state.selectedElement.querySelector('.wb-section, .wb-container, .wb-form') || state.selectedElement;
         container.appendChild(clone);
@@ -1245,11 +1278,22 @@ function initModals() {
         });
     });
     $('#btnCopyCode').addEventListener('click', () => {
-        navigator.clipboard.writeText(codeOutput.textContent).then(() => {
-            const btn = $('#btnCopyCode');
-            const original = btn.innerHTML;
-            btn.innerHTML = '<i class="fa-solid fa-check"></i> Copiato!';
-        });
+        const btn = $('#btnCopyCode');
+        const original = btn.innerHTML;
+        const text = codeOutput.textContent;
+        function showCopied() {
+            btn.innerHTML = '<i class="fa-solid fa-check"></i> Copiate!';
+            setTimeout(() => {
+                btn.innerHTML = original;
+            }, 1500);
+        }
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(text)
+            .then(showCopied)
+            .catch(() => fallbackCopy(text, showCopied));
+        } else {
+            fallbackCopy(text, showCopied);
+        }
     });
 
     $('#btnDownloadZip').addEventListener('click', downloadZip);
@@ -1342,30 +1386,57 @@ ${styles}
 <body>
 ${bodyContent}
 <script>
-document.querySelectorAll('[data-action]').forEach(el => {
-    el.addEventListener('click', function(e)  {
-        const action = this.dataset.action;
-        const value = this.dataset.actionValue;
-        const newTab = this.dataset.actionNewTab === 'true';
-        if (action === 'link' && value) {
-            if (newTab) window.open(value, '_blank');
-            else window.location.href = value;
+document.addEventListener('click', function(e) {
+    const actionEl = e.target.closest('[data-action]');
+    if (!actionEl) return;
+    const action = actionEl.dataset.action;
+    const value = actionEl.dataset.actionValue;
+    const newTab = actionEl.dataset.actionNewTab === 'true';
+    if (action === 'link' && value) {
+        if (newTab) {
+            window.open(value, '_blank', 'noopener,noreferrer');
+        } else {
+            window.location.href = value;
         }
-        if (action === 'scroll' && value) {
-            const target = document.getElementById(value);
-            if (target) target.scrollIntoView({ behavior: 'smooth' });
+    }
+    if (action === 'scroll' && value) {
+        const target = document.getElementById(value);
+        if (target) {
+            target.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
-        if (action === 'show-hide' && value) {
-            const target = document.getElementById(value);
-            if (target) target.style.display = target.style.display === 'none' ? '' : 'none';
-}
+    }
+    if (action === 'show-hide' && value) {
+        const target = document.getElementById(value);
+        if (target) {
+            const hidden = target.hasAttribute('hidden') || target.style.display === 'none';
+            if (hidden) {
+                target.removeAttribute('hidden');
+                target.style.display = '';
+            } else {
+                target.setAttribute('hidden', '');
+                target.style.display = 'none';
+            }
+        }
+    }
         if (action === 'submit') {
-            const form = this.closest('form');
-            if (form) form.submit();
+        const form = actionEl.closest('form');
+        if (form) {
+            if (form.requestSubmit) form.requestSubmit();
+            else form.submit();
         }
-    });
+    }
+});
+document.addEventListener('click', function(e) {
+    const toggle = e.target.closest('[data-menu-toggle]');
+    if (!toggle) return;
+    const menuId = toggle.dataset.menuToggle;
+    const menu = document.getElementById(menuId);
+    if (!menu) return;
+    const open = menu.classList.toggle('is-open');
+    toggle.setAttribute('aria-expanded', open ? 'true ' : 'false');
 });
 <\/script>
+
 </body>
 </html>`;
 }
@@ -1704,6 +1775,36 @@ function addResizeHandles(el) {
     });
 }
 
+let autoScrollFrame = null;
+let autoScrollPointerY = 0;
+function updateAutoScroll(pointerY) {
+    autoScrollPointerY = pointerY;
+    if (autoScrollFrame) return;
+    function step() {
+        const area = document.querySelector('.canvas-area');
+        if (!area) {
+            stopAutoScroll();
+            return;
+        }
+        const rect = area.getBoundingClientRect();
+        const edge = 90;
+        const speed = 18;
+        if (autoScrollPointerY > rect.bottom - edge) {
+            area.scrollTop += speed;
+        } else if (autoScrollPointerY < rect.top + edge) {
+            area.scrollTop -= speed;
+        }
+        autoScrollFrame = requestAnimationFrame(step);
+    }
+    autoScrollFrame = requestAnimationFrame(step);
+}
+function stopAutoScroll() {
+    if (autoScrollFrame) {
+        cancelAnimationFrame(autoScrollFrame);
+        autoScrollFrame = null;
+    }
+}
+
 function startResize(el, handle, startEvent) {
     const startX = startEvent.clientX;
     const startY = startEvent.clientY;
@@ -1713,6 +1814,7 @@ function startResize(el, handle, startEvent) {
     const startTop = parseInt(el.style.top) || 0;
 
     function onMouseMove(e) {
+        updateAutoScroll(e.clientY);
         const dx = e.clientX - startX;
         const dy = e.clientY - startY;
 
@@ -1765,6 +1867,7 @@ function startResize(el, handle, startEvent) {
     function onMouseUp() {
         document.removeEventListener('mousemove', onMouseMove);
         document.removeEventListener('mouseup', onMouseUp);
+        stopAutoScroll();
         saveHistory();
     }
     document.addEventListener('mousemove', onMouseMove);
@@ -1774,6 +1877,8 @@ function startResize(el, handle, startEvent) {
 
 
 function addFreeDrag(el) {
+    if (el._freeDragBound) return;
+    el._freeDragBound = true;
     el.addEventListener('mousedown', function(e) {
         if (currentMode !== 'free') return;
         if (e.target.classList.contains('resize-handle')) return;
@@ -1789,6 +1894,7 @@ function addFreeDrag(el) {
         const startTop = parseInt(el.style.top) || 0;
 
         function onMouseMove(ev) {
+            updateAutoScroll(ev.clientY);
             const dx = ev.clientX - startX;
             const dy = ev.clientY - startY;
             el.style.left = (startLeft + dx) + 'px';
@@ -1798,6 +1904,7 @@ function addFreeDrag(el) {
         function onMouseUp() {
             document.removeEventListener('mousemove', onMouseMove);
             document.removeEventListener('mouseup', onMouseUp);
+            stopAutoScroll();
             saveHistory();
         }
 
@@ -1953,12 +2060,14 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     document.addEventListener('mousemove', (e) => {
         if (!isDragging) return;
+        updateAutoScroll(e.clientY);
         const dy = e.clientY - startY;
         const newHeight = Math.max(400, startHeight + dy);
         canvas.style.minHeight = newHeight + 'px';
     });
     document.addEventListener('mouseup', () => {
         if (isDragging) {
+            stopAutoScroll();
             isDragging = false;
             saveHistory();
         }

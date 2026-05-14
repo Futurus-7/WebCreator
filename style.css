@@ -1339,7 +1339,7 @@ select.prop-input {
     .panel-left,
     .panel-right {
         position: static;
-        width: 100%
+        width: 100%;
         min-width: 0;
         height: auto;
     }
