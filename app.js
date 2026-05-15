@@ -25,6 +25,39 @@ const exportModal = $('#exportModal');
 const previewFrame = $('#previewFrame');
 const codeOutput = $('#codeOutput');
 
+function parseOptionActionsText(text) {
+    const actions = {};
+    (text || '').split('\n').forEach(line => {
+        const parts = line.split('|').map(part => part.trim());
+        const label = parts[0] || '';
+        const action = parts[1] || 'none';
+        const value = parts[2] || '';
+        const newTab = parts[3] === 'true';
+        if (!label || action === 'none') return;
+        actions[label] = {
+            action,
+            value,
+            newTab
+        };
+    });
+    return actions;
+}
+function optionActionsToText(jsonText) {
+    if (!jsonText) return '';
+    try {
+        const actions = JSON.parse(jsonText);
+        return Object.entries(actions).map(([label, config]) => {
+            return [
+                label,
+                config.action || 'none',
+                config.value || '',
+                config.newTab ? 'true' : 'false'
+            ].join(' | ');
+        }).join('\n');
+    } catch (e) {
+        return '';
+    }
+}
 document.addEventListener('DOMContentLoaded', () => {
     initDragAndDrop();
     initToolbar();
@@ -39,6 +72,8 @@ document.addEventListener('DOMContentLoaded', () => {
     initModes();
     initFreeToolbar();
     initPages();
+    initCanvasResize();
+    setInterval(autoSave, 5000);
     const loaded = autoLoad();
     if (!loaded) {
         saveHistory();
@@ -219,6 +254,10 @@ function createElement(type) {
     wrapper.dataset.id = id;
     wrapper.dataset.label = getTypeLabel(type);
     wrapper.draggable = true;
+    if (type === 'background') {
+        wrapper.classList.add('visual-background');
+        wrapper.setAttribute('aria-hidden', 'true');
+    }
 
     wrapper.innerHTML = getElementHTML(type);
 
@@ -232,6 +271,13 @@ function createElement(type) {
         `;
     wrapper.appendChild(actions);
     setupElementEvents(wrapper);
+    if (currentMode = 'free') {
+        wrapper.style.position = 'absolute';
+        wrapper.style.left = '50px';
+        wrapper.style.top = '50px';
+        addResizeHandles(wrapper);
+        addFreeDrag(wraper);
+    }
     return wrapper;
 }
 
@@ -252,6 +298,7 @@ function getTypeLabel(type) {
         'video': 'Video',
         'icon': 'Icona',
         'map': 'Mappa',
+        'background': 'Background',
         'form': 'Modulo',
         'input': 'Campo testo',
         'textarea': 'Area testo',
@@ -304,6 +351,7 @@ function getElementHTML(type) {
                     </div>`,
                 'icon': '<div class="wb-icon"><i class="fa-solid fa-star"></i></div>',
                 'map': '<div class="wb-map"><span><i class="fa-solid fa-map-location-dot"></i>Mappa</span></div>',
+                'background': '<div class="wb-background"></div>',
                 'form': '<form class="wb-form" onsubmit="return false;"></form>',
                 'input': '<input type="text" class="wb-input" placeholder="Inserisci testo...">',
                 'textarea': '<textarea class="wb-textarea-el" placeholder="Scrivi qui..."></textarea>',
@@ -472,7 +520,10 @@ function selectElement(element) {
     panelEmpty.style.display = 'none';
     propertiesContent.style.display = 'block';
     updatePropertyPanel();
-    updateLayers();
+    updateLayers()
+    if (currentMode === 'free') {
+        updateFreeToolbarValues(element);
+    }
 }
 
 function deselectElement() {
@@ -586,7 +637,7 @@ function pasteElement() {
     clone.querySelectorAll('.builder-element').forEach(child => setupElementEvents(child));
 
     if (currentMode === 'free') {
-        addResizeGandles(clone);
+        addResizeHandles(clone);
         addFreeDrag(clone);
     }
     if (state.selectedElement && isContainer(state.selectedElement)) {
@@ -840,6 +891,14 @@ function initPropertyInputs() {
         }));
         saveHistory();
     });
+    $('#propSelectOptionActions').addEventListener('change', () => {
+        if (!state.selectedElement) return;
+        const select = state.selectedElement.querySelector('.wb-select');
+        if (!select) return;
+        const actions= parseOptionActionsText($('#propSelectOptionActions').value);
+        state.selectedElement.dataset.optionActions = JSON.stringify(actions);
+        saveHistory();
+    });
     $('#propAction').addEventListener('change', () => {
         const action = $('#propAction').value;
         $('#actionValueRow').style.display = action === 'none' ? 'none' : 'flex';
@@ -876,7 +935,7 @@ function getStyleTarget(element) {
         '.wb-section, .wb-container, .wb-columns, .wb-grid, .wb-heading, ' +
         '.wb-paragraph, .wb-image, .wb-button, .wb-link, .wb-divider, ' +
         '.wb-spacer, .wb-video, .wb-icon, .wb-map, .wb-form, .wb-input, ' +
-        '.wb-textarea-el, .wb-select, .wb-checkbox-wrapper, .wb-hero, ' +
+        '.wb-textarea-el, .wb-select, .wb-checkbox-wrapper, .wb-background, .wb-hero, ' +
         '.wb-navbar, .wb-footer, .wb-card, .wb-pricing, .wb-testimonial'
     );
     return directChild || element;
@@ -964,9 +1023,11 @@ function updatePropertyPanel() {
         selectGroup.style.display = 'block';
         const opts = Array.from(selectEl.options).map(o => o.text).join('\n');
         $('#propSelectOptions').value = opts;
+        $('#propSelectOptionActions').value = optionActionsToText(el.dataset.optionActions);
     } else {
         selectGroup.style.display = 'none';
         $('#propSelectOptions').value = '';
+        $('#propSelectOptionActions').value = '';
     }
     const actionGroup = $('#actionGroup');
     const elType = el.dataset.type;
@@ -1201,6 +1262,7 @@ const icons = {
     'video': 'fa-solid fa-video',
     'icon': 'fa-solid fa-icons',
     'map': 'fa-solid fa-map-location-dot',
+    'background': 'fa-solid fa-fill-drip',
     'form': 'fa-solid fa-rectangle-list',
     'input': 'fa-solid fa-i-cursor',
     'textarea': 'fa-solid fa-caret-down',
@@ -1484,6 +1546,8 @@ function generateInlineStyles() {
         .wb-video { width: 100%; background: #000; min-height: 200px; display: flex; align-items: center; justify-content: center; }
         .wb-icon { font-size: 40px; color: #4361ee; text-align: center; padding: 10px }
         .wb-map { width: 100%; height: 250px; background: #e8e8e8; display: flex; align-items: center; justify-content: center; color: #000; }
+        .visual-background {pointer-events: none; user-select: none; }
+        .wb-background { width: 100%; min-height: 180px; background: linear-gradient(135deg, #dbeafe, #f8fafc); }
         `;
 }
 
@@ -1658,8 +1722,6 @@ function autoLoad() {
         return false;
     }
 }
-setInterval(autoSave, 5000);
-
 
 let currentMode = 'structure';
 function initModes() {
@@ -2024,26 +2086,6 @@ function updateFreeToolbarValues(el) {
         $(`#ftAlign${a}`).classList.toggle('active', computed.textAlign === a.toLowerCase());
     });
 }
-const originalSelectElement = selectElement;
-selectElement = function(element) {
-    originalSelectElement(element);
-    if (currentMode === 'free') {
-        updateFreeToolbarValues(element);
-    }
-};
-
-const originalCreateElement = createElement;
-createElement = function(type) {
-    const el = originalCreateElement(type);
-    if (currentMode === 'free') {
-        el.style.position = 'absolute';
-        el.style.left = '50px';
-        el.style.top = '50px';
-        addResizeHandles(el);
-        addFreeDrag(el);
-    }
-    return el;
-};
 
 document.addEventListener('DOMContentLoaded', () => {
     const heightControl = $('#canvasHeightControl');

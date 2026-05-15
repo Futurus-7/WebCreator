@@ -116,6 +116,14 @@
                         <i class="fa-solid fa-map-location-dot"></i>
                         <span>Mappa</span>
                     </div>
+                    <div class="draggable-item" draggable="true" data-type="map">
+                        <i class="fa-solid fa-map-location-dot"></i>
+                        <span>Mappa</span>
+                    </div>
+                    <div class="draggable-item" draggable="true" data-type="background">
+                        <i class="fa-solid fa-fill-drip"></i>
+                        <span>Background</span>
+                    </div>
                 </div>
             </div>
             <div class="panel-section">
@@ -265,8 +273,10 @@
                         <input type="text" class="prop-input" id="propAlt" placeholder="Descrizione immagine">
                     </div>
                     <div class="prop-group" id="selectOptionsGroup">
-                        <label class="prop-label">Opzione menu (una per riga)</label>
+                        <label class="prop-label" for="propSelectOptions">Opzione menu (una per riga)</label>
                         <textarea class="prop-input prop-textarea" id="propSelectOptions" rows="4" placeholder="Opzione 1&#10;Opzione 2&#10;Opzione 3"></textarea>
+                        <label class="prop-label" for="propSelectOptionActions" style="margin-top:8px;">Azioni opzioni</label>
+                        <textarea class="prop-input prop-textarea prop-code" id="propSelectOptionActions" rows="5" placeholder="Google | link | https://google.com | true&#10;Contatti | scroll | contatti&#10;Info | show-hide | box-info"></textarea>
                     </div>
                     <div class="prop-group" id="actionGroup" style="display:none;">
                         <label class="prop-label">Azione al click</label>

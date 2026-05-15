@@ -1058,6 +1058,13 @@ select.prop-input {
     padding: 10px;
 }
 
+.canvas .wb-background {
+    width: 100%;
+    min-height: 180px;
+    background: linear-gradient(135deg, #dbeafe, #f8fafc);
+    border: 1px dashed var(--border-color);
+}
+
 .canvas .wb-map {
     width: 100%;
     height: 250px;
