@@ -24,6 +24,13 @@ const previewModal = $('#previewModal');
 const exportModal = $('#exportModal');
 const previewFrame = $('#previewFrame');
 const codeOutput = $('#codeOutput');
+let currentMode = 'structure'
+let structureHTML = '';
+let freeHTML = '';
+let pages = [
+    { name: 'Pagina 1', structureHTML: '', freeHTML: '' }
+];
+let currentPageIndex = 0;
 
 function parseOptionActionsText(text) {
     const actions = {};
@@ -94,7 +101,7 @@ document.addEventListener('DOMContentLoaded', () => {
         alert('Copia automatica non riuscita. Seleziona il codice e copialo manualmente.');
     }
     document.body.removeChild(textarea)
-};
+}
 
 function initDragAndDrop() {
     $$('.draggable-item').forEach(item => {
@@ -257,6 +264,14 @@ function createElement(type) {
     if (type === 'background') {
         wrapper.classList.add('visual-background');
         wrapper.setAttribute('aria-hidden', 'true');
+        wrapper.style.position = 'absolute';
+        wrapper.style.inset = '0';
+        wrapper.style.zIndex = '0';
+        wrapper.style.width = '100%';
+        wrapper.style.height = '100%';
+        wrapper.style.zIndex = '0';
+        wrapper.style.pointerEvents = 'auto';
+        wrapper.draggable = false;
     }
 
     wrapper.innerHTML = getElementHTML(type);
@@ -271,12 +286,12 @@ function createElement(type) {
         `;
     wrapper.appendChild(actions);
     setupElementEvents(wrapper);
-    if (currentMode = 'free') {
+    if (currentMode === 'free') {
         wrapper.style.position = 'absolute';
         wrapper.style.left = '50px';
         wrapper.style.top = '50px';
         addResizeHandles(wrapper);
-        addFreeDrag(wraper);
+        addFreeDrag(wrapper);
     }
     return wrapper;
 }
@@ -441,15 +456,20 @@ function setupElementEvents(element) {
         }
     });
     element.addEventListener('dragstart', (e) => {
+        if (element.dataset.type === 'background') {
+            e.preventDefault();
+            return;
+        } 
         if (e.target === element) {
             state.draggedElement = element;
             state.draggedType= null;
             e.dataTransfer.effectAllowed = 'move';
-            setTimeout(() => {
+            setTimeout(() {
                 element.style.opacity = '0.4';
             }, 0);
         }
     });
+
     element.addEventListener('dragend', (e) => {
         element.style.opacity = '1';
         state.draggedElement = null;
@@ -689,7 +709,9 @@ function initPropertyInputs() {
     });
 
     const propImageSrc = $('#propImageSrc');
-    propImageSrc.addEventListener('change', () => {
+    propImageSrc.addEventListener('change', applyImageSrc);
+    propImageSrc.addEventListener('input', applyImageSrc);
+    function applyImageSrc() {
         if (!state.selectedElement) return;
         const imgContainer = state.selectedElement.querySelector('.wb-image');
         if (imgContainer) {
@@ -706,7 +728,7 @@ function initPropertyInputs() {
             }
             saveHistory();
         }
-    });
+    }
 
     $('#btnUploadImage').addEventListener('click', () => {
         const fileInput = document.createElement('input');
@@ -924,8 +946,18 @@ function initPropertyInputs() {
 
 function applyStyle(property, value) {
     if (!state.selectedElement) return;
-    const target = getStyleTarget(state.selectedElement);
-    target.style[property] = value;
+    const el = state.selectedElement;
+    const isBackground = el.dataset.type == 'background';
+    if (isBackground && property === 'backgroundColor') {
+        const bgChild = el.querySelector('.wb-background');
+        if (bhChild) {
+            bgChild.style.background = value;
+        }
+        el.style.backgroundColor = 'transparent';
+    } else {
+        const target = getStyleTarget(el);
+        target.style(property) = value;    
+    }
     clearTimeout(state._styleTimeout);
     state._styleTimeout = setTimeout(() => saveHistory(), 300);
 }
@@ -957,7 +989,7 @@ function updatePropertyPanel() {
     $('#propLink').value = link ? link.href : '';
 
     const img = el.querySelector('img');
-    $('#propImageSrc').value = img ? img.src : '';
+    $('#propImageSrc').value = img ? (img.getAttribute('src') || '') : '';
     $('#propAlt').value = img ? img.alt : '';
 
     $('#propFont').value = target.style.fontFamily || '';
@@ -1031,7 +1063,8 @@ function updatePropertyPanel() {
     }
     const actionGroup = $('#actionGroup');
     const elType = el.dataset.type;
-    if (elType) {
+    const clickableTypes = ['button', 'link', 'image', 'icon', 'block-hero'];
+    if (elType && clickableTypes.includes(elType)) {
         actionGroup.style.display = 'block';
         $('#propAction').value = el.dataset.action || 'none';
         $('#propActionValue').value = el.dataset.actionValue || '';
@@ -1238,12 +1271,6 @@ function addLayerItem(element, depth) {
         }
     });
 }
-
-function updateLayerSelection() {
-    $$('.layer-item').forEach(item => item.classList.remove('active'));
-}
-
-
 function getTypeIcon(type) {
 const icons = {
     'section': 'fa-solid fa-layer-group',
@@ -1265,7 +1292,8 @@ const icons = {
     'background': 'fa-solid fa-fill-drip',
     'form': 'fa-solid fa-rectangle-list',
     'input': 'fa-solid fa-i-cursor',
-    'textarea': 'fa-solid fa-caret-down',
+    'textarea': 'fa-solid fa-align-left',
+    'select': 'fa-solid fa-caret-down',
     'checkbox': 'fa-solid fa-square-check',
     'block-hero': 'fa-solid fa-panorama',
     'block-navbar': 'fa-solid fa-bars',
@@ -1511,7 +1539,7 @@ function generateInlineStyles() {
         .wb-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; padding: 15px; }
         .wb-heading { font-size: 32px; font-weight: 700; color: #333; }
         .wb-paragraph { font-size: 16px; line-height: 1.6; color: #555 }
-        .wb-button { display: inline-block; padding: 12px 28px; background: #4361ee; color: white; border: none; border-radius: 4px; font-size: 14px; font-size: 14px; font-weight: 600; cursor: pointer; text-decoration: none; }
+        .wb-button { display: inline-block; padding: 12px 28px; background: #4361ee; color: white; border: none; border-radius: 4px; font-size: 14px; font-weight: 600; cursor: pointer; text-decoration: none; }
         .wb-link { color: #4361ee; text-decoration: underline; }
         .wb-divider { border: none; border-top: 1px solid #ddd; margin: 15px 0; }
         .wb-spacer { height: 40px; }
@@ -1546,8 +1574,8 @@ function generateInlineStyles() {
         .wb-video { width: 100%; background: #000; min-height: 200px; display: flex; align-items: center; justify-content: center; }
         .wb-icon { font-size: 40px; color: #4361ee; text-align: center; padding: 10px }
         .wb-map { width: 100%; height: 250px; background: #e8e8e8; display: flex; align-items: center; justify-content: center; color: #000; }
-        .visual-background {pointer-events: none; user-select: none; }
-        .wb-background { width: 100%; min-height: 180px; background: linear-gradient(135deg, #dbeafe, #f8fafc); }
+        .visual-background { pointer-events: none; user-select: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; }
+        .wb-background { width: 100%; height: 100%; }
         `;
 }
 
@@ -1723,7 +1751,6 @@ function autoLoad() {
     }
 }
 
-let currentMode = 'structure';
 function initModes() {
     $$('.mode-btn').forEach(btn => {
         btn.addEventListener('click', () => {
@@ -1734,8 +1761,6 @@ function initModes() {
     });
 }
 
-let structureHTML = '';
-let freeHTML = '';
 function switchMode(mode) {
     if (currentMode === 'structure') {
         structureHTML = canvas.innerHTML;
@@ -1866,7 +1891,34 @@ function stopAutoScroll() {
         autoScrollFrame = null;
     }
 }
-
+function initCanvasResize() {
+    const heightControl = $('#canvasHeightControl');
+    if (!heightControl) return;
+    let isDragging = false;
+    let startY = 0;
+    let startHeight = 0;
+    heightControl.addEventListener('mousedown', (e) => {
+        if (currentMode !== 'free') return;
+        isDragging = true;
+        startY = e.clientY;
+        startHeight = canvas.offsetHeight;
+        e.preventDefault();
+    });
+    document.addEventListener('mousemove', (e) => {
+        if (!isDragging) return;
+        updateAutoScroll(e.clientY);
+        const dy = e.clientY - startY;
+        const newHeight = Math.max(400, startHeight + dy);
+        canvas.style.minHeight = newHeight + 'px';
+    });
+    document.addEventListener('mouseup', () => {
+        if (isDragging) {
+            stopAutoScroll();
+            isDragging = false;
+            saveHistory();
+        }
+    });
+}
 function startResize(el, handle, startEvent) {
     const startX = startEvent.clientX;
     const startY = startEvent.clientY;
@@ -2087,38 +2139,6 @@ function updateFreeToolbarValues(el) {
     });
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-    const heightControl = $('#canvasHeightControl');
-    if (!heightControl) return;
-    let isDragging = false;
-    let startY = 0;
-    let startHeight = 0;
-    heightControl.addEventListener('mousedown', (e) => {
-        if (currentMode !== 'free') return;
-        isDragging = true;
-        startY = e.clientY;
-        startHeight = canvas.offsetHeight;
-        e.preventDefault();
-    });
-    document.addEventListener('mousemove', (e) => {
-        if (!isDragging) return;
-        updateAutoScroll(e.clientY);
-        const dy = e.clientY - startY;
-        const newHeight = Math.max(400, startHeight + dy);
-        canvas.style.minHeight = newHeight + 'px';
-    });
-    document.addEventListener('mouseup', () => {
-        if (isDragging) {
-            stopAutoScroll();
-            isDragging = false;
-            saveHistory();
-        }
-    });
-});
-let pages = [
-    { name: 'Pagina 1', structureHTML: '', freeHTML: '' }
-];
-let currentPageIndex = 0;
 function initPages() {
     $('#btnAddPage').addEventListener('click', addPage);
     renderPageTabs();
@@ -2204,6 +2224,7 @@ function renamePage(index) {
     function finishRename() {
         const newName = input.value.trim() || currentName;
         pages[index].name = newName;
+        autoSave();
         renderPageTabs();
     }
     input.addEventListener('blur', finishRename);
