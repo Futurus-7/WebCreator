@@ -127,31 +127,39 @@ function initDragAndDrop() {
 function handleCanvasDragOver(e) {
     e.preventDefault();
     e.dataTransfer.dropEffect = 'copy';
-
-    removeAllDropIndicators();
-
     const target = getDropTarget(e);
-
-    if (target) {
-        const rect = target.getBoundingClientRect();
-        const midY = rect.top + rect.height / 2;
-        const position = e.clientY  < midY ? 'before' : 'after';
-        const indicator = document.createElement('div');
-        indicator.className = 'drop-indicator';
-
-        if (position === 'before') {
-            target.parentNode.insertBefore(indicator, target);
-        } else {
-            target.parentNode.insertBefore(indicator, target.nextSibling);
+    if (!target) {
+        removeAllDropIndicators();
+        return;
+    }
+    if (state.draggedElement && (target === state.draggedElement || state.draggedElement.contains(target))) {
+        return;
+    }
+    const rect = target.getBoundingClientRect();
+    if (isContainer(target)) {
+        const innerZone = rect.height * 0.3;
+        if (e.clientY > rect.top + innerZone && e.clientY < rect.bottom - innerZone) {
+            removeAllDropIndicators();
+            target.classList.add('drag-over');
+            return;
         }
-
-        if (isContainer(target)) {
-            const innerZone = rect.height * 0.4;
-            if (e.clientY > rect.top + innerZone && e.clientY < rect.bottom - innerZone) {
-                removeAllDropIndicators();
-                target.classList.add('drag-over');
-            }
-        }
+    }
+    const midY = rect.top + rect.height / 2;
+    const position = e.clientY < midY ? 'before' : 'after';
+    const existingIndicator = canvas.querySelector('.drop-indicator');
+    if (existingIndicator) {
+        const prevSibling = existingIndicator.previousElementSibling;
+        const nextSibling = existingIndicator.nextElementSibling;
+        if (position === 'before' && nextSibling === target) return;
+        if (position === 'after' && prevSibling === target) return;
+    }
+    removeAllDropIndicators();
+    const indicator = document.createElement('div');
+    indicator.className = 'drop-indicator';
+    if (position === 'before') {
+        target.parentNode.insertBefore(indicator, target);
+    } else {
+        target.parentNode.insertBefore(indicator, target.nextSibling);
     }
 }
 
@@ -269,7 +277,6 @@ function createElement(type) {
         wrapper.style.zIndex = '0';
         wrapper.style.width = '100%';
         wrapper.style.height = '100%';
-        wrapper.style.zIndex = '0';
         wrapper.style.pointerEvents = 'auto';
         wrapper.draggable = false;
     }
@@ -464,7 +471,7 @@ function setupElementEvents(element) {
             state.draggedElement = element;
             state.draggedType= null;
             e.dataTransfer.effectAllowed = 'move';
-            setTimeout(() {
+            setTimeout(() => {
                 element.style.opacity = '0.4';
             }, 0);
         }
@@ -755,6 +762,54 @@ function initPropertyInputs() {
             saveHistory();
         }
     });
+    const propBgImage = $('#propBgImage');
+    if (propBgImage) {
+        propBgImage.addEventListener('input', applyBgImage);
+        propBgImage.addEventListener('change', applyBgImage);
+    }
+    function applyBgImage() {
+        if (!state.selectedElement) return;
+        if (state.selectedElement.dataset.type !== 'background') return;
+        const bgChild = state.selectedElement.querySelector('.wb-background');
+        if (!bgChild) return;
+        const url = propBgImage.value;
+        if (url) {
+            bgChild.style.backgroundImage = `url('${url}')`;
+            bgChild.style.backgroundSize = $('#propBgSize').value || 'cover';
+            bgChild.style.backgroundRepeat = $('#propBgRepeat').value || 'no-repeat';
+            bgChild.style.backgroundPosition = 'center';
+        } else {
+            bgChild.style.backgroundImage = '';
+        }
+        saveHistory();
+    }
+    const btnUploadBgImage = $('#btnUploadBgImage');
+    if (btnUploadBgImage) {
+        btnUploadBgImage.addEventListener('click', () => {
+            const fileInput = document.createElement('input');
+            fileInput.type = 'file';
+            fileInput.accept = 'image/*';
+            fileInput.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = (ev) => {
+                    propBgImage.value = ev.target.result;
+                    applyBgImage();
+                };
+                reader.readAsDataURL(file);
+            });
+            fileInput.click();
+        });
+    }
+    const propBgSize = $('#propBgSize');
+    if (propBgSize) {
+        propBgSize.addEventListener('change', applyBgImage);
+    }
+    const propBgRepeat = $('#propBgRepeat');
+    if (propBgRepeat) {
+        propBgRepeat.addEventListener('change', applyBgImage);
+    }
 
     $('#propFont').addEventListener('change', () => applyStyle('fontFamily', $('#propFont').value));
 
@@ -923,20 +978,32 @@ function initPropertyInputs() {
     });
     $('#propAction').addEventListener('change', () => {
         const action = $('#propAction').value;
-        $('#actionValueRow').style.display = action === 'none' ? 'none' : 'flex';
+        const helpText = $('#actionHelpText');
+        $('#actionValueRow').style.display = (action === 'none' || action === 'submit') ? 'none' : 'flex';
         $('#actionTargetRow').style.display = action === 'link' ? 'flex' : 'none';
-        if (action === 'link') $('#propActionValue').placeholder = 'https://...';
-        else if (action === 'scroll') $('#propActionValue').placeholder = 'ID elemento';
-        else if (action === 'show-hide') $('#propActionValue').placeholder = 'ID elemento';
+        if (action === 'link') {
+            $('#propActionValue').placeholder = 'Scrivi il link, es: https://google.com';
+            helpText.style.display = 'block';
+            helpText.textContent = 'Scrivi l\'indirizzo del sito dove vuoi mandare chi clicca. Esempio: https://google.com';
+        } else if (action === 'scroll') {
+            $('#propActionValue').placeholder = 'Scrivi il nome della sezione, es: contatti';
+            helpText.style.display = 'block';
+            helpText.textContent = 'Scrivi l\'ID della sezione della pagina dove vuoi che scorra. Devi prima dare un ID all\'elemento di destinazione nel tab "Avanzato".';
+        } else if (action === 'show-hide') { 
+            $('#propActionValue').placeholder = 'Scrivi il nome dell\'elemento, es: menu-nascosto';
+            helpText.style.display = 'block';
+            helpText.textContent = 'Scrivi l\'ID dell\'elemento che vuoi mostrare o nascondere. Devi prima dare un ID a quell\'elemento nel tab "Avanzato".';
+        } else if (action === 'submit') {
+            helpText.style.display = 'block';
+            helpText.textContent = 'Quando l\'utente clicca, il modulo (form) piu vicino viene inviato automaticamente.';
+        } else {
+            helpText.style.display = 'none';
+        }
         if (!state.selectedElement) return;
         state.selectedElement.dataset.action = action;
         saveHistory();
     });
-    $('#propActionValue').addEventListener('change', () => {
-        if (!state.selectedElement) return;
-        state.selectedElement.dataset.actionValue = $('#propActionValue').value;
-        saveHistory();
-    });
+
     $('#propActionNewTab').addEventListener('change', () => {
         if (!state.selectedElement) return;
         state.selectedElement.dataset.actionNewTab = $('#propActionNewTab').checked ? 'true' : 'false';
@@ -947,16 +1014,16 @@ function initPropertyInputs() {
 function applyStyle(property, value) {
     if (!state.selectedElement) return;
     const el = state.selectedElement;
-    const isBackground = el.dataset.type == 'background';
+    const isBackground = el.dataset.type === 'background';
     if (isBackground && property === 'backgroundColor') {
         const bgChild = el.querySelector('.wb-background');
-        if (bhChild) {
+        if (bgChild) {
             bgChild.style.background = value;
         }
         el.style.backgroundColor = 'transparent';
     } else {
         const target = getStyleTarget(el);
-        target.style(property) = value;    
+        target.style[property] = value;  
     }
     clearTimeout(state._styleTimeout);
     state._styleTimeout = setTimeout(() => saveHistory(), 300);
@@ -1074,6 +1141,22 @@ function updatePropertyPanel() {
         $('#actionTargetRow').style.display = act === 'link' ? 'flex' : 'none';
     } else {
         actionGroup.style.display = 'none';
+    }
+    const bgImageGroup = $('#backgroundImageGroup');
+    if (bgImageGroup) {
+        if (elType === 'background') {
+            bgImageGroup.style.display = 'block';
+            const bgChild = el.querySelector('.wb-background');
+            if (bgChild) {
+                const bgImg = bgChild.style.backgroundImage || '';
+                const urlMatch = bgImg.match(/url\(['"]?([^'"]+)['"]?\)/);
+                $('#propBgImage').value = urlMatch ? urlMatch[1] : '';
+                $('#propBgSize').value = bgChild.style.backgroundSize || 'cover';
+                $('#propBgRepeat').value = bgChild.style.backgroundRepeat || 'no-repeat';
+            }
+        } else {
+            bgImageGroup.style.display = 'none';
+        }
     }
 }
 function updateBorder() {
@@ -1574,8 +1657,9 @@ function generateInlineStyles() {
         .wb-video { width: 100%; background: #000; min-height: 200px; display: flex; align-items: center; justify-content: center; }
         .wb-icon { font-size: 40px; color: #4361ee; text-align: center; padding: 10px }
         .wb-map { width: 100%; height: 250px; background: #e8e8e8; display: flex; align-items: center; justify-content: center; color: #000; }
-        .visual-background { pointer-events: none; user-select: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; }
-        .wb-background { width: 100%; height: 100%; }
+        .visual-background { pointer-events: none; user-select: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; }
+        .visual-background .wb-background { width: 100%; height: 100%; }
+        body > *:not(.visual-background) { position: relative; z-index: 1; }
         `;
 }
 

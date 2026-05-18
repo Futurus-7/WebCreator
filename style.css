@@ -2,6 +2,8 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(67, 97, 238, 0.3) rgba(0, 0, 0, 0.05);
 }
 
 :root {
@@ -130,19 +132,6 @@ html, body {
     border-right: 1px solid var(--border-color);
     overflow-y: auto;
     overflow-x: hidden;
-}
-
-.panel-left::-webkit-scrollbar {
-    width: 5px;
-}
-
-.panel-left::-webkit-scrollbar-track {
-    background: transparent;
-}
-
-.panel-left::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 10px;
 }
 
 .panel-header {
@@ -408,19 +397,6 @@ html, body {
     border-left: 1px solid var(--border-color);
     overflow-y: auto;
     overflow-x: hidden;
-}
-
-.panel-right::-webkit-scrollbar {
-    width: 5px;
-}
-
-.panel-right::-webkit-scrollbar-track {
-    background: transparent;
-}
-
-.panel-right::-webkit-scrollbar-thumb{
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 10px;
 }
 
 .panel-empty {
@@ -1777,17 +1753,12 @@ select.prop-input {
     gap: 2px;
     max-width: 400px;
     overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: thin;
+    -webkit-overflow-scrolling: touch;
+    flex-shrink: 1;
  }
 
- .pages-tabs::-webkit-scrollbar {
-    height: 3px;
- }
-
- .pages-tabs::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 10px;
- }
- 
  .page-tab {
     display: flex;
     align-items: center;
@@ -1803,6 +1774,7 @@ select.prop-input {
     white-space: nowrap;
     transition: var(--transition);
     position: relative;
+    flex-shrink: 0;
  }
 
  .page-tab:hover {
@@ -1863,4 +1835,28 @@ select.prop-input {
     color: var(--text-primary);
     font-size: 11px;
     outline: none;
+ }
+
+ ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+ }
+ 
+ ::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.05);
+    border-radius: 10px;
+ }
+
+ ::-webkit-scrollbar-thumb {
+    background: rgba(67, 97, 238, 0.3);
+    border-radius: 10px;
+    transition: background 0.2s;
+ }
+
+ ::-webkit-scrollbar-thumb:hover {
+    background: rgba(67, 97, 238, 0.6);
+ }
+
+ ::-webkit-scrollbar-corner {
+    background: transparent;
  }
