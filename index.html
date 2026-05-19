@@ -6,6 +6,8 @@
     <title>Web Builder</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <link rel="stylesheet" hrdf="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
 </head>
 <body>
     <header class="toolbar">
@@ -522,6 +524,98 @@
                         <label class="prop-label" style="margin-top:8px;">Gap (px)</label>
                         <input type="number" class="prop-input" id="propGap" placeholder="0" min="0" max="200">
                     </div>
+                    <div class="prop-group">
+                        <label class="prop-label">Animazione di entrata</label>
+                        <select class="prop-input" id="propAnimation">
+                            <option value="none">Nessuna</option>
+                            <optgroup label="Dissolvenza">
+                                <option value="fadeIn">Dissolvenza</option>
+                                <option value="fadeInDown">Dissolvenza dall'alto</option>
+                                <option value="fadeInUp">Dissolvenza dal basso</option>
+                                <option value="fadeInLeft">Dissolvenza da sinistra</option>
+                                <option value="fadeInRight">Dissolvenza da destra</option>
+                            </optgroup>
+                            <optGroup label="Zoom">
+                                <option value="zoomIn">Zoom in</option>
+                                <option value="zoomInDown">Zoom dall'alto</option>
+                                <option value="zoomInUp">Zoom dal basso</option>
+                                <option value="zoomInRight">Zoom da destra</option>
+                            </optGroup>
+                            <optgroup label="Scorrimento">
+                                <option value="slideInDown">Scorri dall'alto</option>
+                                <option value="slideInUp">Scorri dal basso</option>
+                                <option value="slideInLeft">Scorri da sinistra</option>
+                                <option value="slideInRight">Scorri da destra</option>
+                            </optgroup>
+                            <optgroup label="Rimbalzo">
+                                <option value="bounceIn">Rimbalzo</option>
+                                <option value="bounceInDown">Rimbalzo dall'alto</option>
+                                <option value="bounceInUp">Rimbalzo dal basso</option>
+                                <option value="bounceInLeft">Rimbalzo da sinistra</option>
+                                <option value="bounceInRight">Rimbalzo da destra</option>
+                            </optgroup>
+                            <optgroup label="Rotazione">
+                                <option value="rotateIn">Rotazione</option>
+                                <option value="rotateInDownLeft">Rotazione in basso a sinistra</option>
+                                <option value="rotateInDownRight">Rotazione in basso a destra</option>
+                                <option value="rotateInUpLeft">Rotazione in alto a sinistra</option>
+                                <option value="rotateInUpRight">Rotazione in alto a destra</option>
+                            </optgroup>
+                            <optgroup label="Elastico">
+                                <option value="backInDown">Elastico dall'alto</option>
+                                <option value="backInUp">Elastico dal basso</option>
+                                <option value="backInLeft">Elastico da sinistra</option>
+                                <option value="backInRight">Elastico da destra</option>
+                            </optgroup>
+                            <optgroup label="Speciali">
+                                <option value="flip">Capovolgimento</option>
+                                <option value="flipInX">Capovolgimento orizzontale</option>
+                                <option value="flipInY">Capovolgimento verticale</option>
+                                <option value="lightSpeedInRight">Velocita luce da destra</option>
+                                <option value="lightSpeedInLeft">Velocita luce da sinistra</option>
+                                <option value="rollIn">Rotolamento</option>
+                            </optgroup>
+                        </select>
+                        <label class="prop-label" style="margin-top:8px;">Animazione al passaggio del mouse(hover)</label>
+                        <select class="prop-input" id="propHoverAnimation">
+                            <option value="none">Nessuna</option>
+                            <optgroup label="Attenzione">
+                                <option value="pulse">Pulsazione</option>
+                                <option value="bounce">Rimbalzo</option>
+                                <option value="shake">Scuotimento</option>
+                                <option value="shakeX">Scuotimento orizzontale</option>
+                                <option value="shakeY">Scuoimento verticale</option>
+                                <option value="wobble">Oscillazione</option>
+                                <option value="swing">Dondolio</option>
+                                <option value="tada">Tada!</option>
+                                <option value="jello">Gelatina</option>
+                                <option value="heartBeat">Battito cardiaco</option>
+                                <option value="headShake">Scuotimento testa</option>
+                                <option value="rubberBand">Elastico</option>
+                                <option value="flash">Flash</option>
+                            </optgroup>
+                        </select>
+                        <div style="display:flex;gap:6px;margin-top:8px;">
+                            <button class="prop-btn-icon" id="btnTestAnimation" title="Testa animazione" style="flex:1;display:flex;align-items:center;justify-content:center;gap:4px;padding:6px;">
+                                <i class="fa-solid fa-play"></i> Testa
+                            </button>
+                        </div>
+                        <p style="font-size:10px;color:var(--text-secondary):margin-top:4px;">L'animazione di entrata si attiva quando l'elemento appare. L'animazione hover si attiva quando ci passi sopra col mouse.</p>
+                    </div>
+
+                    <div class="prop-group">
+                        <label class="prop-label">Ordine livello (z-index)</label>
+                        <div style="display:flex;gap:6px;">
+                            <button class="prop-btn-icon" id="btnLayerDown" title="Manda indietro di un livello" style="flex:1;display:flex;align-items:center;justify-content:center;gap:4px;padding:6px;">
+                                <i class="fa-solid fa-arrow-down"></i> Indietro
+                            </button>
+                            <button class="prop-btn-icon" id="btnLayerUp" title="Porta avanti di un livello" style="flex:1;display:flex;align-items:center;justify-content:center;gap:4px;padding:6px;">
+                                <i class="fa-solid fa-arrow-up"></i> Avanti
+                            </button>
+                        </div>
+                        <p style="font-size:10px;color:var(--text-secondary);margin-top:4px;">Sposta l'elemento sopra o sotto gli altri. clicca piu volte per spostarlo di piu livelli.</p>
+                    </div>
+
                     <div class="prop-group">                
                         <label class="prop-label">Posizione</label>
                         <select class="prop-input" id="propPosition">

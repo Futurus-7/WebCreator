@@ -956,6 +956,35 @@ function initPropertyInputs() {
     $('#btnDuplicateElement').addEventListener('click', () => {
         if (state.selectedElement) duplicateElement(state.selectedElement);
     });
+    $('#btnLayerUp').addEventListener('click', () => {
+        if (!state.selectedElement) return;
+        const el = state.selectedElement;
+        let next = el.nextElementSibling;
+        while (next && !next.classList.contains('builder-element')) {
+            next = next.nextElementSibling;
+        }
+        if (next && next.classList.contains('builder-element')) {
+            el.parentNode.insertBefore(next, el);
+            saveHistory();
+            updateLayers();
+        }
+    });
+    $('#btnLayerDown').addEventListener('click', () => {
+        if (!state.selectedElement) return;
+        const el = state.selectedElement;
+        let prev = el.previousElementSibling;
+        while (prev && !prev.classList.contains('builder-element')) {
+            prev = prev.previousElementSibling;
+        }
+        if (prev && prev.classList.contains('builder-element')) {
+            el.parentNode.insertBefore(el, prev);
+            saveHistory();
+            updateLayers();
+        }
+    });
+
+
+
     $('#propSelectOptions').addEventListener('change', () => {
         if (!state.selectedElement) return;
         const select = state.selectedElement.querySelector('.wb-select');
