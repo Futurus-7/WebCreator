@@ -1875,3 +1875,28 @@ select.prop-input {
  ::-webkit-scrollbar-corner {
     background: transparent;
  }
+
+ .hover-grow {
+    transition: transform 0.3s ease !important;
+ }
+
+ .hover-grow:hover {
+    transform: scale(1.05) !important;
+ }
+
+ .hover-shrink {
+    transition: transform 0.3s ease !important;
+ }
+
+ .hover-shrink:hover {
+    transform: scale(0.95) !important;
+ }
+
+ .animate__animated {
+    animation-duration: 1s;
+    animation-fill-mode: both;
+ }
+
+ .animate__animated.animate__infinite {
+    animation-iteration-count: infinite;
+ }

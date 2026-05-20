@@ -567,6 +567,19 @@ function deselectElement() {
     if (firstTab) firstTab.classList.add('active');
     if (firstPanel) firstPanel.classList.add('active');
 }
+canvas.addEventListener('mouseenter', (e) => {
+    const el = e.target.closest('.builder-element');
+    if (!el) return;
+    const target = getStyleTarget(el);
+    const hoverAnim = el.dataset.hoverAnimation;
+    if (hoverAnim && hoverAnim !== 'none' && hoverAnim !== 'hover-grow' && hoverAnim !== 'hover-shrink') {
+        target.classList.remove('animate__animated', 'animate__' + hoverAnim);
+        void target.offsetWidth;
+        target.style.animationDuration = (el.dataset.animSpeed || '0.8') + 's';
+        target.style.animationFillMode = 'both';
+        target.classList.add('animate__animated', 'animate__' + hoverAnim);
+    }
+}, true);
 
 canvas.addEventListener('click', (e) => {
     if (e.target === canvas || e.target.closest('.canvas-empty')) {
@@ -956,6 +969,56 @@ function initPropertyInputs() {
     $('#btnDuplicateElement').addEventListener('click', () => {
         if (state.selectedElement) duplicateElement(state.selectedElement);
     });
+    $('#propAnimation').addEventListener('change', () => {
+        if (!state.selectedElement) return;
+        const anim = $('#propAnimation').value;
+        const target = getStyleTarget(state.selectedElement);
+        target.className = target.className.replace(/\banimate__\S+/g, '').trim();
+        state.selectedElement.dataset.animation = anim;
+        if (anim !== 'none') {
+            target.classList.add('animate__animated', 'animate__' + anim);
+            target.style.animationDuration = ($('#propAnimSpeed').value || '1') + 's';
+            target.style.animationFillMode = 'both';
+        } else {
+            target.style.animationDuration = '';
+            target.style.animationFillMode = '';
+        }
+        saveHistory();
+    });
+    $('#propHoverAnimation').addEventListener('change', () => {
+        if (!state.selectedElement) return;
+        const hoverAnim = $('#propHoverAnimation').value;
+        const target = getStyleTarget(state.selectedElement);
+        target.classList.remove('hover-grow', 'hover-shrink');
+        target.removeAttribute('data-hover-anim');
+        state.selectedElement.dataset.hoverAnimation = hoverAnim;
+        if (hoverAnim === 'hover-grow' || hoverAnim === 'hover-shrink') {
+            target.classList.add(hoverAnim);
+        } else if (hoverAnim !== 'none') {
+            target.dataset.hoverAnim = hoverAnim;
+        }
+        saveHistory();
+    });
+    $('#propAnimSpeed').addEventListener('input', () => {
+        const speed = $('#propAnimSpeed').value;
+        $('#animSpeedValue').textContent = speed + 's';
+        if (!state.selectedElement) return;
+        const target = getStyleTarget(state.selectedElement);
+        target.style.animationDuration = speed + 's';
+        state.selectedElement.dataset.animSpeed = speed;
+        saveHistory();
+    });
+    $('#btnTestAnimation').addEventListener('click', () => {
+        if (!state.selectedElement) return;
+        const anim = $('#propAnimation').value;
+        if (anim === 'none') return;
+        const target = getStyleTarget(state.selectedElement);
+        target.classList.remove('animate__animated', 'animate__' + anim);
+        void target.offsetWidth;
+        target.style.animationDuration = ($('#propAnimSpeed').value || '1') + 's';
+        target.style.animationFillMode = 'both';
+        target.classList.add('animate__animated', 'animate__' + anim);
+    });
     $('#btnLayerUp').addEventListener('click', () => {
         if (!state.selectedElement) return;
         const el = state.selectedElement;
@@ -1170,6 +1233,19 @@ function updatePropertyPanel() {
         $('#actionTargetRow').style.display = act === 'link' ? 'flex' : 'none';
     } else {
         actionGroup.style.display = 'none';
+    }
+    const propAnim = $('#propAnimation');
+    if (propAnim) {
+        propAnim.value = el.dataset.animation || 'none';
+    }
+    const propAnimSpeed = $('#propAnimSpeed');
+    if (propAnimSpeed) {
+        propAnimSpeed.value = el.dataset.animSpeed || '1';
+        $('#animSpeedValue').textContent = (el.dataset.animSpeed || '1') + 's';
+    }
+    const propHoverAnim = $('#propHoverAnimation');
+    if (propHoverAnim) {
+        propHoverAnim.value = el.dataset.hoverAnimation || 'none';
     }
     const bgImageGroup = $('#backgroundImageGroup');
     if (bgImageGroup) {

@@ -6,8 +6,7 @@
     <title>Web Builder</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
-    <link rel="stylesheet" hrdf="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
 </head>
 <body>
     <header class="toolbar">
@@ -535,12 +534,13 @@
                                 <option value="fadeInLeft">Dissolvenza da sinistra</option>
                                 <option value="fadeInRight">Dissolvenza da destra</option>
                             </optgroup>
-                            <optGroup label="Zoom">
+                            <optgroup label="Zoom">
                                 <option value="zoomIn">Zoom in</option>
                                 <option value="zoomInDown">Zoom dall'alto</option>
                                 <option value="zoomInUp">Zoom dal basso</option>
+                                <option value="zoomInLeft">Zoom da sinistra</option>
                                 <option value="zoomInRight">Zoom da destra</option>
-                            </optGroup>
+                            </optgroup>
                             <optgroup label="Scorrimento">
                                 <option value="slideInDown">Scorri dall'alto</option>
                                 <option value="slideInUp">Scorri dal basso</option>
@@ -584,7 +584,7 @@
                                 <option value="bounce">Rimbalzo</option>
                                 <option value="shake">Scuotimento</option>
                                 <option value="shakeX">Scuotimento orizzontale</option>
-                                <option value="shakeY">Scuoimento verticale</option>
+                                <option value="shakeY">Scuotimento verticale</option>
                                 <option value="wobble">Oscillazione</option>
                                 <option value="swing">Dondolio</option>
                                 <option value="tada">Tada!</option>
@@ -595,12 +595,15 @@
                                 <option value="flash">Flash</option>
                             </optgroup>
                         </select>
+                        <label class="prop-label" style="margin-top:8px;">Velocita animazione</label>
+                        <input type="range" class="prop-range" id="propAnimSpeed" min="0.1" max="5" step="0.1" value = "1">
+                        <span class="range-value" id="animSpeedValue">1s</span>
                         <div style="display:flex;gap:6px;margin-top:8px;">
                             <button class="prop-btn-icon" id="btnTestAnimation" title="Testa animazione" style="flex:1;display:flex;align-items:center;justify-content:center;gap:4px;padding:6px;">
                                 <i class="fa-solid fa-play"></i> Testa
                             </button>
                         </div>
-                        <p style="font-size:10px;color:var(--text-secondary):margin-top:4px;">L'animazione di entrata si attiva quando l'elemento appare. L'animazione hover si attiva quando ci passi sopra col mouse.</p>
+                        <p style="font-size:10px;color:var(--text-secondary);margin-top:4px;">L'animazione di entrata si attiva quando l'elemento appare. L'animazione hover si attiva quando ci passi sopra col mouse.</p>
                     </div>
 
                     <div class="prop-group">
