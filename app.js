@@ -567,7 +567,7 @@ function deselectElement() {
     if (firstTab) firstTab.classList.add('active');
     if (firstPanel) firstPanel.classList.add('active');
 }
-canvas.addEventListener('mouseenter', (e) => {
+canvas.addEventListener('mouseover', (e) => {
     const el = e.target.closest('.builder-element');
     if (!el) return;
     const target = getStyleTarget(el);
@@ -575,9 +575,18 @@ canvas.addEventListener('mouseenter', (e) => {
     if (hoverAnim && hoverAnim !== 'none' && hoverAnim !== 'hover-grow' && hoverAnim !== 'hover-shrink') {
         target.classList.remove('animate__animated', 'animate__' + hoverAnim);
         void target.offsetWidth;
-        target.style.animationDuration = (el.dataset.animSpeed || '0.8') + 's';
+        target.style.setProperty('animation-duration', (el.dataset.animSpeed || '0.8') + 's', 'important');
         target.style.animationFillMode = 'both';
         target.classList.add('animate__animated', 'animate__' + hoverAnim);
+    }
+}, true);
+canvas.addEventListener('mouseleave', (e) => {
+    const el = e.target.closest('.builder-element');
+    if (!el) return;
+    const target = getStyleTarget(el);
+    const hoverAnim = el.dataset.hoverAnimation;
+    if (hoverAnim && hoverAnim !== 'none' && hoverAnim !== 'hover-grow' && hoverAnim !== 'hover-shrink') {
+        target.classList.remove('animate__animated', 'animate__' + hoverAnim);
     }
 }, true);
 
@@ -586,6 +595,18 @@ canvas.addEventListener('click', (e) => {
         deselectElement();
     }
 });
+canvas.addEventListener('click', (e) => {
+    const el = e.target.closest('.builder-element');
+    if (!el) return;
+    if (e.target.closest('.element-actions')) return;
+    const target = getStyleTarget(el);
+    const clickAnim = el.dataset.clickAnimation;
+    if (clickAnim && clickAnim !== 'none') return;
+    target.classList.remove('animate__animated', 'animate__pulse');
+    void target.offsetWidth;
+    target.style.setProperty('animation-duration', '0.3s', 'important');
+    target.classList.add('animate__animated', 'animate__pulse');
+}, true);
 
 function handleElementAction(action, element) {
     switch (action) {
@@ -976,9 +997,13 @@ function initPropertyInputs() {
         target.className = target.className.replace(/\banimate__\S+/g, '').trim();
         state.selectedElement.dataset.animation = anim;
         if (anim !== 'none') {
-            target.classList.add('animate__animated', 'animate__' + anim);
-            target.style.animationDuration = ($('#propAnimSpeed').value || '1') + 's';
+            const speed = ($('#propAnimSpeed').value || '1') + 's';
+            target.style.animationDuration = speed;
             target.style.animationFillMode = 'both';
+            state.selectedElement.dataset.animation  = anim;
+            target.classList.remove('animate__animated', 'animate__' + anim);
+            target.dataset.pending = anim;
+            observeAnimation(target, anim, speed);
         } else {
             target.style.animationDuration = '';
             target.style.animationFillMode = '';
@@ -1004,7 +1029,7 @@ function initPropertyInputs() {
         $('#animSpeedValue').textContent = speed + 's';
         if (!state.selectedElement) return;
         const target = getStyleTarget(state.selectedElement);
-        target.style.animationDuration = speed + 's';
+        target.style.setProperty('animation-duration', speed + 's', 'important');
         state.selectedElement.dataset.animSpeed = speed;
         saveHistory();
     });
@@ -1015,7 +1040,8 @@ function initPropertyInputs() {
         const target = getStyleTarget(state.selectedElement);
         target.classList.remove('animate__animated', 'animate__' + anim);
         void target.offsetWidth;
-        target.style.animationDuration = ($('#propAnimSpeed').value || '1') + 's';
+        const speed = ($('#propAnimSpeed').value || '1') + 's';
+        target.style.setProperty('animation-duration', speed, 'important');
         target.style.animationFillMode = 'both';
         target.classList.add('animate__animated', 'animate__' + anim);
     });
@@ -1229,7 +1255,7 @@ function updatePropertyPanel() {
         $('#propActionValue').value = el.dataset.actionValue || '';
         $('#propActionNewTab').checked = el.dataset.actionNewTab === 'true';
         const act = el.dataset.action || 'none';
-        $('#actionValueRow').style.display = act === 'none' ? 'none' : 'flex';
+        $('#actionValueRow').style.display = (act === 'none' || act === 'submit') ? 'none' : 'flex';
         $('#actionTargetRow').style.display = act === 'link' ? 'flex' : 'none';
     } else {
         actionGroup.style.display = 'none';
@@ -1614,6 +1640,7 @@ function generateCleanHTML() {
         el.removeAttribute('data-id');
         el.removeAttribute('data-label');
         el.removeAttribute('draggable');
+        el.removeAttribute('data-pending');
     });
 
     clone.querySelectorAll('[contenteditable]').forEach(el => {
@@ -1654,6 +1681,7 @@ function generateFullHTML() {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Il mio sito</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
     <style>
         * {margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif; }
@@ -1704,7 +1732,53 @@ document.addEventListener('click', function(e) {
         }
     }
 });
-document.addEventListener('click', function(e) {
+document.addEventListener('mouseover', function(e) {
+    var el = e.target.closest('[data-hover-animation]');
+    if (!el) return;
+    var hoverAnim = el.dataset.hoverAnimation;
+    if (!hoverAnim || hoverAnim === 'none' || hoverAnim === 'hover-grow' || hoverAnim === 'hover-shrink') return;
+    el.classList.remove('animate__animated', 'animate__' + hoverAnim);
+    void el.offsetWidth;
+    el.style.setProperty('animation-duration', (el.dataset.animSpeed || '0.8') + 's', 'important');
+    el.style.animationFillMode = 'both';
+    el.classList.add('animate__animated', 'animate__' + hoverAnim);
+});
+document.addEventListener('mouseout', function(e) {
+    var el = e.target.closest('[data-hover-animation]');
+    if (!el) return;
+    var hoverAnim = el.dataset.hoverAnimation;
+    if (!hoverAnim || hoverAnim === 'none' || hoverAnim === 'hover-grow' || hoverAnim === 'hover-shrink') return;
+    el.classList.remove('animate__animated', 'animate__' + hoverAnim);
+});
+document.addEventListener('DOMContentLoaded', function() {
+    var observer = new IntersectionObserver(function(entries) {
+        entries.forEach(function(entry) {
+            if (entry.isIntersecting) {
+                var el = entry.target;
+                var anim = el.dataset.animation;
+                var speed = (el.dataset.animSpeed || '1') + 's';
+                if (anim && anim !== 'none') {
+                    el.classList.remove('animate__animated', 'animate__' + anim);
+                    void el.offsetWidth;
+                    el.style.setProperty('animation-duration', speed, 'important');
+                    el.style.animationFillMode = 'both';
+                    el.classList.add('animate__animated', 'animate__'+ anim);
+                    observer.unobserve(el);
+                    el.addEventListener('animationend', function() {
+                        el.classList.remove('animate__animated', 'animate__' + anim);
+                    }, { once: true });
+                }
+            }
+        });
+    }, { threshold: 0.15 });
+    document.querySelectorAll('[data-animation]').forEach(function(el) {
+        if (el.dataset.animation && el.dataset.animation !== 'none') {
+            observer.observe(el);
+        }
+    });
+});
+
+    document.addEventListener('click', function(e) {
     const toggle = e.target.closest('[data-menu-toggle]');
     if (!toggle) return;
     const menuId = toggle.dataset.menuToggle;
@@ -2455,4 +2529,21 @@ function renderPageTabs() {
         });
         container.appendChild(tab);
     });
+}
+function observeAnimation(target, anim, speed) {
+    if (target._animObserver) target._animObserver.disconnect();
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                target.classList.remove('animate__animated', 'animate__' + anim);
+                void target.offsetWidth;
+                target.style.setProperty('animation-duration', speed, 'important');
+                target.style.animationFillMode = 'both';
+                target.classList.add('animate__animated', 'animate__' + anim);
+                observer.disconnect();
+            }
+        });
+    }, { threshold: 0.15 });
+    observer.observe(target);
+    target._animObserver = observer;
 }

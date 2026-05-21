@@ -1893,8 +1893,8 @@ select.prop-input {
  }
 
  .animate__animated {
-    animation-duration: 1s;
-    animation-fill-mode: both;
+    animation-duration: 1s !important;
+    animation-fill-mode: both !important;
  }
 
  .animate__animated.animate__infinite {
