@@ -303,26 +303,9 @@
                         </div>
                     <div class="prop-group" id="actionGroup" style="display:none;">
                         <label class="prop-label">Cosa succede quando ci clicchi?</label>
-                        <div class="prop-action-row">
-                            <select class="prop-input" id="propAction">
-                                <option value="none">Niente</option>
-                                <option value="link">Apri una pagina web</option>
-                                <option value="scroll">Scorri fino a un punto della pagina</option>
-                                <option value="show-hide">Mostra o nascondi qualcosa</option>
-                                <option value="submit">Invia il modulo</option>
-                            </select>
-                        </div>
-                        <div class="prop-action-row" id="actionValueRow" style="display:none;">
-                            <input type="text" class="prop-input" id="propActionValue" placeholder="">
-                        </div>
-                        <div class="prop-action-row" id="actionTargetRow" style="display:none;">
-                            <label style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text-secondary);cursor:pointer;">
-                            <input type="checkbox" id="propActionNewTab" style="width:16px;height:16px;cursor:pointer;">Apri in una nuova scheda
-                        </label>
+                        <div ud="actionsContainer"></div>
+                        <button id="addActionBtn" style="margin-top:6px;width:100%;padding:6px;background:rgba(255,255,255,0.06);border:1px dashed rgba(255,255,255,0.15);border-radius:6px;color:var(--text-secondary);font-size:12px;cursor:pointer;">+ Aggiungi azione</button>
                     </div>
-                    <div id="actionHelpText" style="display:none;font-size:11px;color:var(--text-secondary);margin-top:4px;line-height:1.5;padding:8px;background:rgba(255,255,255,0.03);border-radius:4px;"></div>
-                    </div>
-                </div>
                     <div class="prop-panel" id="tab-style">
                         <div class="prop-group">
                             <label class="prop-label">Font</label>

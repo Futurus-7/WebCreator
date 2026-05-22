@@ -127,6 +127,14 @@ function initDragAndDrop() {
 function handleCanvasDragOver(e) {
     e.preventDefault();
     e.dataTransfer.dropEffect = 'copy';
+    const scrollZone = 80;
+    const speed = 12;
+    const canvasRect = canvas.getBoundingClientRect();
+    if (e.clientY > canvasRect.botom - scrollZone) {
+        canvas.parentElement.scrollop += speed;
+    } else if (e.clientY < canvasRect.top + scrollZone) {
+        canvas.parentElement.scrollTop -= speed;
+    }
     const target = getDropTarget(e);
     if (!target) {
         removeAllDropIndicators();
@@ -1094,31 +1102,13 @@ function initPropertyInputs() {
         state.selectedElement.dataset.optionActions = JSON.stringify(actions);
         saveHistory();
     });
-    $('#propAction').addEventListener('change', () => {
-        const action = $('#propAction').value;
-        const helpText = $('#actionHelpText');
-        $('#actionValueRow').style.display = (action === 'none' || action === 'submit') ? 'none' : 'flex';
-        $('#actionTargetRow').style.display = action === 'link' ? 'flex' : 'none';
-        if (action === 'link') {
-            $('#propActionValue').placeholder = 'Scrivi il link, es: https://google.com';
-            helpText.style.display = 'block';
-            helpText.textContent = 'Scrivi l\'indirizzo del sito dove vuoi mandare chi clicca. Esempio: https://google.com';
-        } else if (action === 'scroll') {
-            $('#propActionValue').placeholder = 'Scrivi il nome della sezione, es: contatti';
-            helpText.style.display = 'block';
-            helpText.textContent = 'Scrivi l\'ID della sezione della pagina dove vuoi che scorra. Devi prima dare un ID all\'elemento di destinazione nel tab "Avanzato".';
-        } else if (action === 'show-hide') { 
-            $('#propActionValue').placeholder = 'Scrivi il nome dell\'elemento, es: menu-nascosto';
-            helpText.style.display = 'block';
-            helpText.textContent = 'Scrivi l\'ID dell\'elemento che vuoi mostrare o nascondere. Devi prima dare un ID a quell\'elemento nel tab "Avanzato".';
-        } else if (action === 'submit') {
-            helpText.style.display = 'block';
-            helpText.textContent = 'Quando l\'utente clicca, il modulo (form) piu vicino viene inviato automaticamente.';
-        } else {
-            helpText.style.display = 'none';
-        }
-        if (!state.selectedElement) return;
-        state.selectedElement.dataset.action = action;
+    $('#addActionBn').addEventListener('click', () => {
+        if (!sate.selectedElemen) return;
+        let acions = [];
+        try { acions = JSON.parse(state.selectedElement.daase.actions || '[]'); } catch(e) {}
+        actions.push({ type: 'none', value: '', netTab: false });
+        state.selectedElement.dataset.actions = JSON.stringify(actions);
+        renderActionsPanel(actions);
         saveHistory();
     });
 
@@ -1129,6 +1119,91 @@ function initPropertyInputs() {
     });
 }
 
+function buildActionRow(action, index) {
+    const row = document.createElement('div');
+    row.style.cssText = 'border:1px solid rgba(255,255,255,0.1);border-radius:6px;padding:8px;margin-bottom:6px;background:rgba(255,255,255,0.03);';
+    const placeholders = { link: 'https://google.com', scroll: 'ID sezione, es: contatti', 'show-hide': 'ID elemento, es: menu' };
+    const helps = {
+        link: 'Apre una pagina web quando si clicca.',
+        scroll: 'Scorre fino alla sezione con quell\'ID.',
+        'show-hide': 'Mostra o nasconde l\'elemento con quell\'ID.',
+        submit: 'Invia il modulo più vicino.'
+    };
+    row.innerHTML = `
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;">
+            <select class="prop-input, action-type-select" data-index="${index}" style="flex:1;">
+                <option value="none">Niente</option>
+                <option value="link">Apri una pagina web</option>
+                <option value="scroll">Scorri fino a un punto</option>
+                <option value="show-hide">Mostra o nascondi</option>
+                <option value="submit">Invia il modulo</option>
+            </select>
+            <button class="remove-action-btn" data-index="${index}" style="background:rgba(255,60,60,0.2);border:none;border-radius:4px;color:#ff6b6b;cursor:pointer;padding:4px 8px;font-size:14px;">✕</button>
+        </div>
+        <div class="action-value.row" data-index="${index}" style="display:${(action.type === 'none' || action.type === 'submit') ? 'none' : 'block'};">
+            <input type="text" class="prop-input action-value-input" data-index="${index}" placeholder="${placeholders[action.type] || ''}" value="${action.value || ''}">
+        </div>
+        <div class="action-newtab-row" data-index="${index}" style="display:${action.type === 'link' ? 'flex' : 'none'};align-items:center;gap:6px;margin-top:4px;>
+            <input type="checkbox" class="action-newtab-check" data-index="${index}" style="width:14px;height:14px;" ${action.newTab ? 'checked' : ''}>
+            <label style="font-size:11px;color:var(--text-secondary);">Apri in nuova scheda</label>
+        </div>
+        <div class="action-help" style="font-size:11px;color:var(--text-secondary);margin-top:4px;display:${action.type !== 'none' ? 'block' : 'none'};">${helps[action.type] || ''}</div>
+    `;
+    row.querySelector('.action-type-select').value = action.type;
+    return row;
+}
+
+function renderActionsPanel(actions) {
+    const container = $('#actionsContainer');
+    container.innerHTML = '';
+    action.forEach((action, i) => {
+        container.appendChild(buildActionRow(action, i));
+    });
+    container.querySelectorAll('.action-type-select').forEach(sel => {
+        sel.addEventListener('change', () => {
+            if (!state.selectedElement) return;
+            let actions = [];
+            try { actions = JSON.parse(state.selectedElement.dataset.actions || '[]'); } catch(e) {}
+            const idx = parseInt(sel.dataset.index);
+            actions[idx].type = sel.value;
+            actions[idx].value = '';
+            state.selectedElement.dataset.actions = JSON.stringify(actions);
+            renderActionsPanel(actions);
+            saveHistory();
+        });
+    });
+    container.querySelectorAll('.action-value-input').forEach(inp => {
+        inp.addEventListener('input', () => {
+           if (!state.selectedElement) return;
+           let actions = [];
+           try { actions = JSON.parse(state.selectedElement.dataset.actions || '[]'); } catch(e) {}
+           actions[parseInt(inp.dataset.index)].value = inp.value;
+           state.selectedElement.dataset.actions = JSON.stringify(actions);
+           saveHistory();
+        });
+    });
+    container.querySelectorAll('.action-newtab-check').forEach(chk => {
+        chk.addEventListener('change', () => {
+            if (!state.selectedElement) return;
+            let actions = [];
+            try { actions = JSON.parse(state.selectedElement.dataset.actions || '[]'); } catch(e) {}
+            actions[parseInt(chk.dataset.index)].newTab = chk.checked;
+            state.selectedElement.dataset.actions = JSON.stringify(actions);
+            saveHistory();
+        });
+    });
+    container.querySelectorall('.remove-action-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            if (!state.selectedElement) return;
+            let actions = [];
+            try { actions = JSON.parse(state.selectedElement.dataset.actions || '[]'); } catch(e) {}
+            actions.splice(parseInt(btn.dataset.index), 1);
+            state.selectedElement.dataset.actions = JSON.stringify(actions);
+            renderActionsPanel(actions);
+            saveHistory();
+        });
+    });
+}
 function applyStyle(property, value) {
     if (!state.selectedElement) return;
     const el = state.selectedElement;
