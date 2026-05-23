@@ -303,8 +303,12 @@
                         </div>
                     <div class="prop-group" id="actionGroup" style="display:none;">
                         <label class="prop-label">Cosa succede quando ci clicchi?</label>
-                        <div ud="actionsContainer"></div>
+                        <div id="actionsContainer"></div>
                         <button id="addActionBtn" style="margin-top:6px;width:100%;padding:6px;background:rgba(255,255,255,0.06);border:1px dashed rgba(255,255,255,0.15);border-radius:6px;color:var(--text-secondary);font-size:12px;cursor:pointer;">+ Aggiungi azione</button>
+                        <div style="display:none;">
+                            <input type="checkbox" id="propActionNewTab">
+                        </div>
+                    </div>
                     </div>
                     <div class="prop-panel" id="tab-style">
                         <div class="prop-group">
@@ -458,6 +462,7 @@
                             <span class="range-value" id="opacityValue">100%</span>
                         </div>
                     </div>
+                    </div>
                     <div class="prop-panel" id="tab-advanced">
                         <div class="prop-group">
                             <label class="prop-label">ID elemento</label>
@@ -587,8 +592,11 @@
                             </button>
                         </div>
                         <p style="font-size:10px;color:var(--text-secondary);margin-top:4px;">L'animazione di entrata si attiva quando l'elemento appare. L'animazione hover si attiva quando ci passi sopra col mouse.</p>
+                        <div style="display:flex;align-items:center;gap:8px;margin-top:8px;">
+                            <input type="checkbox" id="propClickAnim" style="width:16px;height:16px;cursor:pointer;">
+                            <label for="propClickAnim" style="font-size:12px;color:var(--text-secondary);cursor:pointer;">Animazione al click (ingrandimento)</label>
+                        </div>
                     </div>
-
                     <div class="prop-group">
                         <label class="prop-label">Ordine livello (z-index)</label>
                         <div style="display:flex;gap:6px;">

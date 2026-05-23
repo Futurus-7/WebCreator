@@ -130,8 +130,8 @@ function handleCanvasDragOver(e) {
     const scrollZone = 80;
     const speed = 12;
     const canvasRect = canvas.getBoundingClientRect();
-    if (e.clientY > canvasRect.botom - scrollZone) {
-        canvas.parentElement.scrollop += speed;
+    if (e.clientY > canvasRect.bottom - scrollZone) {
+        canvas.parentElement.scrollTop += speed;
     } else if (e.clientY < canvasRect.top + scrollZone) {
         canvas.parentElement.scrollTop -= speed;
     }
@@ -603,18 +603,6 @@ canvas.addEventListener('click', (e) => {
         deselectElement();
     }
 });
-canvas.addEventListener('click', (e) => {
-    const el = e.target.closest('.builder-element');
-    if (!el) return;
-    if (e.target.closest('.element-actions')) return;
-    const target = getStyleTarget(el);
-    const clickAnim = el.dataset.clickAnimation;
-    if (clickAnim && clickAnim !== 'none') return;
-    target.classList.remove('animate__animated', 'animate__pulse');
-    void target.offsetWidth;
-    target.style.setProperty('animation-duration', '0.3s', 'important');
-    target.classList.add('animate__animated', 'animate__pulse');
-}, true);
 
 function handleElementAction(action, element) {
     switch (action) {
@@ -1102,13 +1090,18 @@ function initPropertyInputs() {
         state.selectedElement.dataset.optionActions = JSON.stringify(actions);
         saveHistory();
     });
-    $('#addActionBn').addEventListener('click', () => {
-        if (!sate.selectedElemen) return;
-        let acions = [];
-        try { acions = JSON.parse(state.selectedElement.daase.actions || '[]'); } catch(e) {}
-        actions.push({ type: 'none', value: '', netTab: false });
+    $('#addActionBtn').addEventListener('click', () => {
+        if (!state.selectedElement) return;
+        let actions = [];
+        try { actions = JSON.parse(state.selectedElement.dataset.actions || '[]'); } catch(e) {}
+        actions.push({ type: 'none', value: '', newTab: false });
         state.selectedElement.dataset.actions = JSON.stringify(actions);
         renderActionsPanel(actions);
+        saveHistory();
+    });
+    $('#propClickAnim').addEventListener('change', () => {
+        if (!state.selectedElement) return;
+        state.selectedElement.dataset.clickAnim = $('#propClickAnim').checked ? 'true' : 'false';
         saveHistory();
     });
 
@@ -1131,7 +1124,7 @@ function buildActionRow(action, index) {
     };
     row.innerHTML = `
         <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;">
-            <select class="prop-input, action-type-select" data-index="${index}" style="flex:1;">
+            <select class="prop-input action-type-select" data-index="${index}" style="flex:1;">
                 <option value="none">Niente</option>
                 <option value="link">Apri una pagina web</option>
                 <option value="scroll">Scorri fino a un punto</option>
@@ -1140,10 +1133,10 @@ function buildActionRow(action, index) {
             </select>
             <button class="remove-action-btn" data-index="${index}" style="background:rgba(255,60,60,0.2);border:none;border-radius:4px;color:#ff6b6b;cursor:pointer;padding:4px 8px;font-size:14px;">✕</button>
         </div>
-        <div class="action-value.row" data-index="${index}" style="display:${(action.type === 'none' || action.type === 'submit') ? 'none' : 'block'};">
+        <div class="action-value-row" data-index="${index}" style="display:${(action.type === 'none' || action.type === 'submit') ? 'none' : 'block'};">
             <input type="text" class="prop-input action-value-input" data-index="${index}" placeholder="${placeholders[action.type] || ''}" value="${action.value || ''}">
         </div>
-        <div class="action-newtab-row" data-index="${index}" style="display:${action.type === 'link' ? 'flex' : 'none'};align-items:center;gap:6px;margin-top:4px;>
+        <div class="action-newtab-row" data-index="${index}" style="display:${action.type === 'link' ? 'flex' : 'none'};align-items:center;gap:6px;margin-top:4px;">
             <input type="checkbox" class="action-newtab-check" data-index="${index}" style="width:14px;height:14px;" ${action.newTab ? 'checked' : ''}>
             <label style="font-size:11px;color:var(--text-secondary);">Apri in nuova scheda</label>
         </div>
@@ -1156,7 +1149,7 @@ function buildActionRow(action, index) {
 function renderActionsPanel(actions) {
     const container = $('#actionsContainer');
     container.innerHTML = '';
-    action.forEach((action, i) => {
+    actions.forEach((action, i) => {
         container.appendChild(buildActionRow(action, i));
     });
     container.querySelectorAll('.action-type-select').forEach(sel => {
@@ -1192,7 +1185,7 @@ function renderActionsPanel(actions) {
             saveHistory();
         });
     });
-    container.querySelectorall('.remove-action-btn').forEach(btn => {
+    container.querySelectorAll('.remove-action-btn').forEach(btn => {
         btn.addEventListener('click', () => {
             if (!state.selectedElement) return;
             let actions = [];
@@ -1326,12 +1319,9 @@ function updatePropertyPanel() {
     const clickableTypes = ['button', 'link', 'image', 'icon', 'block-hero'];
     if (elType && clickableTypes.includes(elType)) {
         actionGroup.style.display = 'block';
-        $('#propAction').value = el.dataset.action || 'none';
-        $('#propActionValue').value = el.dataset.actionValue || '';
-        $('#propActionNewTab').checked = el.dataset.actionNewTab === 'true';
-        const act = el.dataset.action || 'none';
-        $('#actionValueRow').style.display = (act === 'none' || act === 'submit') ? 'none' : 'flex';
-        $('#actionTargetRow').style.display = act === 'link' ? 'flex' : 'none';
+        let actions = [];
+        try { actions = JSON.parse(el.dataset.actions || '[]'); } catch(e) {}
+        renderActionsPanel(actions);
     } else {
         actionGroup.style.display = 'none';
     }
@@ -1348,6 +1338,12 @@ function updatePropertyPanel() {
     if (propHoverAnim) {
         propHoverAnim.value = el.dataset.hoverAnimation || 'none';
     }
+
+    const propClickAnim = $('#propClickAnim');
+    if (propClickAnim) {
+        propClickAnim.checked = el.dataset.clickAnim === 'true';
+    }
+
     const bgImageGroup = $('#backgroundImageGroup');
     if (bgImageGroup) {
         if (elType === 'background') {
@@ -1768,45 +1764,38 @@ ${styles}
 ${bodyContent}
 <script>
 document.addEventListener('click', function(e) {
-    const actionEl = e.target.closest('[data-action]');
+    var actionEl = e.target.closest('[data-actions]');
     if (!actionEl) return;
-    const action = actionEl.dataset.action;
-    const value = actionEl.dataset.actionValue;
-    const newTab = actionEl.dataset.actionNewTab === 'true';
-    if (action === 'link' && value) {
-        if (newTab) {
-            window.open(value, '_blank', 'noopener,noreferrer');
-        } else {
-            window.location.href = value;
+    var actionsRaw = actionEl.dataset.actions;
+    if (!actionsRaw) return;
+    var actions = [];
+    try { actions = JSON.parse(actionsRaw); } catch(err) {}
+    actions.forEach(function(action) {
+        if (action.type === 'link' && action.value) {
+            if (action.newTab) { window.open(action.value, '_blank'); }
+            else { window.location.href = action.value; }
+        } else if (action.type === 'scroll' && action.value) {
+            var target = document.getElementById(action.value);
+            if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        } else if (action.type === 'show-hide' && action.value) {
+            var target = document.getElementById(action.value);
+            if (target) target.style.display = target.style.display === 'none' ? '' : 'none';
+        } else if (action.type === 'submit') {
+            var form = actionEl.closest('form');
+            if (form) form.submit();
         }
-    }
-    if (action === 'scroll' && value) {
-        const target = document.getElementById(value);
-        if (target) {
-            target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
-    }
-    if (action === 'show-hide' && value) {
-        const target = document.getElementById(value);
-        if (target) {
-            const hidden = target.hasAttribute('hidden') || target.style.display === 'none';
-            if (hidden) {
-                target.removeAttribute('hidden');
-                target.style.display = '';
-            } else {
-                target.setAttribute('hidden', '');
-                target.style.display = 'none';
-            }
-        }
-    }
-        if (action === 'submit') {
-        const form = actionEl.closest('form');
-        if (form) {
-            if (form.requestSubmit) form.requestSubmit();
-            else form.submit();
-        }
-    }
+    }.bind(actionEl));
 });
+document.addEventListener('click', function(e) {
+    var el = e.target.closest('[data-click-anim="true"]');
+    if (!el) return;
+    var target = el.querySelector('.wb-button, .wb-link, .wb-icon, .wb-image, .wb-hero') || el;
+    target.classList.remove('animate__animated', 'animate__pulse');
+    void target.offsetWidth;
+    target.style.setProperty('animation-duration', '0.2s', 'important');
+    target.classList.add('animate__animated', 'animate__pulse');
+});
+
 document.addEventListener('mouseover', function(e) {
     var el = e.target.closest('[data-hover-animation]');
     if (!el) return;
@@ -1860,7 +1849,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const menu = document.getElementById(menuId);
     if (!menu) return;
     const open = menu.classList.toggle('is-open');
-    toggle.setAttribute('aria-expanded', open ? 'true ' : 'false');
+    toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
 });
 <\/script>
 
@@ -1957,27 +1946,27 @@ function downloadZip() {
 <body>
 ${htmlContent}
 <script>
-document.querySelectorAll('[data-action]').forEach(el => {
+document.querySelectorAll('[data-actions]').forEach(el => {
     el.addEventListener('click', function(e) {
-        const action = this.dataset.action;
-        const value = this.dataset.actionValue;
-        const newTab = this.dataset.actionNewTab === 'true';
-        if (action === 'link' && value) {
-            if (newTab) window.open(value, '_blank');
-            else window.location.href = value;
-        }
-        if (action === 'scroll' && value) {
-            const target = document.getElementById(value);
-            if (target) target.scrollIntoView({ behavior: 'smooth' });
-        }
-        if (action === 'show-hide' && value) {
-            const target = document.getElementById(value);
-            if (target) target.style.display = target.style.display === 'none' ? '' : 'none';
-        }
-        if (action === 'submit') {
-            const form = this.closest('form');
-            if (form) form.submit();
-        }
+        var actionsRaw = this.dataset.actions;
+        if (!actionsRaw) return;
+        var actions = [];
+        try { actions = JSON.parse(actionsRaw); } catch(e) {}
+        actions.forEach(function(action) {
+            if (action.type === 'link' && action.value) {
+                if (action.newTab) { window.open(action.value, '_blank'); }
+                else { window.location.href = action.value; }
+            } else if (action.type === 'scroll' && action.value) {
+                var target = document.getElementById(action.value);
+                if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            } else if (action.type === 'show-hide' && action.value) {
+                var target = document.getElementById(action.value);
+                if (target) target.style.display = target.style.display === 'none' ? '' : 'none';
+            } else if (action.type === 'submit') {
+                var form = this.closest('form');
+                if (form) form.submit();
+            }
+        }.bind(this));
     });
 });
 <\/script>
