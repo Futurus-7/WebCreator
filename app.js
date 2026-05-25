@@ -69,6 +69,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initDragAndDrop();
     initToolbar();
     initViewport();
+    initPlatformWarning();
     initPanelSections();
     initPropertyTabs();
     initPropertyInputs();
@@ -80,6 +81,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initFreeToolbar();
     initPages();
     initCanvasResize();
+    initTouchDragAndDrop();
     setInterval(autoSave, 5000);
     const loaded = autoLoad();
     if (!loaded) {
@@ -122,6 +124,54 @@ function initDragAndDrop() {
     canvas.addEventListener('dragover', handleCanvasDragOver);
     canvas.addEventListener('dragleave', handleCanvasDragLeave);
     canvas.addEventListener('drop', handleCanvasDrop);
+}
+
+function initTouchAndDrop() {
+    let touchDragType = null;
+    let touchGhost = null;
+
+    $$('.draggable-item').forEach(item => {
+        item.addEventListener('touchstart', (e) => {
+            touchDragType = item.dataset.type;
+            const touch = e.touches[0];
+            touchGhost = item.cloneNode(true);
+            touchGhost.style.cssText = `
+                position: fixed;
+                left: $(touch.clientX - 40)px;
+                top: $(touch.clientY - 40)px;
+                width: 80px;
+                opacity: 0.7;
+                pointer-events: none;
+                z-index: 9999;
+                background: var(--accent-light);
+                border: 1px solid var(--accent);
+                border-radius: 8px;
+            `;
+            document.body.appendChild(touchGhost);
+        }, { passive: true });
+        item.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+            const touch = e.touches[0];
+            if (touchGhost) {
+                touchGhost.style.left = (touch.clientX - 40) + 'px';
+                touchGhost.style.top = (touch.clientY - 40) + 'px';
+            }
+        }, { passibe: false });
+        
+        item.addEventListener('touchend', (e) => {
+            if (touchGhost) { touchGhost.remove(); touchGhost = null; }
+            if (!touchDragType) return;
+            const touch = e.changedTouches[0];
+            const el = document.elementFromPoint(touch.clientX, touch.clientY);
+            const canvasEl = el ? el.closest('#canvas') : null;
+            if (canvasEl) {
+                const newElement = createElement(touchDragType);
+                canvas.appendChild(newElement);
+                finalizeDrop(newElement);
+            }
+            touchDragType = null;
+        });
+    });
 }
 
 function handleCanvasDragOver(e) {
@@ -1343,6 +1393,10 @@ function updatePropertyPanel() {
     if (propClickAnim) {
         propClickAnim.checked = el.dataset.clickAnim === 'true';
     }
+    const propStartHidden = $('#propStartHidden');
+    if (propStartHidden) {
+        propStartHidden.checked = el.dataset.startHidden === 'true';
+    }
 
     const bgImageGroup = $('#backgroundImageGroup');
     if (bgImageGroup) {
@@ -1712,6 +1766,13 @@ function generateCleanHTML() {
         el.removeAttribute('data-label');
         el.removeAttribute('draggable');
         el.removeAttribute('data-pending');
+        if (el.dataset.startHidden = 'true') {
+            el.dataset.summoned = 'hidden';
+            el.style.visibility = 'hidden';
+            el.style.pointerEvents = 'none';
+            el.style.opacity = '0';
+        }
+        el.removeAttribute('data-start-hidden');
     });
 
     clone.querySelectorAll('[contenteditable]').forEach(el => {
@@ -2610,4 +2671,25 @@ function observeAnimation(target, anim, speed) {
     }, { threshold: 0.15 });
     observer.observe(target);
     target._animObserver = observer;
+}
+function initPlatformWarning() {
+    const banner = document.getElementById('platformWarning');
+    const closeBtn = document.getElementById('platformWarningClose');
+    if (!banner || !closeBtn) return;
+    const isDesktop = window.matchMedia('(min-width: 1024px)').matches && !navigator.maxTouchPoints;
+    const dismissed = sessionStorage.getItem('platform-warning-dismissed');
+    if (!isDesktop && !dismissed) {
+        banner.classList.add('visible');
+        requestAnimationFrame(() => {
+            const h = banner.offsetHeight;
+            document.documentElement.style.setProperty('--warning-banner-height', h + 'px');
+            document.body.classList.add('has-platform-warning');
+        });
+    }
+    closeBtn.addEventListener('click', () => {
+        banner.classList.remove('visible');
+        document.body.classList.remove('has-platform-warning');
+        document.documentElement.style.removeProperty('--warning-banner-height');
+        sessionStorage.setItem('platform-warning-dismissed', '1');
+    });
 }
