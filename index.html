@@ -23,7 +23,6 @@
             </button>
         </div>
     </div>
-</div>
     <header class="toolbar">
         <div class="toolbar-left">
             <span class="logo">WebBuilder</span>
@@ -479,6 +478,15 @@
                     </div>
                     </div>
                     <div class="prop-panel" id="tab-advanced">
+                        <div class="prop-group">
+                            <label class="prop-label" style="display:flex;align-items:center;gap:8px;cursor:pointer;">
+                                <input type="checkbox" id="propStartHidden" style="width:16px;height:16px;cursor:pointer;">
+                                Invisibile all'avvio (evocabile)
+                            </label>
+                            <p style="font-size:10px;color:var(--text-secondary);margin-top:4px;line-height:1.5;">
+                                L'elemento esiste ma non si vede e non si può cliccare. Evocalo con un'azione "Evoca" su un altro elemento usando il suo ID.
+                            </p>
+                        </div>
                         <div class="prop-group">
                             <label class="prop-label">ID elemento</label>
                             <input type="text" class="prop-input" id="propId" placeholder="mio-elemento">

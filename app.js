@@ -126,7 +126,7 @@ function initDragAndDrop() {
     canvas.addEventListener('drop', handleCanvasDrop);
 }
 
-function initTouchAndDrop() {
+function initTouchDragAndDrop() {
     let touchDragType = null;
     let touchGhost = null;
 
@@ -137,8 +137,8 @@ function initTouchAndDrop() {
             touchGhost = item.cloneNode(true);
             touchGhost.style.cssText = `
                 position: fixed;
-                left: $(touch.clientX - 40)px;
-                top: $(touch.clientY - 40)px;
+                left: ${touch.clientX - 40}px;
+                top: ${touch.clientY - 40}px;
                 width: 80px;
                 opacity: 0.7;
                 pointer-events: none;
@@ -156,7 +156,7 @@ function initTouchAndDrop() {
                 touchGhost.style.left = (touch.clientX - 40) + 'px';
                 touchGhost.style.top = (touch.clientY - 40) + 'px';
             }
-        }, { passibe: false });
+        }, { passive: false });
         
         item.addEventListener('touchend', (e) => {
             if (touchGhost) { touchGhost.remove(); touchGhost = null; }
@@ -510,11 +510,20 @@ function setupElementEvents(element) {
     element._eventsBound = true;
     element.addEventListener('click', (e) => {
         e.stopPropagation();
-        selectElement(element);
+        if (state.selectedElement === element) {
+            setTimeout(() => {
+                if (state.selectedElement === element) {
+                    deselectElement();
+                }
+            }, 10);
+        } else {
+            selectElement(element);
+        }
     });
 
     element.addEventListener('dblclick', (e) => {
         e.stopPropagation();
+        e.preventDefault();
         const editable = element.querySelector('[contenteditable]');
         if (editable) {
             editable.focus();
@@ -598,14 +607,21 @@ function setupElementEvents(element) {
 function selectElement(element) {
     if (state.selectedElement) {
         state.selectedElement.classList.remove('selected');
+        if (state.selectedElement.dataset.startHidden === 'true') {
+            state.selectedElement.style.opacity = '0.3';
+        }
     }
     state.selectedElement = element;
     element.classList.add('selected');
+    if (element.dataset.startHidden === 'true') {
+        element.style.opacity = '0.7';
+     //   element.style.visibility = 'visible';
+    }
 
     panelEmpty.style.display = 'none';
     propertiesContent.style.display = 'block';
     updatePropertyPanel();
-    updateLayers()
+    updateLayers();
     if (currentMode === 'free') {
         updateFreeToolbarValues(element);
     }
@@ -614,7 +630,14 @@ function selectElement(element) {
 function deselectElement() {
     if (state.selectedElement) {
         state.selectedElement.classList.remove('selected');
-    }  
+        if (state.selectedElement.dataset.startHidden === 'true') {
+            state.selectedElement.style.opacity = '0.3';
+        }
+    }
+    //if (state.selectedElement && state.selectedElement.dataset.startHidden === 'true') {
+      //  state.selectedElement.style.opacity = '0';
+        //state.selectedElement.style.visibility = 'hidden';
+    //}
     state.selectedElement = null;
     panelEmpty.style.display = 'flex';
     propertiesContent.style.display = 'none';
@@ -625,6 +648,7 @@ function deselectElement() {
     if (firstTab) firstTab.classList.add('active');
     if (firstPanel) firstPanel.classList.add('active');
 }
+
 canvas.addEventListener('mouseover', (e) => {
     const el = e.target.closest('.builder-element');
     if (!el) return;
@@ -997,8 +1021,11 @@ function initPropertyInputs() {
     $('#propOverflow').addEventListener('change', () => applyStyle('overflow', $('#propOverflow').value));
     $('#propId').addEventListener('change', () => {
         if (!state.selectedElement) return;
+        const newId = $('#propId').value;
+        state.selectedElement.id = newId;
+        state.selectedElement.dataset.elementId = newId;
         const target = getStyleTarget(state.selectedElement);
-        target.id = $('#propId').value;
+        if (target !== state.selectedElement) target.removeAttribute('id');
         saveHistory();
     });
 
@@ -1149,6 +1176,26 @@ function initPropertyInputs() {
         renderActionsPanel(actions);
         saveHistory();
     });
+
+    $('#propStartHidden').addEventListener('change', () => {
+        if (!state.selectedElement) return;
+        const el = state.selectedElement;
+        if ($('#propStartHidden').checked) {
+            el.dataset.startHidden = 'true';
+            el.style.opacity = '0.3';
+            el.style.outline = '';
+            el.style.visibility = '';
+            el.style.pointerEvents = '';
+        } else {
+            el.dataset.startHidden = 'false';
+            el.style.opacity = '';
+            el.style.visibility = '';
+            el.style.pointerEvents = '';
+            el.style.outline = '';
+        }
+        saveHistory();
+    });
+
     $('#propClickAnim').addEventListener('change', () => {
         if (!state.selectedElement) return;
         state.selectedElement.dataset.clickAnim = $('#propClickAnim').checked ? 'true' : 'false';
@@ -1180,6 +1227,8 @@ function buildActionRow(action, index) {
                 <option value="scroll">Scorri fino a un punto</option>
                 <option value="show-hide">Mostra o nascondi</option>
                 <option value="submit">Invia il modulo</option>
+                <option value="summon">Evoca elemento nascosto</option>
+                <option value="toggle-visibility">Mostra/nascondi (toggle)</option>
             </select>
             <button class="remove-action-btn" data-index="${index}" style="background:rgba(255,60,60,0.2);border:none;border-radius:4px;color:#ff6b6b;cursor:pointer;padding:4px 8px;font-size:14px;">✕</button>
         </div>
@@ -1348,7 +1397,7 @@ function updatePropertyPanel() {
     $('#propPosition').value = computed.position || 'static';
     $('#propOverflow').value = computed.overflow || 'visible';
 
-    $('#propId').value = target.id || '';
+    $('#propId').value = el.id || el.dataset.elementId || '';
     const userClasses = Array.from(target.classList).filter(c => !c.startsWith('wb-') && c !== 'builder-element' && c !== 'selected');
     $('#propClasses').value = userClasses.join(' ');
     $('#propCustomCSS').value = '';
@@ -1766,11 +1815,18 @@ function generateCleanHTML() {
         el.removeAttribute('data-label');
         el.removeAttribute('draggable');
         el.removeAttribute('data-pending');
-        if (el.dataset.startHidden = 'true') {
+        if (el.dataset.startHidden === 'true') {
             el.dataset.summoned = 'hidden';
             el.style.visibility = 'hidden';
             el.style.pointerEvents = 'none';
             el.style.opacity = '0';
+            el.style.transition = 'opacity 0.35s ease';
+        } else {
+            el.style.removeProperty('visibility');
+            el.style.removeProperty('pointer-events');
+            if (el.style.opacity === '0' || el.style.opacity === '0.3' || el.style.opacity === '0.7') {
+                el.style.removeProperty('opacity');
+            }
         }
         el.removeAttribute('data-start-hidden');
     });
@@ -1840,10 +1896,40 @@ document.addEventListener('click', function(e) {
             if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
         } else if (action.type === 'show-hide' && action.value) {
             var target = document.getElementById(action.value);
-            if (target) target.style.display = target.style.display === 'none' ? '' : 'none';
+            if (target) {
+                    var hidden = target.style.visibility === 'hidden' || target.style.opacity === '0';
+                    target.style.transition = 'opacity 0.3s ease';
+                    target.style.visibility = hidden ? 'visible' : 'hidden';
+                    target.style.opacity = hidden ? '1' : '0';
+                    target.style.pointerEvents = hidden ? 'auto' : 'none';
+                }
         } else if (action.type === 'submit') {
             var form = actionEl.closest('form');
             if (form) form.submit();
+} else if (action.type === 'summon' && action.value) {
+    var target = document.getElementById(action.value);
+    if (target) {
+        var isHidden = target.style.visibility === 'hidden' || target.style.opacity === '0';
+        target.style.transition = 'opacity 0.35s ease';
+        if (isHidden) {
+            target.style.visibility = 'visible';
+            target.style.opacity = '1';
+            target.style.pointerEvents = 'auto';
+        } else {
+            target.style.visibility = 'hidden';
+            target.style.opacity = '0';
+            target.style.pointerEvents = 'none';
+        }
+    }
+        } else if (action.type === 'toggle-visibility' && action.value) {
+            var target = document.getElementById(action.value);
+            if (target) {
+                var hidden = target.style.visibility === 'hidden' || target.style.opacity === '0';
+                target.style.visibility = hidden ? 'visible' : 'hidden';
+                target.style.opacity = hidden ? '1' : '0';
+                target.style.pointerEvents = hidden ? 'auto' : 'none';
+                target.style.transition = 'opacity 0.3s ease';
+            }
         }
     }.bind(actionEl));
 });
@@ -2022,10 +2108,41 @@ document.querySelectorAll('[data-actions]').forEach(el => {
                 if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
             } else if (action.type === 'show-hide' && action.value) {
                 var target = document.getElementById(action.value);
-                if (target) target.style.display = target.style.display === 'none' ? '' : 'none';
+                if (target) {
+                    var hidden = target.style.visibility === 'hidden' || target.style.opacity === '0';
+                    target.style.transition = 'opacity 0.3s ease';
+                    target.style.visibility = hidden ? 'visible' : 'hidden';
+                    target.style.opacity = hidden ? '1' : '0';
+                    target.style.pointerEvents = hidden ? 'auto' : 'none';
+                }
             } else if (action.type === 'submit') {
                 var form = this.closest('form');
                 if (form) form.submit();
+            } else if (action.type === 'summon' && action.value) {
+                var target = document.getElementById(action.value);
+                if (target) {
+                    var isHidden = target.style.visibility === 'hidden' || target.style.opacity === '0';
+                    target.style.transition = 'opacity 0.35s ease';
+                    if (isHidden) {
+                        target.style.visibility = 'visible';
+                        target.style.opacity = '1';
+                        target.style.pointerEvents = 'auto';
+                    } else {
+                        target.style.visibility = 'hidden';
+                        target.style.opacity = '0';
+                        target.style.pointerEvents = 'none';}
+                }
+            }
+        }
+            } else if (action.type === 'toggle-visibility' && action.value) {
+                var target = document.getElementById(action.value);
+                if (target) {
+                    var hidden = target.style.visibility === 'hidden' || target.style.opacity === '0';
+                    target.style.visibility = hidden ? 'visible' : 'hidden';
+                    target.style.opacity = hidden ? '1' : '0';
+                    target.style.pointerEvents = hidden ? 'auto' : 'none';
+                    target.style.transition = 'opacity 0.3s ease';
+                }
             }
         }.bind(this));
     });

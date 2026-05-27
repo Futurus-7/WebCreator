@@ -325,7 +325,12 @@ html, body {
     background: rgba(46, 196, 182, 0.05);
 }
 
--canvas .builder-elemen[data-start-hidden="true"]::after {
+.canvas .builder-element[data-start-hidden="true"] {
+    outline: 2px dashed #f4a261 !important;
+    outline-offset: -2px;
+}
+
+.canvas .builder-element[data-start-hidden="true"]::after {
     content: 'Nascosto';
     position: absolute;
     bottom: -20px;
@@ -1934,7 +1939,7 @@ select.prop-input {
 
 @keyframes slideDownBanner {
     from { transform: translateY(-100%); opacity: 0; }
-    to   { transform: translateY(0); opacityu: 1;}
+    to   { transform: translateY(0); opacity: 1;}
 }
 
 .platform-warning-inner {
