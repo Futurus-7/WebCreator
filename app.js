@@ -150,12 +150,11 @@ function initTouchDragAndDrop() {
             document.body.appendChild(touchGhost);
         }, { passive: true });
         item.addEventListener('touchmove', (e) => {
+            if (!touchGhost) return;
             e.preventDefault();
             const touch = e.touches[0];
-            if (touchGhost) {
-                touchGhost.style.left = (touch.clientX - 40) + 'px';
-                touchGhost.style.top = (touch.clientY - 40) + 'px';
-            }
+            touchGhost.style.left = (touch.clientX - 40) + 'px';
+            touchGhost.style.top = (touch.clientY - 40) + 'px';
         }, { passive: false });
         
         item.addEventListener('touchend', (e) => {
@@ -326,7 +325,11 @@ function createElement(type) {
     wrapper.dataset.type = type;
     wrapper.dataset.id = id;
     wrapper.dataset.label = getTypeLabel(type);
-    wrapper.draggable = true;
+   if (currentMode === 'free') {
+        wrapper.draggable = false;
+    } else {
+        wrapper.draggable = true;
+    }
     if (type === 'background') {
         wrapper.classList.add('visual-background');
         wrapper.setAttribute('aria-hidden', 'true');
@@ -530,6 +533,7 @@ function setupElementEvents(element) {
         }
     });
     element.addEventListener('dragstart', (e) => {
+        if (currentMode === 'free') { e.preventDefault(); return; }
         if (element.dataset.type === 'background') {
             e.preventDefault();
             return;
@@ -2504,18 +2508,26 @@ function addFreeDrag(el) {
         if (e.target.closest('.element-actions')) return;
         if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') return;
         if (e.target.isContentEditable && document.activeElement === e.target) return;
-        e.preventDefault();
         e.stopPropagation();
-        selectElement(el);
         const startX = e.clientX;
         const startY = e.clientY;
         const startLeft = parseInt(el.style.left) || 0;
         const startTop = parseInt(el.style.top) || 0;
-
+        let isDragging = false;
         function onMouseMove(ev) {
-            updateAutoScroll(ev.clientY);
             const dx = ev.clientX - startX;
             const dy = ev.clientY - startY;
+            if (!isDragging && Math.abs(dx) < 5 && Math.abs(dy) < 5) return;
+            if (!isDragging) {
+                isDragging = true;
+                selectElement(el);
+                if (!el.style.width || el.style.width === 'auto') {
+                    el.style.width = el.offsetWidth + 'px';
+                    el.style.height = el.offsetHeight + 'px';
+                }
+            }
+            ev.preventDefault();
+            updateAutoScroll(ev.clientY);
             el.style.left = (startLeft + dx) + 'px';
             el.style.top = (startTop + dy) + 'px';
             updateFreeToolbarValues(el);
@@ -2524,8 +2536,10 @@ function addFreeDrag(el) {
             document.removeEventListener('mousemove', onMouseMove);
             document.removeEventListener('mouseup', onMouseUp);
             stopAutoScroll();
-            saveHistory();
+            if (isDragging) {
+                saveHistory();
         }
+    }
 
         document.addEventListener('mousemove', onMouseMove);
         document.addEventListener('mouseup', onMouseUp);
@@ -2793,20 +2807,19 @@ function initPlatformWarning() {
     const banner = document.getElementById('platformWarning');
     const closeBtn = document.getElementById('platformWarningClose');
     if (!banner || !closeBtn) return;
-    const isDesktop = window.matchMedia('(min-width: 1024px)').matches && !navigator.maxTouchPoints;
-    const dismissed = sessionStorage.getItem('platform-warning-dismissed');
-    if (!isDesktop && !dismissed) {
+    const isSmallScreen = window.innerWidth < 1024;
+    const dismissed = localStorage.getItem('platform-warning-dismissed');
+    if (isSmallScreen && !dismissed) {
         banner.classList.add('visible');
-        requestAnimationFrame(() => {
+        setTimeout(() => {
             const h = banner.offsetHeight;
             document.documentElement.style.setProperty('--warning-banner-height', h + 'px');
             document.body.classList.add('has-platform-warning');
-        });
+        }, 100);
     }
     closeBtn.addEventListener('click', () => {
         banner.classList.remove('visible');
         document.body.classList.remove('has-platform-warning');
-        document.documentElement.style.removeProperty('--warning-banner-height');
-        sessionStorage.setItem('platform-warning-dismissed', '1');
+        localStorage.setItem('platform-warning-dismissed', 'true');
     });
 }

@@ -208,6 +208,7 @@ html, body {
     cursor: grab;
     transition: var(--transition);
     user-select: none;
+    touch-action: none;
 }
 
 .draggable-item:hover {
