@@ -679,14 +679,14 @@
         <i class="fa-solid fa-layer-group"></i>
     </button>
 
-    <div class="model-overlay" id="functionsModal">
+    <div class="modal-overlay" id="functionsModal">
         <div class="modal-content" style="max-width:800px;width:95%;">
             <div class="modal-header">
                 <h3><i class="fa-solid fa-bolt" style="color:var(--accent);margin-right:8px;"></i>Funzioni del sito</h3>
                 <button class="close-btn" id="closeFunctions"><i class="fa-solid fa-xmark"></i></button>
             </div>
             <div class="modal-body" style="padding:0;">
-                <div style="display:flex;height:500px;"
+                <div style="display:flex;height:500px;">
                     <div style="width:200px;min-width:200px;background:var(--bg-dark);border-right:1px solid var(--border-color);padding:12px 8px;">
                         <div class="fn-menu-item active" data-fn="email">
                             <i class="fa-solid fa-envelope"></i> Moduli & Email
@@ -697,43 +697,110 @@
                         <div class="fn-menu-item" data-fn="coming">
                             <i class="fa-solid fa-clock"></i> Prossimamente
                         </div>
+                        </div>
                         <div style="flex:1;overflow-y:auto;padding:24px;">
                             <div class="fn-panel active" id="fn-email">
                                 <h2 style="font-size:18px;margin-bottom:6px;"> Moduli & Email</h2>
-                                <p style="color:var(--text-secondary);font-size:13px;margin-bottom:20px;">Quando qualcuno compila un modulo sul tuo sito, ricevi una email con i dati inseriti. Gratis, senza bisodno di server.</p>
+                                <p style="color:var(--text-secondary);font-size:13px;margin-bottom:20px;">Quando qualcuno compila un modulo sul tuo sito, ricevi una email con i dati inseriti. Gratis, senza bisogno di server.</p>
                                 <div style="background:rgba(67,97,238,0.1);border:1px solid var(--accent);border-radius:8px;padding:14px;margin-bottom:20px;">
                                 <strong style="color:var(--accent);font-size:13px;">Come funziona?</strong>
-                                <ol style="color:var(--text-secondary);font-size:12px;margin-top:8px;padding:-left:18px;line-height:2;">
+                                <ol style="color:var(--text-secondary);font-size:12px;margin-top:8px;padding-left:18px;line-height:2;">
                                     <li>Vai su <a href="https://formspree.io" target="_blank" style="color:var(--accent);">formspree.io</a> e crea un account gratis</li>
                                     <li>Clicca "New Form" e copia il link che ti danno</li>
                                     <li>Incollalo qui sotto</li>
                                     <li>Ogni volta che qualcuno compila un modulo, ricevi un email!</li>
                                 </ol>
                             </div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+                            <div class="prop-group">
+                                <label class="prop-label">Il tuo link Formspree</label>
+                                <input type="text" class="prop-input" id="formspreeUrl" placeholder="https://formspree.io/f/xxxxxxxx">
+                                <p style="font-size:11px;color:var(--text-secondary);margin-top:4px;">Esempio: https://formspree.io/f/abc12345</p>
+                            </div>
+                            <div class="prop-group">
+                                <label class="prop-label">Messaggio dopo invio modulo</label>
+                                <input type="text" class="prop-input" id="formSuccessMsg" placeholder="Grazie! Ti risponderemo presto." value="Grazie! Ti risponderemo presto.">
+                            </div>
+                            <div class="prop-group">
+                                <div class="prop-group">
+                                    <label class="prop-label">Quale modulo collegare?</label>
+                                    <select class="prop-input" id="formSelect">
+                                        <option value="">-- Selezione un modulo --</option>
+                                    </select>
+                                    <p style="font-size:11px;color:var(--text-secondary);margin-top:4px;">Devi avere un elemento "Modulo" nel canvas.</p>
+                                </div>
+                                <button class="toolbar-btn btn-primary" id="btnSaveFormspree" style="width:100%;justify-content:center;padding:10px;">
+                                    <i class="fa-solid fa-check"></i> Salva impostazioni
+                                </button>
+                                <div id="formspreeStatus" style="display:none;margin-top:12px;padding:10px;border-radius:6px;font-size:13px;text-align:center;"></div>
+                            </div>
+                        </div>
+                        <div class="fn-panel" id="fn-sheets">
+                                <h2 style="font-size:18px;margin-bottom:6px;"> Salva dati in Google sheets</h2>
+                                <p style="color:var(--text-secondary);font-size:13px;margin-bottom:20px;">Ogni volta che qualcuno compila un modulo, i dati vengono salvati automaticamente in un foglio Google. Gratis! </p>
+                                <div style="background:rgba(67,97,238,0.1);border:1px solid var(--accent);border-radius:8px;padding-left:18px;line-height:2px;">
+                                <strong style="color:var(--accent);font-size:13px;">Come funziona?</strong>
+                                <ol style="color:var(--text-secondary);font-size:12px;margin-top:8px;padding-left:18px;line-height:2;">
+                                    <li>Vai su <a href="https://sheet.best" target="_blank" style="color:var(--accent);">sheet.best</a> e crea un account gratis</li>
+                                    <li>Collega il tuo Google Sheet</li>
+                                    <li>Copia il link API che ti danno</li>
+                                    <li>Incollalo qui sotto</li>
+                                </ol>
+                            </div>
+                            <div class="prop-group">
+                                <label class="prop-label">Il tuo link Sheet.best</label>
+                                <input type="text" class="prop-input" id="sheetsUrl" placeholder="https://sheet.best/api/sheets/xxxxxxxx">
+                            </div>
+                            <div class="prop-group">
+                                <label class="prop-label">Quale modulo collegare?</label>
+                                <select class="prop-input" id="formSelectSheets">
+                                    <option value="">-- Seleziona un modulo --</option>
+                                </select>
+                            </div>
+                            <button class="toolbar-btn btn-primary" id="btnSaveSheets" style="width:100%;justify-content:center;padding:10px;">
+                                <i class="fa-solid fa-check"></i> Salva impostazioni
+                            </button>
+                            <div id="sheetsStatus" style="display:none;margin-top:12px;padding:10px;border-radius:6px;font-size:13px;text-align:center;"></div>
+                        </div>
+                        <div class="fn-panel" id="fn-coming">
+                            <h2 style="font-size:18px;margin-bottom:20px;"> Prossimamente</h2>
+                            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                                <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border-color);border-radius:8px;padding:16px;opacity:0.6;">
+                                    <div style="font-size:24px;margin-bottom:8px;">👤</div>
+                                    <strong style="font-size:13px;">Login & Utenti</strong>
+                                    <p style="font-size:11px;color:var(--text-secondary);margin-top:4px;">Registrazione, login e pagine protette</p>
+                                </div>
+                                <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border-color);border-radius:8px;padding:16px;padding:16px;opacity:0.6;">
+                                    <div style="font-size:24px;margin-bottom:8px;">📝</div>
+                                    <strong style="font-size:13px;">Blog dinamico</strong>
+                                    <p style="font-size:11px;color:var(--text-secondary);margin-top:4px;">Aggiungi articoli senza toccare il codice</p>
+                                </div>
+                                <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border-color);border-radius:8px;padding:16px;opacity:0.6;">
+                                    <div style="font-size:24px;margin-bottom:8px;">🛒</div>
+                                    <strong style="font-size:13px;">Prodotti & Catalogo</strong>
+                                    <p style="font-size:11px;color:var(--text-secondary);margin-top:4px;">Gestisci prodotti e prezzi facilmente</p>
+                                </div>
+                                <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border-color);border-radius:8px;padding:16px;opacity:0.6;">
+                                    <div style="font-size:24px;margin-bottom:8px;">📅</div>
+                                    <strong style="font-size:13px;">Prenotazione</strong>
+                                    <p style="font-size:11px;color:var(--text-secondary);margin-top:4px;">Sistema prenotazioni e appuntamenti</p>
+                                </div>
+                                <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border-color);border-radius:8px;padding:16px;opacity:0.6;">
+                                    <div style="font-size:24px;margin-bottom:8px;">💳</div>
+                                    <strong style="font-size:13px;">Pagamenti</strong>
+                                    <p style="font-size:11px;color:var(--text-secondary);margin-top:4px;">Stripe e PayPal integrati</p>
+                                </div>
+                                <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border-color);border-radius:8px;padding:16px;opacity:0.6;">
+                                    <div style="font-size:24px;margin-bottom:8px;">📧</div>
+                                    <strong style="font-size:13px;">Newsletter</strong>
+                                    <p style="font-size:11px;color:var(--text-secondary);margin-top:4px;">Raccogli email e manda newsletter</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
     <div class="modal-overlay" id="previewModal">
         <div class="modal-content modal-fullscreen">
             <div class="modal-header">
