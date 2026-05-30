@@ -2005,3 +2005,40 @@ body.has-platform-warning .toolbar {
 body.has-platform-warning .main-wrapper {
     padding-top: var(--warning-banner-height, 60px);
 }
+
+.fn-menu-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 12px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    transition: var(--transition);
+    margin-bottom: 4px;
+}
+
+.fn-menu-item:hover {
+    background: var(--accent-light);
+    color: var(--accent);
+}
+
+.fn-menu-item.active {
+    background: var(--accent-light);
+    color: var(--accent);
+}
+
+.fn-menu-item i {
+    width: 16px;
+    text-align: center;
+}
+
+.fn-panel {
+    display: none;
+}
+
+.fn-panel.active {
+    display: block;
+}

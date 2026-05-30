@@ -82,6 +82,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initPages();
     initCanvasResize();
     initTouchDragAndDrop();
+    initFunctions();
     setInterval(autoSave, 5000);
     const loaded = autoLoad();
     if (!loaded) {
@@ -2002,6 +2003,46 @@ document.addEventListener('DOMContentLoaded', function() {
     const open = menu.classList.toggle('is-open');
     toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
 });
+document.querySelectorAll('form[data-formspree-url]').forEach(function(form) {
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        var url = form.dataset.formspreeUrl;
+        var msg = form.dataset.formSuccessMsg || 'Grazie!';
+        var data = new FormData(form);
+        fetch(url, {
+            method: 'POST',
+            body: data,
+            headers: { 'Accept': 'application/json' }
+        }).then(function(r) {
+            if (r.ok) {
+                form.reset();
+                alert(msg);
+            } else {
+                alert('Errore nell invio. Riprova.');
+            }
+        }).catch(function() {
+            alert('Errore di connessione.');
+        });
+    });
+});
+document.querySelectorAll('form[data-sheets-url]').forEach(function(form) {
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        var url = form.dataset.sheetsUrl;
+        var data = {};
+        new FormData(form).forEach(function(v, k) { data[k] = v; });
+        fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        }).then(function(r) {
+            if (r.ok) {
+                form.reset();
+                alert('Dati salvati!');
+            }
+        }).catch(function() {});
+    });
+});
 <\/script>
 
 </body>
@@ -2822,4 +2863,135 @@ function initPlatformWarning() {
         document.body.classList.remove('has-platform-warning');
         localStorage.setItem('platform-warning-dismissed', 'true');
     });
+}
+function initFunctions() {
+    const functionsModal = $('#functionsModal');
+    const btnFunctions = $('#btnFunctions');
+    const closeFunctions = $('#closeFunctions');
+    btnFunctions.addEventListener('click', () => {
+        functionsModal.classList.add('visible');
+        populateFormSelects();
+    });
+    closeFunctions.addEventListener('click', () => {
+        functionsModal.classList.remove('visible');
+    });
+    functionsModal.addEventListener('click', (e) => {
+        if (e.target === functionsModal) functionsModal.classList.remove('visible');
+    });
+    $$('.fn-menu-item').forEach(item => {
+        item.addEventListener('click', () => {
+            $$('.fn-menu-item').forEach(i => i.classList.remove('active'));
+            $$('.fn-panel').forEach(p => p.classList.remove('active'));
+            item.classList.add('active');
+            const panel = $('#fn-' + item.dataset.fn);
+            if (panel) panel.classList.add('active');
+        });
+    });
+    $('#btnSaveFormspree').addEventListener('click', saveFormspree);
+    $('#btnSaveSheets').addEventListener('click', saveSheets);
+    loadFunctionSettings();
+}
+function populateFormSelects() {
+    const forms = canvas.querySelectorAll('.builder-element[data-type="form"]');
+    const selects = [
+        $('#formSelect'),
+        $('#formSelectSheets')
+    ];
+    select.forEach(select => {
+        if (!select) return;
+        const currentVal = select.value;
+        select.innerHTML = '<option value="">-- Seleziona un modulo --</option>';
+        forms.forEach((form, i) => {
+            const id = form.id || form.dataset.id || ('form-' + i);
+            const label = form.dataset.label || ('Modulo ' + (i + 1));
+            const option = document.createElement('option');
+            option.value = id;
+            option.textContent = label;
+            select.appendChild(option);
+        });
+        if (currentVal) select.value = currentVal;
+    });
+}
+function saveFormSpree() {
+    const url = $('#formspreeUrl').value.trim();
+    const msg = $('#formSuccessMsg').value.trim();
+    const formId = $('#formSelect').value;
+    const status = $('#formspreeStatus');
+    if (!url) {
+        showFnStatus(status, 'Inserisci il link Formspree!', 'error');
+        return;
+    }
+    if (!url.includes('formspree.io')) {
+        showFnStatus(status, 'Il link deve essere di formspree.io', 'error');
+        return;
+    }
+    if (!formId) {
+        showFnStatus(status, 'Seleziona un modulo dal canvas!', 'error');
+        return;
+    }
+     const formEl = canvas.querySelector('.builder-element[data-id="' + formId + '"]') ||
+                    canvas.querySelector('#' formId);
+
+    if (!formEl) {
+        showFnStatus(status, 'Modulo non trovato nel canvas!', 'error');
+        return;
+    }
+    formEl.dataset.formspreeUrl = url;
+    formEl.dataset.formSuccessMsg = msg || 'Grazie! Ti risponderemo presto.';
+    saveFunctionSettings();
+    savehistory();
+    showFnStatus(status. 'Collegamento salvato! Il modulo ora inviera email.'. 'success');
+}
+function saveSheets() {
+    const url = $('#sheetsUrl').value.trim();
+    const formId = $('#formSelectSheets').value;
+    const status = $('#sheetsStatus');
+    if (!url) {
+        showFnStatus(status, 'Inserisci il link Sheet.best!', 'error');
+        return;
+    }
+    if (!formId)  {
+        showFnStatus(status, 'Seleziona un modulo del canvas!', 'error');
+        return;
+    }
+    const formEl = canvas.querySelector('.builder-element[data-id="' + formId + '"]') ||
+                   canvas.querySelector('#' + formId);
+    if (!formEl) {
+        showFnStatus(status, 'Modulo non trovato nel canvas!', 'error');
+        return;
+    }
+    formEl.dataset.sheetsUrl = url;
+    saveFunctionSettings();
+    saveHistory();
+    showFnStatus(status, 'Collegamento salvato! I dati verranno salvati in Google Sheets.', 'success');
+}
+function showFnStatus(el, message, type) {
+    if (!el) return;
+    el.style.display = 'block';
+    el.textContent = message;
+    el.style.background = type === 'success' ? 'rgba(46,196,182,0.15)' : 'rgba(230,57,70,0.15)';
+    el.style.color = type === 'success' ? 'var(--success)' : 'var(--danger)';
+    setTimeout(() => {
+        el.style.display = 'none';
+    }, 4000);
+}
+function saveFunctionSettings() {
+    const settings = {
+        formspreeUrl: $('#formspreeUrl').value,
+        formSuccessMsg: $('#formSuccessMsg').value,
+        formSelect: $('#formSelect').value,
+        sheetsUrl: $('#sheetsUrl').value,
+        formSelectSheets: $('#formSelectSheets').value
+    };
+    localStorage.setItem('webbuilder-functions', JSON.stringify(setting));
+}
+function loadFunctionSettings() {
+    try {
+        const saved = localStorage.getItem('webbuilder-functions');
+        if (!saved) return;
+        const settings = JSON.parse(saved);
+        if (settings.formspreeUrl) $('#formspreeUrl').value = settings.formspreeUrl;
+        if (settings.formSuccessMsg) $('#formSuccessMsg').value = settings.formSuccessMsg;
+        if (settings.sheetsUrl) $('#sheetsUrl').value = settings.sheetsUrl;
+    } catch (e) {}
 }
