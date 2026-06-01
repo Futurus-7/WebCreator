@@ -139,11 +139,11 @@
                 </div>
             </div>
             <div class="panel-section">
-                <h4 class="section-title" data-toggle="forms">Modulo</h4>
+                <h4 class="section-title" data-toggle="forms">Moduli</h4>
                 <div class="section-content" id="forms">
-                    <div class="draggable-item" draggable="true" data-type="form">
-                        <i class="fa-solid fa-rectangle-list"></i>
-                        <span>Modulo</span>
+                    <div class="draggable-item" draggable="true" data-type="form-contact">
+                        <i class="fa-solid fa-envelope"></i>
+                        <span>Modulo Contatti</span>
                     </div>
                     <div class="draggable-item" draggable="true" data-type="input">
                         <i class="fa-solid fa-align-left"></i>
@@ -720,6 +720,13 @@
                                 <label class="prop-label">Messaggio dopo invio modulo</label>
                                 <input type="text" class="prop-input" id="formSuccessMsg" placeholder="Grazie! Ti risponderemo presto." value="Grazie! Ti risponderemo presto.">
                             </div>
+                                <div class="prop-group">
+                                    <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:12px;color:var(--text-secondary);">
+                                        <input type="checkbox" id="formMultipleSubmit" style="width:16px;height:16px;cursor:pointer;">
+                                        Permetti invii multipli
+                                    </label>
+                                    <p style="font-size:10px;color:var(--text-secondary);margin-top:4px;">Se non spunti, il modulo si può inviare solo una vola. Dopo l'invio apparira il messaggio di conferma e il modulo scomparirà.</p>
+                                </div>
                             <div class="prop-group">
                                 <div class="prop-group">
                                     <label class="prop-label">Quale modulo collegare?</label>
@@ -800,7 +807,6 @@
                 </div>
             </div>
         </div>
-    </div>
     <div class="modal-overlay" id="previewModal">
         <div class="modal-content modal-fullscreen">
             <div class="modal-header">

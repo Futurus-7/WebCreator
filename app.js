@@ -383,7 +383,7 @@ function getTypeLabel(type) {
         'icon': 'Icona',
         'map': 'Mappa',
         'background': 'Background',
-        'form': 'Modulo',
+        'form-contact': 'Modulo Contatti',
         'input': 'Campo testo',
         'textarea': 'Area testo',
         'select': 'Menu a tendina',
@@ -437,6 +437,23 @@ function getElementHTML(type) {
                 'map': '<div class="wb-map"><span><i class="fa-solid fa-map-location-dot"></i>Mappa</span></div>',
                 'background': '<div class="wb-background"></div>',
                 'form': '<form class="wb-form" onsubmit="return false;"></form>',
+                'form-contact': `
+                    <form class="wb-form" onsubmit="return false;" style="max-width:500px;">
+                        <h3 style="margin-bottom:16px;font-size:20px;color:#333;">Contatateci</h3>
+                        <div style="margin-bottom:12px;">
+                            <label style="display:block;font-size:13px;color:#555;margin-bottom:4px;">Nome *</label>
+                            <input type="text" name="nome" class="wb-input" placeholder="Il Tuo nome" required>
+                        </div>
+                        <div style="margin-bottom:12px;">
+                            <label style="display:block;font-size:13px;color:#555;margin-bottom:4px;">Email *</label>
+                            <input type="email" name="email" class="wb-input" placeholder="la-tua@email.com" required>
+                        </div>
+                        <div style="margin-bottom:16px;">
+                            <label style="display:block;font-size:13px;color:#555;margin-bottom:4px;">Messaggio *</label>
+                            <textarea name="messaggio" class="wb-textarea-el" placeholder="Scrivi il tuo messaggio..." rows="4" required></textarea>
+                        </div>
+                        <button type="submit" class="wb-button" style="width:100%;cursor:pointer;">Invia messaggio</button>
+                    </form>`,
                 'input': '<input type="text" class="wb-input" placeholder="Inserisci testo...">',
                 'textarea': '<textarea class="wb-textarea-el" placeholder="Scrivi qui..."></textarea>',
                 'select': `
@@ -1683,7 +1700,7 @@ const icons = {
     'icon': 'fa-solid fa-icons',
     'map': 'fa-solid fa-map-location-dot',
     'background': 'fa-solid fa-fill-drip',
-    'form': 'fa-solid fa-rectangle-list',
+    'form-contact': 'fa-solid fa-envelope',
     'input': 'fa-solid fa-i-cursor',
     'textarea': 'fa-solid fa-align-left',
     'select': 'fa-solid fa-caret-down',
@@ -1838,6 +1855,19 @@ function generateCleanHTML() {
 
     clone.querySelectorAll('[contenteditable]').forEach(el => {
         el.removeAttribute('contenteditable');
+    });
+    clone.querySelectorAll('form.wb-form').forEach(form => {
+        const parentEl = form.closest('.builder-element');
+        if (parentEl && parentEl.dataset.formspreeUrl) {
+            form.removeAttribute('onsubmit');
+            form.dataset.formspreeUrl = parentEl.dataset.formspreeUrl;
+            form.dataset.formSuccessMsg = parentEl.dataset.formSuccessMsg || 'Grazie';
+            form.dataset.formMultiple = parentEl.dataset.formMultiple || 'false';
+        }
+        if (parentEl && parentEl.dataset.sheetsUrl) {
+            form.removeAttribute('onsubmit');
+            form.dataset.sheetsUrl = parentEl.dataset.sheetsUrl;
+        }
     });
     return formatHTML(clone.innerHTML);
 }
@@ -2015,8 +2045,13 @@ document.querySelectorAll('form[data-formspree-url]').forEach(function(form) {
             headers: { 'Accept': 'application/json' }
         }).then(function(r) {
             if (r.ok) {
-                form.reset();
-                alert(msg);
+                var multiple = form.dataset.formMultiple === 'true';
+                if (multiple) {
+                    form.reset();
+                    alert(msg);
+                } else {
+                    form.innerHTML = '<div style="text-align:center;padding:30px;color:#2ec4b6;font-size:16px;font-weight:600;">' + msg + '</div>';
+                }
             } else {
                 alert('Errore nell invio. Riprova.');
             }
@@ -2892,12 +2927,12 @@ function initFunctions() {
     loadFunctionSettings();
 }
 function populateFormSelects() {
-    const forms = canvas.querySelectorAll('.builder-element[data-type="form"]');
+    const forms = canvas.querySelectorAll('.builder-element[data-type="form"], .builder-element[data-type="form-contact"]');
     const selects = [
         $('#formSelect'),
         $('#formSelectSheets')
     ];
-    select.forEach(select => {
+    selects.forEach(select => {
         if (!select) return;
         const currentVal = select.value;
         select.innerHTML = '<option value="">-- Seleziona un modulo --</option>';
@@ -2912,7 +2947,7 @@ function populateFormSelects() {
         if (currentVal) select.value = currentVal;
     });
 }
-function saveFormSpree() {
+function saveFormspree() {
     const url = $('#formspreeUrl').value.trim();
     const msg = $('#formSuccessMsg').value.trim();
     const formId = $('#formSelect').value;
@@ -2929,8 +2964,8 @@ function saveFormSpree() {
         showFnStatus(status, 'Seleziona un modulo dal canvas!', 'error');
         return;
     }
-     const formEl = canvas.querySelector('.builder-element[data-id="' + formId + '"]') ||
-                    canvas.querySelector('#' formId);
+    const formEl = canvas.querySelector('.builder-element[data-id="' + formId + '"]') ||
+                   canvas.querySelector('#' + formId);
 
     if (!formEl) {
         showFnStatus(status, 'Modulo non trovato nel canvas!', 'error');
@@ -2938,9 +2973,10 @@ function saveFormSpree() {
     }
     formEl.dataset.formspreeUrl = url;
     formEl.dataset.formSuccessMsg = msg || 'Grazie! Ti risponderemo presto.';
+    formEl.dataset.formMultiple = $('#formMultipleSubmit').checked ? 'true' : 'false';
     saveFunctionSettings();
-    savehistory();
-    showFnStatus(status. 'Collegamento salvato! Il modulo ora inviera email.'. 'success');
+    saveHistory();
+    showFnStatus(status, 'Collegamento salvato! Il modulo ora invierà email.', 'success');
 }
 function saveSheets() {
     const url = $('#sheetsUrl').value.trim();
@@ -2980,10 +3016,11 @@ function saveFunctionSettings() {
         formspreeUrl: $('#formspreeUrl').value,
         formSuccessMsg: $('#formSuccessMsg').value,
         formSelect: $('#formSelect').value,
+        formMultipleSubmit: $('#formMultipleSubmit').checked,
         sheetsUrl: $('#sheetsUrl').value,
         formSelectSheets: $('#formSelectSheets').value
     };
-    localStorage.setItem('webbuilder-functions', JSON.stringify(setting));
+    localStorage.setItem('webbuilder-functions', JSON.stringify(settings));
 }
 function loadFunctionSettings() {
     try {
@@ -2992,6 +3029,7 @@ function loadFunctionSettings() {
         const settings = JSON.parse(saved);
         if (settings.formspreeUrl) $('#formspreeUrl').value = settings.formspreeUrl;
         if (settings.formSuccessMsg) $('#formSuccessMsg').value = settings.formSuccessMsg;
+        if (settings.formMultipleSubmit !== undefined) $('#formMultipleSubmit').checked = settings.formMultipleSubmit;
         if (settings.sheetsUrl) $('#sheetsUrl').value = settings.sheetsUrl;
     } catch (e) {}
 }
