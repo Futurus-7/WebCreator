@@ -2060,6 +2060,25 @@ document.querySelectorAll('form[data-formspree-url]').forEach(function(form) {
         });
     });
 });
+var _supUrl = '${$('#supabaseUrl').value || ''}';
+var _supKey = '${$('#supabaseKey').value || ''}':
+var _authLogin = ${$('#authLogin').checked};
+var _authRegister = ${$('#authRegister').checked};
+var _authLogout = ${$('#authLogout').checked};
+if (_supUrl && _supKey) {
+    var supScript = document.createElement('script');
+    supScript.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
+    supScript.onload = function() {
+        window._supabase = supabase.creaeClient(_supUrl, _supKey);
+        if (_authLogin || _authRegister) {
+            document.querySelectorAll('[data-auth-login]').forEach(function(form) {
+                form.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    var email = form.querySelector('[name="email"]').value;
+                    var password = form.querySelector('[name="password"]').value;
+                    window._supabase.auth.signInWithPassword({ email: email, password: password })
+                    .then(function(res) {
+        
 document.querySelectorAll('form[data-sheets-url]').forEach(function(form) {
     form.addEventListener('submit', function(e) {
         e.preventDefault();

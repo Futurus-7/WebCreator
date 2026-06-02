@@ -694,6 +694,9 @@
                         <div class="fn-menu-item" data-fn="sheets">
                             <i class="fa-solid fa-table"></i> Salva dati
                         </div>
+                        <div class="fn-menu-item" data-fn="auth">
+                            <i class="fa-solid fa-user-lock"></i> Login & Utenti
+                        </div>
                         <div class="fn-menu-item" data-fn="coming">
                             <i class="fa-solid fa-clock"></i> Prossimamente
                         </div>
@@ -768,6 +771,67 @@
                             </button>
                             <div id="sheetsStatus" style="display:none;margin-top:12px;padding:10px;border-radius:6px;font-size:13px;text-align:center;"></div>
                         </div>
+                        <div class="fn-panel" id="fn-auth">
+                            <h2 style="font-size:18px;margin-bottom:6px;">Login & Utenti</h2>
+                            <p style="color:var(--text-secondary);font-size:13px;margin-bottom:16px;">Aggiungi registrazione e login al tuo sito. Gli utenti potranno creare un account e accedere a pagine protette.</p>
+                            <div style="background:rgba(46,196,182,0.1);border:1px solid var(--success);border-radius:8px;padding:14px;margin-bottom:16px;">
+                                <strong style="color:var(--success);font-size:13px;"> Quanto costa?</strong>
+                                <p style="color:var(--text-secondary);font-size:12px;margin-top:8px;line-height:1.8;">
+                                    <strong style="color:var(--text-primary);">Tu non paghi niente.</strong> Usi il servizio gratuio di <strong>Supabase</strong>.<br>
+                                                                                                                                                Il piano gratuito include fino a <strong>50.000 utenti registrati</strong> sul tuo sito.<br>
+                                                                                                                                                Se il tuo sito cresce oltre quel numero, pagherai direttamente Supabase (non noi).<br>
+                                                                                                                                                <em>Per la maggior parte dei siti, il piano gratuito dura per sempre.</em>
+                                                                                                                                            </p>
+                                                                                                                                        </div>
+                                                                                                                                        <div style="background:rgba(67,97,238,0.1);border:1px solid var(--accent);border-radius:8px;padding:14px;margin-bottom:20px;">
+                                                                                                                                            <strong style="color:var(--accent);font-size:13px;">Come funziona?</strong>
+                                                                                                                                            <ol style="color:var(--text-secondary);font-size:12px;margin-top:8px;padding-left:18px;line-height:2.2;">
+                                                                                                                                                <li>Vai su <a href="https://supabase.com" target="_blank" style="color:var(--accent);">supabase.com</a> e crea un account <strong>gratis</strong></li>
+                                                                                                                                                <li>Clicca <strong>"New Project"</strong> e dagli un nome</li>
+                                                                                                                                                <li>Vai in <strong>Settings -> API</strong></li>
+                                                                                                                                                <li>Copia il <strong> Project URL</strong> e la <strong>anon public key</strong></li>
+                                                                                                                                                <li>Incollali qui sotto e salva</li>
+                                                                                                                                                <li>Il tuo sito avrà login e registrazione!</li>
+                                                                                                                                            </ol>
+                                                                                                                                        </div>
+                                                                                                                                        <div class="prop-group">
+                                                                                                                                            <label class="prop-label">Supabase Project URL</label>
+                                                                                                                                            <input type="text" class="prop-input" id="supabaseUrl" placeholder="https://xxxxxxxx.supabase.co">
+                                                                                                                                            <p style="font-size:11px;color:var(--text-secondary);margin-top:4px;">Lo trovi in Settings -> API -> Project URL</p>
+                                                                                                                                        </div>
+                                                                                                                                        <div class="prop-group">
+                                                                                                                                            <label class="prop-label">Supabase Anon Key (chiave pubblica)</label>
+                                                                                                                                            <input type="text" class="prop-input" id="supabaseKey" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...">
+                                                                                                                                            <p style="font-size:11px;color:var(--text-secondary);margin-top:4px;">Lo trovi in Settings -> API -> anon public</p>
+                                                                                                                                        </div>
+                                                                                                                                        <div class="prop-group">
+                                                                                                                                            <label class="prop-label">Cosa vuoi aggiungere al sito?</label>
+                                                                                                                                            <div style="display:flex;flex-direction:column;gap:8px;margin-top:6px;">
+                                                                                                                                                <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:12px;color:var(--text-secondary);">
+                                                                                                                                                    <input type="checkbox" id="authLogin" checked style="width:16px;height:16px;cursor:pointer;">
+                                                                                                                                                    Pagina di Login
+                                                                                                                                                </label>
+                                                                                                                                                <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:12px;color:var(--text-secondary);">
+                                                                                                                                                    <input type="checkbox" id="authRegister" checked style="width:16px;height:16px;cursor:pointer;">
+                                                                                                                                                    Pagina di Registrazione
+                                                                                                                                                </label>
+                                                                                                                                                <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:12px;color:var(--text-secondary);">
+                                                                                                                                                    <input type="checkbox" id="authLogout" checked style="width:16px;height:16px;cursor:pointer;">
+                                                                                                                                                    Bottone Logout
+                                                                                                                                                </label>
+                                                                                                                                            </div>
+                                                                                                                                        </div>
+                                                                                                                                        <button class="toolbar-btn btn-primary" id="btnSaveAuth" style="width:100%;justify-content:center;padding:10px;">
+                                                                                                                                            <i class="fa-solid fa-check"></i> Salva e attiva Login
+                                                                                                                                        </button>
+                                                                                                                                        <div id="authStatus" style="display:none;margin-top:12px;padding:10px;border-radius:6px;font-size:13px;text-align:center;"></div>
+                                                                                                                                        <div style="margin-top:16px;padding:12px;background:rgba(255,255,255,0.03);border-radius:8px;border:1px solid var(--border-color);">
+                                                                                                                                            <strong style="font-size:12px;color:var(--text-secondary);">Cosa succede dopo aver salvato?</strong>
+                                                                                                                                            <p style="font-size:11px;color:var(--text-secondary);margin-top:6px;line-height:1.8;">
+                                                                                                                                                Quando esporti il sio, il codice del login verrà incluso automaticamente. Gli utenti del tuo sito potranno registrarsi e fare login con la loro email e password.
+                                                                                                                                            </p>
+                                                                                                                                        </div>
+                                                                                                                                    </div>
                         <div class="fn-panel" id="fn-coming">
                             <h2 style="font-size:18px;margin-bottom:20px;"> Prossimamente</h2>
                             <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
@@ -807,6 +871,7 @@
                 </div>
             </div>
         </div>
+    </div>
     <div class="modal-overlay" id="previewModal">
         <div class="modal-content modal-fullscreen">
             <div class="modal-header">
