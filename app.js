@@ -394,6 +394,9 @@ function getTypeLabel(type) {
         'block-card': 'Card',
         'block-pricing': 'Pricing',
         'block-testimonial': 'Testimonial'
+        'block-login': 'Form Login',
+        'block-register': 'Form Registrazione',
+        'block-logout': 'Bottone Logout'
     };
     return labels[type] || type;
 }
@@ -510,7 +513,7 @@ function getElementHTML(type) {
                         </ul>
                             <button class="wb-button" contenteditable="true">Scegli piano</button>
                         </div>`,
-                                        'block-testimonial': `
+                        'block-testimonial': `
                         <div class="wb-testimonial">
                             <div class="testimonial-quote" contenteditable="true">"Questo prodotto ha cambiato completamente il mio modo di lavorare. Lo consiglio a tutti."</div>
                             <div class="testimonial-author">
@@ -520,8 +523,29 @@ function getElementHTML(type) {
                                     <div class="testimonial-role" contenteditable="true">CEO, Azienda</div>
                                 </div>
                             </div>
-                        </div>`
-    };
+                        </div>`,
+                        'block-login': `
+                            <form class="wb-form" data-auth-login style="max-width:420px;margin:0 auto;">
+                                <h3 style="margin-bottom:16px;font-size:22px;color:#333;text-align:center;">Accedi</h3>
+                                <div style="margin-bottom:12px;">
+                                    <label style="display:block;font-size:13px;color:#555;margin-bottom:4px;">Email</label>
+                                    <input type="email" name="email" class="wb-input" placeholder="la-tua@email.com" required>
+                                </div>
+                                <div style="margin-bottom:16px;">
+                                    <label style="display:block;font-size:13px;color:#555;margin-bottom:4px;">Password</label>
+                                    <input type="password" name="password" class="wb-input" placeholder="La tua password" required>
+                                </div>
+                                <button type="submit" class="wb-button" style="width:100%;cursor:pointer;">Accedi</button>
+                            </form>`,
+                            'block-register'; `
+                                <form class="wb-form" data-auth-register style="max-width:420px;margin:0 auto;">
+                                    <h3 style="margin-bottom:16px;font-size:22px;color:#333;text-align:center;">Registrati</h3>
+                                    
+                            `
+                            
+
+
+
     return templates[type] || '<div>Elemento</div>';
 }
 
@@ -1710,7 +1734,10 @@ const icons = {
     'block-footer': 'fa-solid fa-shoe-prints',
     'block-card': 'fa-solid fa-id-card',
     'block-pricing': 'fa-solid fa-tags',
-    'block-testimonial': 'fa-solid fa-quote-left'
+    'block-testimonial': 'fa-solid fa-quote-left',
+    'block-login': 'fa-solid fa-right-to-bracket',
+    'block-register': 'fa-solid fa-user-plus',
+    'block-logout': 'fa-solid fa-right-from-bracket'
     };
     return icons[type] || 'fa-solid fa-cube';
 }
@@ -2061,7 +2088,7 @@ document.querySelectorAll('form[data-formspree-url]').forEach(function(form) {
     });
 });
 var _supUrl = '${$('#supabaseUrl').value || ''}';
-var _supKey = '${$('#supabaseKey').value || ''}':
+var _supKey = '${$('#supabaseKey').value || ''}';
 var _authLogin = ${$('#authLogin').checked};
 var _authRegister = ${$('#authRegister').checked};
 var _authLogout = ${$('#authLogout').checked};
@@ -2069,7 +2096,7 @@ if (_supUrl && _supKey) {
     var supScript = document.createElement('script');
     supScript.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
     supScript.onload = function() {
-        window._supabase = supabase.creaeClient(_supUrl, _supKey);
+        window._supabase = supabase.createClient(_supUrl, _supKey);
         if (_authLogin || _authRegister) {
             document.querySelectorAll('[data-auth-login]').forEach(function(form) {
                 form.addEventListener('submit', function(e) {
@@ -2078,7 +2105,37 @@ if (_supUrl && _supKey) {
                     var password = form.querySelector('[name="password"]').value;
                     window._supabase.auth.signInWithPassword({ email: email, password: password })
                     .then(function(res) {
-        
+                        if (res.error) { alert('Errore: ' + res.error.message); }
+                        else { alert('Login Effettuato!'); window.location.reload(); }
+                    });
+                });
+            });
+            document.querySelectorAll('[data-auth-register]').forEach(function(form) {
+                form.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    var email = form.querySelector('[name="email"]').value;
+                    var password = form.querySelector('[name="password"]').value;
+                    window._supabase.auth.signUp({ email: email, password: password })
+                    .then(function(res) {
+                        if (res.error) { alert('Errore: ' + res.error.message); }
+                        else { alert('Registrazione completata! Conrolla la tua email.'); }
+                    });
+                });
+            });
+        }
+        if (_authLogout) {
+            document.querySelectorAll('[data-auth-logout]').forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                    window._supabase.auth.signOut().then(function() {
+                        alert('Logout effettuato!');
+                        window.location.reload();
+                    });
+                });
+            });
+        }
+    };
+    document.head.appendChild(supScript);
+}           
 document.querySelectorAll('form[data-sheets-url]').forEach(function(form) {
     form.addEventListener('submit', function(e) {
         e.preventDefault();
@@ -2943,6 +3000,7 @@ function initFunctions() {
     });
     $('#btnSaveFormspree').addEventListener('click', saveFormspree);
     $('#btnSaveSheets').addEventListener('click', saveSheets);
+    $('#btnSaveAuth').addEventListener('click', saveAuth);
     loadFunctionSettings();
 }
 function populateFormSelects() {
@@ -3037,7 +3095,12 @@ function saveFunctionSettings() {
         formSelect: $('#formSelect').value,
         formMultipleSubmit: $('#formMultipleSubmit').checked,
         sheetsUrl: $('#sheetsUrl').value,
-        formSelectSheets: $('#formSelectSheets').value
+        formSelectSheets: $('#formSelectSheets').value,
+        supabaseUrl: $('#supabaseUrl').value,
+        supabaseKey: $('#supabaseKey').value,
+        authLogin: $('#authLogin').checked,
+        authRegister: $('#authRegister').checked,
+        authLogout: $('#authLogout').checked
     };
     localStorage.setItem('webbuilder-functions', JSON.stringify(settings));
 }
@@ -3050,5 +3113,29 @@ function loadFunctionSettings() {
         if (settings.formSuccessMsg) $('#formSuccessMsg').value = settings.formSuccessMsg;
         if (settings.formMultipleSubmit !== undefined) $('#formMultipleSubmit').checked = settings.formMultipleSubmit;
         if (settings.sheetsUrl) $('#sheetsUrl').value = settings.sheetsUrl;
+        if (settings.supabaseUrl) $('#supabaseUrl').value = settings.supabaseUrl;
+        if (settings.supabaseKey) $('#supabaseKey').value = settings.supabaseKey;
+        if (settings.authLogin !== undefined) $('#authLogin').checked = settings.authLogin;
+        if (settings.authRegister !== undefined) $('#authRegister').checked = settings.authRegister;
+        if (settings.authLogout !== undefined) $('#authLogout').checked = settings.authLogout;
     } catch (e) {}
+}
+function saveAuth() {
+    const url = $('#supabaseUrl').value.trim();
+    const key = $('#supabaseKey').value.trim();
+    const status = $('#authStatus');
+    if (!url) {
+        showFnStatus(status, 'Inserisci il Supabase Project URL!', 'error');
+        return;
+    }
+    if (!url.includes('supabase.co')) {
+        showFnStatus(status, 'Il link deve essere di supabase.co', 'error');
+        return;
+    }
+    if (!key) {
+        showFnStatus(status, 'Inserisci la Supabase Anon Key!', 'error');
+        return;
+    }
+    saveFunctionSettings();
+    showFnStatus(status, 'Login attivato! Verrà incluso quando esporti il sito.', 'success');
 }
