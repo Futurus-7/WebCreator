@@ -393,7 +393,7 @@ function getTypeLabel(type) {
         'block-footer': 'Footer',
         'block-card': 'Card',
         'block-pricing': 'Pricing',
-        'block-testimonial': 'Testimonial'
+        'block-testimonial': 'Testimonial',
         'block-login': 'Form Login',
         'block-register': 'Form Registrazione',
         'block-logout': 'Bottone Logout'
@@ -537,14 +537,24 @@ function getElementHTML(type) {
                                 </div>
                                 <button type="submit" class="wb-button" style="width:100%;cursor:pointer;">Accedi</button>
                             </form>`,
-                            'block-register'; `
-                                <form class="wb-form" data-auth-register style="max-width:420px;margin:0 auto;">
-                                    <h3 style="margin-bottom:16px;font-size:22px;color:#333;text-align:center;">Registrati</h3>
-                                    
-                            `
-                            
-
-
+                        'block-register': `
+                            <form class="wb-form" data-auth-register style="max-width:420px;margin:0 auto;">
+                                <h3 style="margin-bottom:16px;font-size:22px;color:#333;text-align:center;">Registrati</h3>
+                                <div style="margin-bottom:12px;">
+                                    <label style="display:block;font-size:13px;color:#555;margin-bottom:4px;">Email</label>
+                                    <input type="email" name="email" class="wb-input" placeholder="la-tua@email.com" required>
+                                </div>
+                                <div style="margin-bottom:16px;">
+                                    <label style="display:block;font-size:13px;color:#555;margin-bottom:4px;">Password</label>
+                                    <input type="password" name="password" class="wb-input" placeholder="Crea una password" required>
+                                </div>
+                                <button type="submit" class="wb-button" style="width:100%;cursor:pointer;">Crea account</button>
+                            </form>`,
+                        'block-logout': `
+                            <div style="text-align:center;">
+                                <button type="button" class="wb-button" data-auth-logout style="cursor:pointer;">Logout</button>
+                            </div>`
+    };
 
     return templates[type] || '<div>Elemento</div>';
 }
@@ -1776,7 +1786,11 @@ function restoreHistory() {
     deselectElement();
     canvas.querySelectorAll('.builder-element').forEach(el => {
         setupElementEvents(el);
-    });
+        if (currentMode === 'free') {
+            addResizeHandles(el);
+            addFreeDrag(el);
+        }
+    }); 
     showCanvasEmpty();
     updateLayers();
 }
@@ -1873,10 +1887,8 @@ function generateCleanHTML() {
         } else {
             el.style.removeProperty('visibility');
             el.style.removeProperty('pointer-events');
-            if (el.style.opacity === '0' || el.style.opacity === '0.3' || el.style.opacity === '0.7') {
-                el.style.removeProperty('opacity');
+            el.style.removeProperty('opacity');
             }
-        }
         el.removeAttribute('data-start-hidden');
     });
 
@@ -2274,31 +2286,6 @@ document.querySelectorAll('[data-actions]').forEach(el => {
             } else if (action.type === 'submit') {
                 var form = this.closest('form');
                 if (form) form.submit();
-            } else if (action.type === 'summon' && action.value) {
-                var target = document.getElementById(action.value);
-                if (target) {
-                    var isHidden = target.style.visibility === 'hidden' || target.style.opacity === '0';
-                    target.style.transition = 'opacity 0.35s ease';
-                    if (isHidden) {
-                        target.style.visibility = 'visible';
-                        target.style.opacity = '1';
-                        target.style.pointerEvents = 'auto';
-                    } else {
-                        target.style.visibility = 'hidden';
-                        target.style.opacity = '0';
-                        target.style.pointerEvents = 'none';}
-                }
-            }
-        }
-            } else if (action.type === 'toggle-visibility' && action.value) {
-                var target = document.getElementById(action.value);
-                if (target) {
-                    var hidden = target.style.visibility === 'hidden' || target.style.opacity === '0';
-                    target.style.visibility = hidden ? 'visible' : 'hidden';
-                    target.style.opacity = hidden ? '1' : '0';
-                    target.style.pointerEvents = hidden ? 'auto' : 'none';
-                    target.style.transition = 'opacity 0.3s ease';
-                }
             }
         }.bind(this));
     });
@@ -2960,7 +2947,7 @@ function initPlatformWarning() {
     const closeBtn = document.getElementById('platformWarningClose');
     if (!banner || !closeBtn) return;
     const isSmallScreen = window.innerWidth < 1024;
-    const dismissed = localStorage.getItem('platform-warning-dismissed');
+    const dismissed = sessionStorage.getItem('platform-warning-dismissed');
     if (isSmallScreen && !dismissed) {
         banner.classList.add('visible');
         setTimeout(() => {
@@ -2972,7 +2959,7 @@ function initPlatformWarning() {
     closeBtn.addEventListener('click', () => {
         banner.classList.remove('visible');
         document.body.classList.remove('has-platform-warning');
-        localStorage.setItem('platform-warning-dismissed', 'true');
+        sessionStorage.setItem('platform-warning-dismissed', 'true');
     });
 }
 function initFunctions() {
