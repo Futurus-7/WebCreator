@@ -205,6 +205,47 @@
                     </div>
                 </div>
             </div>
+            <div class="panel-section">
+                <h4 class="section-title" data-toggle="users">Utenti & Contenuti</h4>
+                <div class="section-content" id="users">
+                    <div class="draggable-item" draggable="true" data-type="block-protected">
+                        <i class="fa-solid fa-lock"></i>
+                        <span>Sezione Protetta</span>
+                    </div>
+                    <div class="draggable-item" draggable="true" data-type="block-role-gate">
+                        <i class="fa-solid fa-shield-halved"></i>
+                        <span>Gate Ruolo</span>
+                    </div>
+                    <div class="draggable-item" draggable="true" data-type="block-user-profile">
+                        <i class="fa-solid fa-circle-user"></i>
+                        <span>Profilo Utente</span>
+                    </div>
+                    <div class="draggable-item" draggable="true" data-type="block-progress">
+                        <i class="fa-solid fa-chart-line"></i>
+                        <span>Progressi</span>
+                    </div>
+                    <div class="draggable-item" draggable="true" data-type="block-blog-list">
+                        <i class="fa-solid fa-newspaper"></i>
+                        <span>Lista Blog</span>
+                    </div>
+                    <div class="draggable-item" draggable="true" data-type="block-blog-editor">
+                        <i class="fa-solid fa-pen-to-square"></i>
+                        <span>Editor Blog</span>
+                    </div>
+                    <div class="draggable-item" draggable="true" data-type="block-user-data">
+                        <i class="fa-solid fa-database"></i>
+                        <span>Dato Utente</span>
+                    </div>
+                    <div class="draggable-item" draggable="true" data-type="block-leaderboard">
+                        <i class="fa-solid fa-ranking-star"></i>
+                        <span>Classifica</span>
+                    </div>
+                    <div class="draggable-item" draggable="true" data-type="block-admin">
+                        <i class="fa-solid fa-user-shield"></i>
+                        <span>Pannello Admin</span>
+                    </div>
+                </div>
+            </div>
         </aside>
 
     <main class="canvas-area">
@@ -709,6 +750,15 @@
                         <div class="fn-menu-item" data-fn="auth">
                             <i class="fa-solid fa-user-lock"></i> Login & Utenti
                         </div>
+                        <div class="fn-menu-item" data-fn="roles">
+                            <i class="fa-solid fa-shield-halved"></i> Ruoli & Permessi
+                        </div>
+                        <div class="fn-menu-item" data-fn="blog">
+                            <i class="fa-solid fa-newspaper"></i> Blog & Contenuti
+                        </div>
+                        <div class="fn-menu-item" data-fn="dbsetup">
+                            <i class="fa-solid fa-database"></i> Setup Database
+                        </div>
                         <div class="fn-menu-item" data-fn="coming">
                             <i class="fa-solid fa-clock"></i> Prossimamente
                         </div>
@@ -840,10 +890,80 @@
                                                                                                                                         <div style="margin-top:16px;padding:12px;background:rgba(255,255,255,0.03);border-radius:8px;border:1px solid var(--border-color);">
                                                                                                                                             <strong style="font-size:12px;color:var(--text-secondary);">Cosa succede dopo aver salvato?</strong>
                                                                                                                                             <p style="font-size:11px;color:var(--text-secondary);margin-top:6px;line-height:1.8;">
-                                                                                                                                                Quando esporti il sio, il codice del login verrà incluso automaticamente. Gli utenti del tuo sito potranno registrarsi e fare login con la loro email e password.
+                                                                                                                                           Quando esporti il sio, il codice del login verrà incluso automaticamente. Gli utenti del tuo sito potranno registrarsi e fare login con la loro email e password.
                                                                                                                                             </p>
-                                                                                                                                        </div>
+                                                                                                                                             </div>
                                                                                                                                     </div>
+                        <div class="fn-panel" id="fb-roles">
+                            <h2 style="font-size:18px;margin-bottom:6px;"> Ruoli & Permessi</h2>
+                            <p style="color:var(--text-secondary);font-size:13px;margin-bottom:20px;">Definisci i ruoli sul sito. Un ruolo più in basso ha meno privilegi.</p>
+                            <div style="background:rgba(67,97,238,0.1);border:1px solid var(--accent);border-radius:8px;padding:14px;margin-bottom:16px;">
+                                <strong style="color:var(--accent);font-size:13px;">Gerarchia ruoli</strong>
+                                <p style="color:var(--text-secondary);font-size:12px;margin-top:6px;line-height:1.8;">Scrivi i ruoli <strong>dal più basso al più alto</strong>. Un admin puù vedere tutto quello che vede un premium, che vede tuto quello che vede uno user, ecc.</p>
+                            </div>
+                            <div class="prop-group">
+                                <label class="prop-label">Ruoli (uno per riga, dal basso verso l'alto)</label>
+                                <textarea class="prop-input prop-textarea" id="rolesConfig" rows="5">user
+premium
+moderator
+admin</textarea>
+                                <button class="prop-btn-small" id="btnUpdateRoleSelects" style="margin-top:6px;">Aggiorna tutte le liste ruoli</button>
+                            </div>
+                            <div class="prop-group">
+                                <label class="prop-label">Ruolo assegnato ai nuovi utenti</label>
+                                <select class="prop-input" id="defaultUserRole">
+                                    <option value="user">user</option>
+                                </select>
+                            </div>
+                            <div class="prop-group">
+                                <label class="prop-label">Chi può pubblicare sul blog?</label>
+                                <select class="prop-input" id="blogPublishRole">
+                                    <option value="user">Tutti gli utenti registrati</option>
+                                    <option value="premium">Solo Premium e superiori</option>
+                                    <option value="moderator">Solo Moderatori e superiori</option>
+                                    <option value="admin">Solo Admin</option>
+                                </select>
+                            </div>
+                            <div class="prop-group">
+                                <label class="prop-label">Chi può eliminare post altrui?</label>
+                                <select class="prop-input" id="blogModerateRole">
+                                    <option value="moderator">Moderatori e superiori</option>
+                                    <option value="admin">Solo Admin</option>
+                                </select>
+                            </div>
+                            <button class="toolbar-btn btn-primary" id="btnSaveRoles" style="width:100;justify-content:center;padding:10px;margin-top:8px;">
+                                <i class="fa-solid fa-check"></i> Salva configurazione ruoli
+                            </button>
+                            <div id="rolesStatus" style="display:none;margin-top:12px;padding:10px;border-radius:6px;font-size:13px;text-align:center;"></div>
+                        </div>
+                        <div class="fn-panel" id="fn-blog">
+                            <h2 style="font-size:18px;margin-bottom:6px;"> Blog & Contenuti</h2>
+                            <p style="color:var(--text-secondary);font-size:13px;margin-bottom:20px;">Configura il sistema di blog condiviso del tuo sito.</p>
+                            <div class="prop-group">
+                                <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:12px;color:var(--text-secondary);">
+                                    <input type="checkbox" id="blogEnabled" checked style="width:16px;height:16px;cursor:pointer;">
+                                    Abilita sistema blog
+                                </label>
+                            </div>
+                            <div class="prop-group">
+                                <label class="prop-label">Numero post mostrati</label>
+                                <input type="number" class="prop-input" id="blogPostsPerPage" value="10" min="1" max="100">
+                            </div>
+                            <div class="prop-group">
+                                <label class="prop-label">Moderazione post</label>
+                                <select class="prop-input" id="blogModeration">
+                                    <option value="none">Pubblica subito (nessuna Moderazione)</option>
+                                    <option value="manual">Approvazione manuale admin</option>
+                                </select>
+                            </div>
+                            <div class="prop-group">
+                                <label class="prop-label">Categorie blog (una per riga)</label>
+                                <textarea class="prop-input prop-textarea" id="blogCategories" rows="4" placeholder="Generale&#10;Tutorial&#10;Notizie&#10;Domande"></textarea>
+                            </div>
+                            <button class="toolbar-btn btn-primary" id="btnSaveBlog" style="width:100%;justify-content:center;padding:10px;margin-top:8px;">
+                                 
+
+
                         <div class="fn-panel" id="fn-coming">
                             <h2 style="font-size:18px;margin-bottom:20px;"> Prossimamente</h2>
                             <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
