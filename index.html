@@ -377,7 +377,61 @@
                             <input type="checkbox" id="propActionNewTab">
                         </div>
                     </div>
+                    <div class="prop-group" id="progressConfig" style="display:none;">
+                        <label class="prop-label" style="color:var(--accent);"> Configurazione Barra Progressi</label>
+                        <label class="prop-label" style="margin-top:8px;">Chiave (nome univoco del progresso)</label>
+                        <input type="text" class="prop-input" id="propProgressKey" placeholder="es: corso-html, livello-gioco">
+                        <p style="font-size:10px;color:var(--text-secondary);margin-top:2px;">Usa la stessa chiave nella Classifica per collegare i due elementi.</p>
+                        <label class="prop-label" style="margin-top:8px;">Etichetta</label>
+                        <input type="text" class="prop-input" id="propProgressLabel" placeholder="Il tuo progresso">
+                        <div style="display:flex;gap:8px;margin-top:8px;">
+                            <div style="flex:1;">
+                                <label class="prop-label">Unità</label>
+                                <input type="text" class="prop-input" id="propProgressUnit" placeholder="% o punti">
+                            </div>
+                            <div style="flex:1;">
+                                <label class="prop-label">Valora max</label>
+                                <input type="number" class="prop-input" id="propProgressMax" value="100">
+                            </div>
+                        </div>
+                        <label class="prop-label" style="margin-top:8px;">Valore bottone +</label>
+                        <input type="number" class="prop-input" id="propProgressIncrement" value="10">
+                        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:12px;color:var(--text-secondary);margin-top:8px;">
+                            <input type="checkbox" id="propProgressShowReset" style="width:14px;height:14px;cursor:pointer;" checked>
+                            Mostra bottone Reset
+                        </label>
                     </div>
+                    <div class="prop-group" id="blogListConfig" style="display:none;">
+                        <label class="prop-label" style="color:var(--accent);"> Configurazione Lista Blog</label>
+                        <label class="prop-label" style="margin-top:8px;">Numero massimo di post</label>
+                        <input type="number" class="prop-input" id="propBlogLimit" value="10" min="1" max="100">
+                        <label class="prop-label" style="margin-top:8px;">Categoria (lascia vuoto per tutte)</label>
+                        <input type="text" class="prop-input" id="propBlogCategory" placeholder="es: Tutorial">
+                        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:12px;color:var(--text-secondary);margin-top:8px;">
+                            <input type="checkbox" id="propBlogShowAuthor" style="width:14px;height:14px;" checked>
+                            Mostra nome autore
+                        </label>
+                        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:12px;color:var(--text-secondary);margin-top:6px;">
+                            <input type="checkbox" id="propBlogShowDate" style="width:14px;height:14px;" checked>
+                            Mostra data pubblicatione
+                        </label>
+                    </div>
+                    <div class="prop-group" id="userDataConfig" style="display:none;">
+                        <label class="prop-label" style="color:var(--accent);"> Configurazione Dato Utente</label>
+                        <label class="prop-label" style="margin-top:8px;">Chiave dato (nome univoco)</label>
+                        <input type="text" class="prop-input" id="propUserDataKey" placeholder="es: nickname, colore-preferito">
+                        <label class="prop-label" style="margin-top:8px;">Etichetta visualizzata</label>
+                        <input type="text" class="prop-input" id="propUserDataLabel" placeholder="Il tuo nickname">
+                        <label class="prop-label" style="margin-top:8px;">Tipo di input</label>
+                        <select class="prop-input" id="propUserDataType">
+                            <option value="text">Testo libero</option>
+                            <option value="number">Numero</option>
+                            <option value="color">Colore</option>
+                        </select>
+
+
+                    
+
                     <div class="prop-panel" id="tab-style">
                         <div class="prop-group">
                             <label class="prop-label">Font</label>
@@ -961,9 +1015,31 @@ admin</textarea>
                                 <textarea class="prop-input prop-textarea" id="blogCategories" rows="4" placeholder="Generale&#10;Tutorial&#10;Notizie&#10;Domande"></textarea>
                             </div>
                             <button class="toolbar-btn btn-primary" id="btnSaveBlog" style="width:100%;justify-content:center;padding:10px;margin-top:8px;">
-                                 
-
-
+                                <i class="fa-solid fa-check"></i> Salva configurazione blog
+                            </button>
+                            <div id="blogStatus" style="display:none;margin-top:12px;padding:10px;border-radius:6px;font-size:13px;text-align:center;"></div>
+                        </div>
+                        <div class="fn-panel" id="fn-dbsetup">
+                            <h2 style="font-size:18px;margin-bottom:6px;"> Setup Database Supabase</h2>
+                            <p style="color:var(--text-secondary);font-size:13px;margin-bottom:16px;">Esegui questo SQL una sola volta nel tuo progetto Supabase per creare tutte le tabelle necessarie.</p>
+                            <div style="background:rgba(46,196,182,0.1);border:1px solid var(--success);border-radius:8px;padding:14px;margin-bottom:16px;">
+                                <strong style="color:var(--success);font-size:13px;"> Istruzioni:</strong>
+                                <ol style="color:var(--text-secondary);font-size:12px;margin-top:8px;padding-left:18px;line-height:2.2;"> 
+                                    <li>Vai su <a href="https://supabase.com" target="_blank" style="color:var(--accent);">supabase.com</a> -> apri il progetto</li>
+                                    <li>Clicca <strong>SQL Editor</strong> -> <strong>New Query</strong></li>
+                                    <li>Incolla tutto il codice qui sotto</li>
+                                    <li>Clicca <strong>Run</strong> ></li>
+                                </ol>
+                            </div>
+                            <pre class="code-output" id="dbSetupSQL" style="max-height:320px;font-size:11px;"></pre>
+                            <div class="export-actions" style="margin-top:12px;">
+                                <button class="toolbar-btn" id="btnCopySQL"><i class="fa-solid fa-copy"></i> Copia SQL</button>
+                            </div>
+                            <div style="margin-top:16px;padding:12px;background:rgba(244,162,97,0.1);border:1px solid var(--warning);border-radius:8px;">
+                                <strong style="color:var(--warning);font-size:12px;"> Esegui UNA SOLA VOLTA per progetto.</strong>
+                                <p style="font-size:11px;color:var(--text-secondary);margin-top:4px;line-height:1.8;">Se lo esegui di nuovo non causa problemi (usa IF NOT EXISTS). Assicurati di aver prima configurato <strong>Login & Utenti</strong> con le credenziali Supabase.</p>
+                            </div>
+                        </div>
                         <div class="fn-panel" id="fn-coming">
                             <h2 style="font-size:18px;margin-bottom:20px;"> Prossimamente</h2>
                             <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
