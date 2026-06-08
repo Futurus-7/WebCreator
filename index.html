@@ -377,6 +377,34 @@
                             <input type="checkbox" id="propActionNewTab">
                         </div>
                     </div>
+                    <div class="prop-group" id="protectedConfig" style="display:none;">
+                        <label class="prop-label" style="color:var(--danger);"> Configurazione Sezione Protetta</label>
+                        <label class="prop-label" style="margin-top:8px;">Ruolo minimo richiesto</label>
+                        <select class="prop-input" id="propRequireRole">
+                            <option value="user">Utente registrato (qualsiasi)</option>
+                            <option value="premium">Premium e superiori</option>
+                            <option value="moderator">Moderatore e superiori</option>
+                            <option value="admin">Solo Admin</option>
+                        </select>
+                        <label class="prop-label" style="margin-top:8px;">Titolo blocco</label>
+                        <input type="text" class="prop-input" id="propProtectedTitle" placeholder="Contenuto Riservato">
+                        <label class="prop-label" style="margin-top:8px;">Messaggio per non autorizzati</label>
+                        <input type="text" class="prop-input" id="propProtectedMsg" placeholder="Devi fare login per vedere questo">
+                        <label class="prop-label" style="margin-top:8px;">Pagina login (es: login.html)</label>
+                        <input type="text" class="prop-input" id="propProtectedRedirect" placeholder="login.html (opzionale)">
+                    </div>
+                    <div class="prop-group" id="roleGateConfig" style="display:none;">
+                        <label class="prop-label" style="color:var(--accent);"> Configurazione Gate Ruolo</label>
+                        <label class="prop-label" style="margin-top:8px;">Mostra questo contenuto solo a:</label>
+                        <select class="prop-input" id="propRoleGateRole">
+                            <option value="user">Utenti registrati e superiori</option>
+                            <option value="premium">Premium e superiori</option>
+                            <option value="moderator">Moderatori e superiori</option>
+                            <option value="admin">Solo Admin</option>
+                        </select>
+                        <p style="font-size:10px;color:var(--text-secondary);margin-top:4px;line-height:1.5;">Gli utenti con ruolo inferiore non vedranno questo blocco nel sito finale.</p>
+                    </div>
+
                     <div class="prop-group" id="progressConfig" style="display:none;">
                         <label class="prop-label" style="color:var(--accent);"> Configurazione Barra Progressi</label>
                         <label class="prop-label" style="margin-top:8px;">Chiave (nome univoco del progresso)</label>
@@ -428,9 +456,25 @@
                             <option value="number">Numero</option>
                             <option value="color">Colore</option>
                         </select>
-
-
-                    
+                        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:12px;color:var(--text-secondary);margin-top:8px;">
+                            <input type="checkbox" id="propUserDataEditable" style="width:14px;height:14px;" checked>
+                            L'utente può modificarlo
+                        </label>
+                    </div>
+                    <div class="prop-group" id="leaderboardConfig" style="display:none;">
+                        <label class="prop-label" style="color:var(--accent);"> Configurazione Classifica</label>
+                        <label class="prop-label" style="margin-top:8px;">Chiave progresso da mostrare</label>
+                        <input type="text" class="prop-input" id="propLeaderboardKey" placeholder="es: corso-html (uguale al progresso)">
+                        <label class="prop-label" style="margin-top:8px;">Titolo classifica</label>
+                        <input type="text" class="prop-input" id="propLeaderboardKey" placeholder=" Classifica">
+                        <label class="prop-label" style="margin-top:8px;">Numero posizioni</label>
+                        <input type="number" class="prop-input" id="propLeaderboardLimit" value="10" min="3" max="100">
+                        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:12px;color:var(--text-secondary);margin-top:8px;">
+                            <input type="checkbox" id="propLeaderboardDesc" style="width:14px;height:14px;" checked>
+                            Ordine decrescente (valore più alto vince)
+                        </label>
+                    </div>
+                    </div>
 
                     <div class="prop-panel" id="tab-style">
                         <div class="prop-group">
@@ -1040,6 +1084,7 @@ admin</textarea>
                                 <p style="font-size:11px;color:var(--text-secondary);margin-top:4px;line-height:1.8;">Se lo esegui di nuovo non causa problemi (usa IF NOT EXISTS). Assicurati di aver prima configurato <strong>Login & Utenti</strong> con le credenziali Supabase.</p>
                             </div>
                         </div>
+
                         <div class="fn-panel" id="fn-coming">
                             <h2 style="font-size:18px;margin-bottom:20px;"> Prossimamente</h2>
                             <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">

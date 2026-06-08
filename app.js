@@ -31,6 +31,16 @@ let pages = [
     { name: 'Pagina 1', structureHTML: '', freeHTML: '' }
 ];
 let currentPageIndex = 0;
+let advancedConfig = {
+    roles: ['user', 'premium', 'moderator', 'admin'],
+    defaultRole: 'user',
+    blogEnabled: true,
+    blogPostsPerPage: 10,
+    blogPublishRole: 'user',
+    blogModerateRole: 'moderator',
+    blogModeration: 'none',
+    blogCategories: []
+};
 
 function parseOptionActionsText(text) {
     const actions = {};
@@ -396,7 +406,16 @@ function getTypeLabel(type) {
         'block-testimonial': 'Testimonial',
         'block-login': 'Form Login',
         'block-register': 'Form Registrazione',
-        'block-logout': 'Bottone Logout'
+        'block-logout': 'Bottone Logout',
+        'block-protected': 'Sezione Protetta',
+        'block-role-gate': 'Gate Ruolo',
+        'block-user-profile': 'Profilo Utente',
+        'block-progress': 'Barra Progressi',
+        'block-blog-list': 'Lista Blog',
+        'block-blog-editor': 'Editor Blog',
+        'block-user-data': 'Dato Utente',
+        'block-leaderboard': 'Classifica',
+        'block-admin': 'Pannello Admin'
     };
     return labels[type] || type;
 }
@@ -553,8 +572,37 @@ function getElementHTML(type) {
                         'block-logout': `
                             <div style="text-align:center;">
                                 <button type="button" class="wb-button" data-auth-logout style="cursor:pointer;">Logout</button>
-                            </div>`
-    };
+                            </div>`,
+                        'block-protected': `
+                            <div class="wb-protected-gate" data-wb-protected data-wb-require-role="user">
+                                <div class="wb-protected-lock">
+                                    <i class="fa-solid fa-lock"></i>
+                                    <h3>Contenuto Riservato</h3>
+                                    <p>Devi fare login per vedere questo contenuto</p>
+                                    <button class="wb-button" style="margin-top:8px;font-size:13px;padding:8px 20px;">Accedi</button>
+                                </div>
+                                <div class="wb-protected-content">
+                                    <p style="color:#aaa;text-align:center;font-size:12px;padding:10px;">
+                                        <i class="fa-solid fa-info-circle"></i> Trascina elementi qui dentro - saranno visibili solo agli utenti autorizzati.
+                                    </p>
+                                </div>
+                            </div>`,
+                        'block-role-gate': `
+                            <div class="wb-role-gate" data-wb-role-show="admin">
+                                <i class="fa-solid fa-shield-halved"></i>
+                                <div class="wb-role-gate-label">Visibile solo a: Admin</div>
+                                <div class="wb-role-gate-sub">Trascina elementi qui. Gli utenti con ruolo inferiore non vedranno questo blocco.</div>
+                            </div>`,
+                        'block-user-profile': `
+                            <div class="wb-user-profile" data-wb-user-profile>
+                                <div class="wb-profile-avatar">
+                                    <span data-wb-avatar-letter>U</span>
+                                </div>
+                                <div class="wb-profile-info">
+                                    <div class="wb-profile-name" data-wb-username>Mario Rossi</div>
+                            
+                        `
+                        
 
     return templates[type] || '<div>Elemento</div>';
 }
@@ -1747,7 +1795,16 @@ const icons = {
     'block-testimonial': 'fa-solid fa-quote-left',
     'block-login': 'fa-solid fa-right-to-bracket',
     'block-register': 'fa-solid fa-user-plus',
-    'block-logout': 'fa-solid fa-right-from-bracket'
+    'block-logout': 'fa-solid fa-right-from-bracket',
+    'block-protected': 'fa-solid fa-lock',
+    'block-role-gate': 'fa-solid fa-shield-halved',
+    'block-user-profile': 'fa-solid fa-circle-user',
+    'block-progress': 'fa-solid fa-chart-line',
+    'block-blog-list': 'fa-solid fa-newspaper',
+    'block-blog-editor': 'fa-solid fa-pen-to-square',
+    'block-user-data': 'fa-solid fa-database',
+    'block-leaderboard': 'fa-solid fa-ranking-star',
+    'block-admin': 'fa-solid fa-user-shield'
     };
     return icons[type] || 'fa-solid fa-cube';
 }
