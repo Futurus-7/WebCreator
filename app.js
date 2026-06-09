@@ -600,9 +600,85 @@ function getElementHTML(type) {
                                 </div>
                                 <div class="wb-profile-info">
                                     <div class="wb-profile-name" data-wb-username>Mario Rossi</div>
-                            
-                        `
-                        
+                                    <div class="wb-profile-email" data-wb-useremail>mario@esempio.com</div>
+                                    <span class="wb-profile-role" data-wb-userrole>user</span>
+                                    <div class="wb-profile-bio" data-wb-userbio>La tua bio apparirà qui...</div>
+                                    <button class="wb-profile-edit-btn" data-wb-profile-edit>
+                                        <i class="fa-solid fa-pen"></i> Modifica profilo
+                                    </button>
+                                </div>
+                            </div>`,
+                        'block-progress': `
+                            <div class="wb-progress-tracker" data-wb-progress="my-progress" data-wb-progress-max="100" data-wb-progress-unit="%">
+                                <div class="wb-progress-header">
+                                    <div class="wb-progress-label">Il tuo progresso</div>
+                                    <div class="wb-progress-value">0%</div>
+                                </div>
+                                <div class="wb-progress-bar">
+                                    <div class="wb-progress-fill" style="width:0%;"></div>
+                                </div>
+                                <div class="wb-progress-actions">
+                                    <button class="wb-button" data-wb-progress-add="10" style="font-size:12px;padding:6px 14px;">+10</button>
+                                    <button class="wb-button" data-wb-progress-reset style="font-size:12px;padding:6px; 14px;background:#e63946;">Reset</button>
+                                </div>
+                            </div>`,
+                        'block-blog-list': `
+                            <div class="wb-blog-editor" data-wb-blog-editor>
+                                <h3> Scrivi un post</h3>
+                                <input type="text" class="wb-input" placeholder="Titolo del post..." data-wb-title style="margin-bottom:10px;">
+                                <textarea class="wb-textarea-el" placeholder="Scrivi il tuo contenuto qui..." data-wb-blog-content rows="5" style="margin-bottom:10px;"></textarea>
+                                <div class="wb-blog-editor-actions">
+                                    <button class="wb-button" data-wb-blog-publish> Pubblica</button>
+                                    <button class="wb-button" data-wb-blog-draft style="background:#666;"> Bozza</button>
+                                </div>
+                            </div>`,
+                        'block-user-data': `
+                            <div class="wb-user-data-widget" data-wb-userdate="my-data">
+                                <div class="wb-user-data-label">Il tuo dato</div>
+                                <div class="wb-user-data-value" data-wb-data-value>-</div>
+                                <input type="text" class="wb-input" placeholder="Inserisci il valore..." data-wb-data-input style="margin-top:8px;">
+                                <button class="wb-button" data-wb-data-save style="margin-top:8px;font-size:12px;padding:7px 16px;> Salva</button>
+                            </div>`,
+                        'block-leaderboard': `
+                            <div class="wb-leaderboard" data-wb-leaderboard="my-progress" data-wb-leaderboard-limit="10">
+                                <div class="wb-leaderboard-title"> Classifica</div>
+                                <div class="wb-leaderboard-body">
+                                    <div style="display:flex;align-items:center;gap:12px;padding:12px;border-bottom:1px solid #f0f0f0;">
+                                        <span style="font-size:18px;min-width:30px;">1: </span>
+                                        <span style="flex:1;font-weight:600px;color:#333;">Mario Rossi</span>
+                                        <span style="font-weight:800;color:#4361ee;">95</span>
+                                    </div>
+                                    <div style="display:flex;align-items:center;gap:12px;padding:12px;border-bottom:1px solid #f0f0f0;">
+                                        <span style="font-size:18px;min-width:30px;">2: </span>
+                                        <span style="flex:1;font-weight:600;color:#333;">Anna Bianchi</span>
+                                        <span style="font-weight:800;color:#4361ee;">87</span>
+                                    </div>
+                                </div>
+                            </div>`,
+                        'block-admin': `
+                            <div class="wb-admin-panel" data-wb-role-show="admin">
+                                <div class="wb-admin-title">
+                                    <i class="fa-solid fa-user-shield"></i> Pannello Amministrazione
+                                </div>
+                                <div class="wb-admin-tabs">
+                                    <button class="wb-admin-tab active" data-wb-admin-tab="users"> Utenti</button>
+                                    <button class="wb-admin-tab" data-wb-admin-tab="posts"> Post</button>
+                                    <button class="wb-admin-tab" data-wb-admin-tab="stats"> Statistiche</button>
+                                </div>
+                                <div data-wb-admin-content="users" style="color:#999;text-align:center;padding:20px;font-size:13px;">
+                                    <i class="fa-solid fa-users" style=font-size:24px;display:block;;margin-bottom:8px;opacity:0.3;"></i>
+                                    Lista utenti caricata in tempo (solo nel sito esportato)
+                                </div>
+                                <div data-wb-admin-content="posts" style="display:none;color:#999;text-align:center;padding:20px;font-size:13px;">
+                                    <i class="fa-solid fa-newspaper" style="font-size:24px;display:block;margin-bottom:8px;opacity:0.3;"></i>
+                                    Lista post caricata in tempo reale
+                                </div>
+                                <div data-wb-admin-content="stats" style="display:none;color:#999;text-align:center;padding:20px;font-size:13px;">
+                                    <i class="fa-solid fa-chart-bar" style="font-size:24px;display:block;margin-bottom:8px;opacity:0.3;"></i>
+                                    Statistiche caricate in tempo reale
+                                </div>
+                            </div>`
+                        };
 
     return templates[type] || '<div>Elemento</div>';
 }
@@ -1551,6 +1627,12 @@ function updatePropertyPanel() {
         propStartHidden.checked = el.dataset.startHidden === 'true';
     }
 
+    ['protectedConfig', 'roleGateConfig', 'progressConfig','blogListConfig','userDataConfig','leaderboardConfig'].forEach(id => {
+        const cfgEl = document.getElementById(id);
+        if (cfgEl) cfgEl.style.display = 'none';
+    });
+
+    
     const bgImageGroup = $('#backgroundImageGroup');
     if (bgImageGroup) {
         if (elType === 'background') {
