@@ -1387,6 +1387,96 @@ function initPropertyInputs() {
         state.selectedElement.dataset.actionNewTab = $('#propActionNewTab').checked ? 'true' : 'false';
         saveHistory();
     });
+    $('#propRequireRole')?.addEventListener('change', () => {
+        if (!state.selectedElement) return;
+        const gate = state.selectedElement.querySelector('[data-wb-protected]');
+        if (gate) gate.dataset.wbRequireRole = $('#propRequireRole').value;
+        saveHistory();
+    });
+    $('#propProtectedTitle')?.addEventListener('input', () => {
+        if (!state.selectedElement) return;
+        const h3 = state.selectedElement.querySelector('.wb-protected-lock h3');
+        if (h3) h3.textContent = $('#propProtectedTitle').value;
+        saveHistory();
+    });
+    $('#propProtectedMsg')?.addEventListener('input', () => {
+        if (!state.selectedElement) return;
+        const p = state.selectedElement.querySelector('.wb-protector-lock p');
+        if (p) p.textContent = $('#propProtectedMsg').value;
+        saveHistory();
+    }
+    $('#propProtectedRedirect')?.addEventListener('change', () => {
+        if (!state.selectedElement) return;
+        state.selectedElement.dataset.loginRedirect = $('#propProtectedRedirect').value;
+        saveHistory();
+    });
+    $('#propRoleGateRole')?.addEventListener('change', () => {
+        if (!state.selectedElement) return;
+        const rg = stat.selectedElement.querySelector('[data-wb-role-show]');
+        if (rg) {
+            rg.dataset.wbRoleShow = $('#propRoleGateRole').value;
+            const lbl = state.selectedElement.querySelector('.wb-role-gate-label');
+            if (lbl) lbl.textContent = 'Visibile solo a: ' + $('#propRoleGateRole').value;
+        }
+        saveHistory();
+    });
+    ['propProgressKey','propProgressLabel','propProgressUnit','propProgressMax','propProgressIncrement'].forEach(id => {
+        const inp = document.getElementById(id);
+        if (!inp) return;
+        inp.addEventListener('input', () => {
+            if (!state.selectedElement) return;
+            const tr = state.selectedElement.querySelector('[data-wb-progress]');
+            if (!tr) return;
+            if (id === 'propProgressKey') tr.dataset.wbProgress = inp.value;
+            if (id === 'propProgressUnit') { tr.dataset.wbProgressUnit = inp.value; const v = state.selectedElement.querySelector('.wb-progress-value'); if (v) v.textContent = '0' + inp.value; }
+            if (id === 'propProgressMax') tr.dataset.wbProgressMax = inp.value;
+            if (id === 'propProgressLabel') { const l = state.selectedElement.querySelector('.wb-progress-label'); if (l) l.textContent = inp.value; }
+            if (id === 'propProgressIncrement') { const b = state.selectedElement,querySelector('[data-wb-progress-add]'); if (b) { b.dataset.wbProgressAdd = inp.value; b.textContent = '+' + inp.value; } }
+            saveHistory();
+        });
+    });
+    $('#propBlogLimit')?.addEventListener('change', () => {
+        if (!state.selectedElement) return;
+        const bl = state.selectedElement.querySelector('[data-wb-blog-list]');
+        if (bl) bl.dataset.wbBlogLimit = $('#propBlogLimit').value;
+        saveHistory();
+    });
+    $('#propBlogCategory')?.addEventListener('change', () => {
+        if (!state.selectedElement) return;
+        const bl = state.selectedElement.querySelector('[data-wb-blog-list]');
+        if (bl) bl.dataset.wbBlogCategory = $('#propBlogCategory').value;
+        saveHistory();
+    });
+    $('#propUserDataKey')?.addEventListener('change', () => {
+        if (!state.selectedElement) return;
+        const wd = state.selectedElement.querySelector('[data-wb-userdata]');
+        if (wd) wd.dataset.wbUserdata = $('#propUserDataKey').value;
+        saveHistory();
+    });
+    $('#propUserDataLabel')?.addEventListener('input', () => {
+        if (!state.selectedElement) return;
+        const lbl= state.selectedElement.querySelector('.wb-user-data-label');
+        if (lbl) lbl.textContent = $('#propUserDataLabel').value;
+        saveHistory();
+    });
+    $('#propLeaderboardKey')?.addEventListener('change', () => {
+        if (!state.selectedElement) return;
+        const lb = state.selectedElement.querySelector('[data-wb-leaderboard]');
+        if (lb) lb.dataset.wbLeaderboard = $('#propLeaderboardKey').value;
+        saveHistory();
+    });
+    $('#propLeaderboardTitle')?.addEventListener('input', () => {
+        if (!state.selectedElement) return;
+        const t = state.selectedElement.querySelector('.wb-leaderboard-title');
+        if (t) t.textContent = $('#propLeaderboardTitle').value;
+        saveHistory();
+    });
+    $('#propLeaderboardLimit')?.addEventListener('change', () => {
+        if (!state.selectedElement) return;
+        const lb = state.selectedElement.querySelector('[data-wb-leaderboard]');
+        if (lb) lb.dataset.wbLeaderboardLimit = $('#propLeaderboardLimit').value;
+        saveHistory();
+    });
 }
 
 function buildActionRow(action, index) {
@@ -1631,7 +1721,57 @@ function updatePropertyPanel() {
         const cfgEl = document.getElementById(id);
         if (cfgEl) cfgEl.style.display = 'none';
     });
-
+    switch(elType) {
+        case 'block-protected': {
+            $('#protectedConfig').style.display = 'block';
+            const gate = el.querySelector('[data-wb-protected]');
+            $('#propRequireRole').value = gate?.dataset.wbRequireRole || 'user';
+            $('#propProtectedTitle').value = el.querySelector('.wb-protected-lock h3')?.textContent || '';
+            $('#propProtectedMsg').value = el.querySelector('.wb-protected-lock p')?.textContent || '';
+            $('#propProtectedRedirect').value = el.dataset.loginRedirect || '';
+            break;
+        }
+        case 'block-role-gate': {
+            $('#roleGateConfig').style.display = 'block';
+            const rg = el.querySelector('[data-wb-role-show]');
+            $('#propRoleGateRole').value = rg?.dataset.wbRoleShow || 'admin';
+            break;
+        }
+        case 'block-progress': {
+            $('#progressConfig').style.display = 'block';
+            const pr = el.querySelector('[data-wb-progress]');
+            $('#propProgressKey').value = pr?.dataset.wbProgress || '';
+            $('#propProgressLabel').value = el.querySelector('.wb-progress-label')?.textContent || '';
+            $('#propProgressUnit').value = pr?.dataset.wbProgressUnit || '%';
+            $('#propProgressMax').value = pr?.dataset.wbProgressMax || 100;
+            const addBtn = el.querySelector('[data-wb-progress-add]');
+            $('#propProgressIncrement').value = addBtn?.dataset.wbProgressAdd || 10;
+            $('#propProgressShowReset').checked = !!el.querySelector('[data-wb-progress-reset]');
+            break;
+        }
+        case 'block-blog-list': {
+            $('#blogListConfig').style.display = 'block';
+            const bl = el.querySelector('[data-wb-blog-list]');
+            $('#propBlogLimit').value = bl?.dataset.wbBlogLimit || 10;
+            $('#propBlogCategory').value = bl?.dataset.wbBlogCategory || '';
+            break;
+        }
+        case 'block-user-data': {
+            $('#userDataConfig').style.display = 'block';
+            const wd = el.querySelector('[data-wb-userdata]');
+            $('#propUserDataKey').value = wd?.dataset.wbUserdata || '';
+            $('#propUserDataLabel').value = el.querySeletor('.wb-user-data-label')?.textContent || '';
+            break;
+        }
+        case 'block-leaderboard': {
+            $('#leaderboardConfig').style.display = 'block';
+            const lb = el.querySelector('[data-wb-leaderboard]');
+            $('#propLeaderboardKey').value = lb?.dataset.wbLeaderboard || '';
+            $('#propLeaderboardTitle').value = el.querySelector('.wb-leaderboard-title')?.textContent || '';
+            $('#propLeaderboardLimit').value = lb?.dataset.wbLeaderboardLimit || 10;
+            break;
+        }
+    }
     
     const bgImageGroup = $('#backgroundImageGroup');
     if (bgImageGroup) {
@@ -2509,6 +2649,7 @@ function autoSave() {
             currentPageIndex: currentPageIndex,
             currentMode: currentMode,
             counter: state.elementCounter,
+            advancedConfig: advancedConfig,
             timestamp: Date.now()
         };
         localStorage.setItem('webbuilder-autosave', JSON.stringify(data));
