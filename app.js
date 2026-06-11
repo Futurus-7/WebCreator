@@ -2215,6 +2215,9 @@ function generateCleanCSS() {
 function generateFullHTML() {
     const bodyContent = generateCleanHTML();
     const styles = generateInlineStyles();
+    const sbUrl = $('#supabaseUrl').value || '';
+    const sbKey = $('#supabaseKey').value || '';
+    const cfg = JSON.stringify(advancedConfig);
     return `<!DOCTYPE html>
 <html lang="it">
 <head>
@@ -2227,12 +2230,107 @@ function generateFullHTML() {
         * {margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif; }
         img { max-width: 100%; height: auto; }
+        .wb-profile-edit-btn { display:inline-flex;align-items:center;gap:6px;margin-top:10px;padding:7px 14px;background:#f0f4ff;border:1px solid #4361ee;color:#4361ee;border-radius:6px;cursor:pointer;font-size:12px;font-weight:600; }
+        .wb-profile-edit-btn:hover { background:#4361ee;color:white; }
+        .wb-admin-tab { padding:8px 16px;font-size:12px;font-weight:600;cursor:pointer;border:none;background:none;color:#888;border-bottom:2px solid transparent; }
+        .wb-admin-tab.active { color:#f4a261;border-bottom-color:#f4a261; }
+        [data-wb-role-show] { display:none; }
+        [data-wb-protected] .wb-protected-content { display:none; }
+        [data-wb-protected] .wb-protected-lock { display:flex; }
 ${styles}
     </style>
 </head>
 <body>
 ${bodyContent}
 <script>
+var _sbUrl = '${sbUrl}';
+var _sbKey = '${sbKey}';
+var _cfg = ${cfg};
+var _roles = _cfg.roles || ['user','premium','moderator','admin'];
+var _u = null;
+var _p = null;
+function _ri(r) { var i = _roles.indexOf(r); return i === -1 ? 0 : i; }
+function _hasRole(req) {
+    if (req === 'guest') return true;
+    if (!_u) return false;
+    if (req === 'user') return true;
+    var ur = _p ? (_p.role || 'user') : 'user';
+    return _ri(ur) >= _ri(req);    
+}
+function _esc(s) { return String(s|| '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+async function _leadProfile() {
+    if (!_u || !window._sb) return;
+    try {
+        var r = await window._sb.from('wb-profiles').select('*').eq('id', _u.id).maybeSingle();
+        if (r.data) { _p = r.data; }
+        else {
+            var np = { id: _u.id, username: _u.email.split('@')[0], role: _cfg.defaultRole || 'user', bio: '' };
+            await window._sb.from('wb_profiles').insert(np);
+            _p = np;
+        }
+    } catch(e) { console.warn('Profile error:', e); }
+}
+
+function _applyGates() {
+    document.querySelectorAll('[data-wb-protected]').forEach(function(el) {
+        var req = el.dataset.wbRequireRole || 'user';
+        var ok = _hasRole(req);
+        var lock = el.querySelector('.wb-protected-lock');
+        var content = el.querySelector('.wb-protected-content');
+        if (lock) lock.style.display = ok ? 'none' : 'flex';
+        if (content) content.style.display = ok ? '' : 'none';
+    });
+    document.querySelectorAll('[data-wb-role-show]').forEach(function(el) {
+        el.style.display = _hasRole(el.dataset.wbRoleShow) ? '' : 'none';
+    });
+    document.querySelectorAll('[data-wb-user-profile]').forEach(function(el) {
+        var nm = el.querySelector('[data-wb-username]');
+        var em = el.querySelector('[data-wb-useremail]');
+        var ro = el.querySelector('[data-wb-userrole]');
+        var bi = el.querySelector('[data-wb-userbio]');
+        var av = el.querySelector('[data-wb-avatar-letter]');
+        if (_u && _p) {
+            if (nm) nm.textContent = _p.username || _u.email.split('@')[0];
+            if (em) em.textContent = _u.email;
+            if (ro) ro.textContent = _p.role || 'user';
+            if (bi) bi.textContent = _p.bio || '';
+            if (av) av.textContent = (_p.username || u.email || 'U')[0].toUpperCase();
+        } else {
+            if (nm) nm.textContent = 'Ospite';
+            if (em) em.textContent = 'Non connesso';
+            if (ro) ro.textContent = '';
+            if (bi) bi.textContent = '';
+            if (av) av.textContent = '?';
+        
+        }
+    });
+}
+async function _loadProgress() {
+    if (!_u || !window._sb) return;
+    document.querySelectorAll('[data-wb-progress]').forEach(async function(el) {
+        var key = el.dataset.wbProgress;
+        var unit = el.dataset.wbProgressUnit || '%';
+        var max = parseFloat(el.dataset.wbProgressMax) || 100;
+        try {
+            var r = await window._sb.from('wb_user_progress').select('value').eq('user_id', _u.id).eq('key', key).maybeSingle();
+            var val = r.data ? (parseFloat(r.data.value) || 0) : 0;
+            var fill = el.querySelector('.wb-progress-fill');
+            var valEl = el.querySelector('.wb-progress-value');
+            if (fill) fill.style.width = Math.min(100, val / max * 100) + '%';
+            if (valEl) valEl.textContent = val + unit;
+        } catch(e) {}
+    });
+}
+        
+
+
+
+
+
+
+
+
 document.addEventListener('click', function(e) {
     var actionEl = e.target.closest('[data-actions]');
     if (!actionEl) return;
@@ -2671,6 +2769,7 @@ function autoLoad() {
         $$('.mode-btn').forEach(b => b.classList.remove('active'));
         const modeBtn = document.querySelector(`.mode-btn[data-mode="${currentMode}"]`);
         if (modeBtn) modeBtn.classList.add('active');
+        if (data.advancedConfig) Object.assign(advancedConfig, data.advancedConfig);
         renderPageTabs();
         loadPage(currentPageIndex);
         return true;
@@ -3269,6 +3368,7 @@ function initFunctions() {
     $('#btnSaveSheets').addEventListener('click', saveSheets);
     $('#btnSaveAuth').addEventListener('click', saveAuth);
     loadFunctionSettings();
+    initAdvancedFunctions();
 }
 function populateFormSelects() {
     const forms = canvas.querySelectorAll('.builder-element[data-type="form"], .builder-element[data-type="form-contact"]');
