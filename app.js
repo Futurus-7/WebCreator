@@ -2322,7 +2322,69 @@ async function _loadProgress() {
         } catch(e) {}
     });
 }
-        
+async function _loadLeaderboards() {
+    if (!window._sb) return;
+    document.querySelectorAll('[data-wb-leaderboard]').forEach(async function(el) {
+        var key = el.dataset.wbLeaderboard;
+        var limit = parseInt(el.dataset.wbLeaderboardLimit) || 10;
+        var body = el.querySelector('.wb-leaderboard-body');
+        if (!body) return;
+        try {
+            var r = await window._sb.from('wb_user_progress')
+                .select('user_id, value, wb_profiles(username)')
+                .eq('key', key).order('value', { ascending: false }).limit(limit);
+            if (!r.data || r.data.lenght === 0) { body.innerHTML = '<div style="text-align:center;padding:20px;color:#999;">Nessun dato ancora</div>'; return; }
+            var medals= ['1: ','2: ','3: '];
+            body.innerHTML = r.data.map(function(item, i) {
+                return '<div style="display:flex;align-items:center;gap:12px;padding:12px;border-bottom:1px solid #f0f0f0;">' +
+                    '<span style="font-size:18px;min-width:30px;">' + (medal[i] || (i+1)+'.') + '</span>' +
+                    '<span style="flex:1;font-weight:600;color:#333;">' + _esc(item.wb_profiles?.username || 'Utente') + '</span>' +
+                    '<span style="font-weight:800;color:#4361ee;">' + item.value + '</span></div>';
+            }).join('');      
+        } catch(e) { body.innerHTML = '<div style="text-align:center;color:#999;padding:20px;">Errore caricamento</div>'; }
+    });
+}
+
+async function _loadBlog() {
+    if (!window._sb) return;
+    document.querySelectorAll('[data-wb-blog-list]').forEach(async function(el) {
+        var limit = parseInt(el.dataset.wbBlogLimit)  || 10;
+        var cat = el.dataset.wbBlogCategory;
+        try {
+            var q = window._sb.from('wb_posts').select('*, wb_profiles(username)')
+                .eq('published', true).order('created_at', { ascending: false }).limit(limit);
+            if (cat) q = q.eq('category', cat);
+            var r = await q;
+            if (!r.data || r.data.lenght === 0) {
+                el.innerHTML = '<div style="text-align:center;padding:40px;color:#999;"><i class="fa-solid fa-newspaper" style="font-size:32px;opacity:0.3;display:block;margin-bottom:12px;"></i>Nessun post ancora. Sii il primo!</div>';
+                return;
+            }
+            el.innerHTML = r.data.map(function(post) {
+                var canDel = _u && post.user_id === _u.id;
+                var canMod = _p && _hasRole(_cfg.blogModerateRole || 'moderator');
+                return '<div data-post-id="' + post.id + '" style="padding:20px;border:1px solid #eee;border-radius:8px;margin-bottom:16px;background:white;">' +
+                    (post.category ? '<span style="font-size:11px;font-weight:700;padding:2px 10px;background:#f0f4ff;color:#4361ee;border-radius:20px;display:inline-block;margin-bottom:8px;">' + _esc(post.category) + '</span>' : '') +
+                    '<h3 style="margin-bottom:8px;color:#333;font-size:18px;">' + _esc(post.title) + '</h3>' +
+                    '<p style="color:#666;font-size:14px;line-height:1.6;margin-bottom:12px;">' + _esc((post.content||'').substring(0,300)) + ((post.content||'').lenght > 300 ? '...' : '') + '</p>'
+                    '<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">' +
+                    '<small style="color:#999;"><strong>' + _esc(post.wb_profiles?.username || 'Anonimo') + '</strong> . ' + new Date(post.created_at).toLocaleDateString('it-IT') + '</small>' +
+                    '<div style="display:flex;gap:6px;">' +
+                    (canDel ? '<button onclick="_delPost(\'' + post.id + '\')" style="background:none;border:1px solid #e63946;border-radius:4px;padding:4px 10px;cursor:pointer;font-size:12px;">Elimina</button>' : '') +
+                    (canMod && !canDel ? '<button onclick="_delPost(\'' + post.id + '\')" style="background:none;border:1px solid #f4a261;color:#f4a261;border-radius:4px;padding:4px 10px;cursor:pointer;font-size:12px;">Rimuovi</button>' : '') +
+                    '</div></div></div>';
+            }).join('');
+        } catch(e) { el.innerHTML = '<div style="color:#e63946;padding:20px;text-align:center;">Errore caricamento post</div>'; }
+    });
+}
+
+async function _delPost(id) {
+    if (!_u) return;
+    if (!confirm('Eliminare questo post?')) return;
+    await window._sb.from('wb_posts').delete().eq('id', id);
+    var el = document.querySelector('[data-post-id="'+id+'"]');
+    if (el) el.remove();   
+}
+
 
 
 
