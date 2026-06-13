@@ -2385,6 +2385,68 @@ async function _delPost(id) {
     if (el) el.remove();   
 }
 
+async function _loadUserData() {
+    if (!_u || !window._sb) return;
+    document.querySelectorAll('[data-wb-userdata]').forEach(async function(el) {
+        var key = el.dataset.wbUserdata;
+        try {
+            var r = await window._sb.from('wb_user_data').select('value').eq('user_id', _u.id).eq('key', key).maybeSingle();
+            var val = r.data ? r.data.value : null;
+            var disp = el.querySelector('[data-wb-data-value]');
+            var inp = el.querySelector('[data-wb-data-input]');
+            if (disp) disp.textContent = val !== null ? val : '-';
+            if (inp && val !== null) inp.value = val;
+        } catch(e) {}
+    }):
+}
+
+async function _loadAdmin() {
+    if (!_p || !_hasRole('admin') || !window._sb) return;
+    var usersEl = document.querySelector('[data-wb-admin-content="users"]');
+    if (usersEl) {
+        try {
+            var r = await window._sb.from('wb_profiles').select('*').order('created_at', { ascending: false }).limit(50);
+            if (r.data) {
+                usersEl.innerHTML = '<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;font-size:13px;">' +
+                    '<thead><tr style="background:#f8f9fa;"><th style="padding:10px;text-align:left;border-bottom:2px solid #eee;">Username</th><th style="padding:10px;text-align:left;border-bottom:2px solid #eee;">Email</th><th style="padding:10px;border-bottom:2px solid #eee;">Ruolo</th><th style="padding:10px;border-bottom:2px solid #eee;">Azione</th></tr></thead><tbody>' +
+                    r.data.map(function(user) {
+                        return '<tr style="border-bottom:1px solid #f0f0f0;">' +
+                            '<td style="padding:10px;">' + _esc(user.username || '-') + '</td>' +
+                            '<td style="padding:10px;color:#888;">' + _esc(user.id.substring(0,8) + '...') + '</td>' +
+                            '<td style="padding:10px;text-align:center;"><select onchange="_changeRole(\'' + user.id + '\',this.value)" style="padding:4px 8px;border:1px solid #ddd;border-radius:4px;font-size:12px;">' +
+                            _roles.map(function(role) { return '<option value="' + role + '"' + (user.role === role ? ' selected' : '') + '>' + role '</option>'; }).join('') +
+                            '</select></td>' +
+                            '<td style="padding:10px;text-align:center;">' +
+                            (user.id !== (_u?.id||'') ? '<button onclick="_banUser(\'' + user.id + '\')" style="background:none;border:1px solid #e63946;color:#e63946;color:#e63946;border-radius:4px;padding:4px 10px;cursor:pointer;font-size:11px;cursor:pointer;font-size:11px;">Ban</button>' : '<em style="color:#999;font-size:11px;">Tu</em>') +
+                            '</td></tr>';
+                    }).join('') + '</tbody></table></div>';
+            }
+        } catch(e) { usersEl.innerHTML = '<p style="color:#e63946;padding:20px;">Errore caricamento utenti</p>'; }
+    }
+    var postsEl = document.querySelector('[data-wb-admin-content="posts"]');
+    if (postsEl) {
+        try {
+            var rp = await window._sb.from('wb_posts').select('*, wb_profiles(username)').order('created_at', { ascending: false }).limit(30);
+            if (rp.data) {
+                postsEl.innerHTML = '<table style="width:100%;border-collapse;font-size:13px;">' +
+                    '<thead><tr style="background:#f8f9fa;"><th style="padding:10px;text-align:left;border-bottom:2px solid #eee;">Titolo</th><th style="Padding:10px;border-bottom:2px solid #eee;">Autore</th><th style="padding:10px;border-bottom:2px solid #eee;">Stato</th><th style="padding:10px;border-bottom:2px solid #eee;">Azione</th></tr></thead><tbody>' +
+                    rp.data.map(function(post) {
+                        return '<tr style="border-bottom:1px solid #f0f0f0;">' +
+                            '<td style="padding:10px;">' + _esc((post.title||'').substring(0,40)) + '</td>' +
+                            '<td style="padding:10px;text-align:center;color:#888;">' + _esc(post.wb_profiles?.username || '?') + '</td>' +
+                            '<td style="padding:10px;text-align:center;">' + (post.published ? '<span style="color:green;font-size:11px;"> Pub.</span>' : '<span style="color:orange;font-size:11px;"> Bozza</span>') + '</td>' +
+                            '<td style="padding:10px;text-align:center;"><button onclick="_adminDelPost(\'' + post.id + '\')" style="background:none;border:1px solid #e63946;color:#e63946;border-radius:4px;padding:4px 10px;cursor:pointer;font-size:11px;">Rimuovi</button></td></tr>';
+                    }).join('') + '</tbody></table>';
+            }
+        } catch(e) {}
+    }
+    var statsEl = document.querySelector('[data-wb-admin-content="stats"]');
+    if (statsEl) {
+        try {
+            var ru = await window._sb.from('wb_profiles').select('id', { count: 'exact', head: true });
+            var rpo = await window._sb.from('wb_posts').select('id', { count: 'exact', head: true }).eq('published', true);
+            statsEl.innerHTML = 
+        }}
 
 
 
