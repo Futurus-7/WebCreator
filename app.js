@@ -2445,8 +2445,109 @@ async function _loadAdmin() {
         try {
             var ru = await window._sb.from('wb_profiles').select('id', { count: 'exact', head: true });
             var rpo = await window._sb.from('wb_posts').select('id', { count: 'exact', head: true }).eq('published', true);
-            statsEl.innerHTML = 
-        }}
+            statsEl.innerHTML = '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:10px;">' +
+                '<div style="background:#f0f4ff;border-radius:8px;padding:20px;text-align:center;"><div style="font-size:36px;font-weight:800;color:#4361ee;">' + (ru.count || 0) + '</div><div style="font-size:13px;color:#666;margin-top:4px;">Utenti registrati</div></div>' +
+                '<div style="background:#f0f4ff;border-radius:8px;padding:20px;text-align:center;"><div style="font-size:36px;font-weight:800;color:#2ec4b6;">' + (rpo.count || 0) + '</div><div style="font-size:13px;color:#666;margin-top:4px;">Post pubblicati</div></div>' +
+                '</div>';
+        } catch(e) {}
+    }
+}
+
+async function _changeRole(userId, newRole) {
+    if (!hasRole('admin') || !window._sb) return;
+    await window._sb.from('wb_profiles').update({ role: newRole }).eq('id', userId);
+}
+async function _banUser(userId) {
+    if (!_hasRole('admin') || !window._sb) return;
+    if (!confirm('Impostare questo utente come "banned"?)) return;
+    await window._sb.from('wb_profiles').update({ role: 'banned' }).eq('id', userId);
+    await _loadAdmin();
+}
+
+async function _adminDelPost(id) {
+    if (!_hasRole('admin') || !window._sb) return;
+    if (!confirm('Eliminare definitivamente questo post?')) return;
+    await window._sb.from('wb_profiles').update({ role: 'banned' }).eq('id', 'userId);
+    await _loadAdmin();
+}
+function _setupListeners() {
+    document.querySelectorAll('.wb-admin-tab').forEach(function(tab) {
+        tab.addEventListener('click', function() {
+            var panel = tab.closest('[data-wb-role-show]') || tab.closest('.wb-admin-panel') || document;
+            panel.querySelectorAll('.wb-admin-tab').forEach(function(t) { t.classList.remove('active'); });
+            panel.querySelectorAll('[data-wb-admin-content]').forEach(function(c) { c.style.display = 'none'; });
+            tab.classList.add('active');
+            var c = panel.querySelector('[data-wb-admin-content="' + tab.dataset.wbAdminTab + '"]');
+            if (c) c.style.display = '';
+        });
+    });
+    document.querySelectorAll('[data-auth-login]').forEach(function(form) {
+        form.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            var eEl = form.querySelector('[name="email"]'), pEl = form.querySelector('[name="password"]');
+            var btn = form.querySelector('[type="submit"]');
+            if (!eEl || !pEl) return;
+            if (btn) { btn.disabled = true; btn.textContent = 'Accesso...'; }
+            var r = await window._sb.auth.signInWithPassword({ email: eEl.value, password: pEl.value });
+            if (r.error) {
+                alert('Errore: ' + r.error.message);
+                if (btn) { btn.disabled = false; btn.textContent = 'Accedi'; }    
+            } else {
+                _u = r.data.user;
+                await _loadProfile();
+                _applyGates();
+                await Promise.all([_loadProgress(), _loadUserData(), _loadBlog(), _loadLeaderboards(), _loadAdmin()]);
+                var red = form.dataset.loginRedirect;
+                if (red) window.location.href = red;
+            }
+        });
+    });
+    document.querySelectorAll('[data-auth-register]').forEach(function(form) {
+        form.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            var eEl = form.querySelector('[name="email"]'), pEl = form.querySelector('[name="password"]'), uEl = form.querySelector('[name="username"]');
+            var btn = form.querySelector('[type="submit"]');
+            if (!eEl || !pEl) return;
+            if (btn) { btn.disabled = true; btn.textContent = 'Registrazione...'; }
+            var r = await window._sb.auth.signUp({ email: eEl.value, password: pEl.value });
+            if (r.error) {
+                alert('Errore: ' + r.error.message);
+                if (btn) { btn.disabled = false; btn.textContent = 'Registrati'; }
+            } else {
+                if (uEl && r.data.user) {
+                    await.window._sb.from('wb_profiles').upsert({ id: r.data.user.id, username: uEl.value.trim(), role: '${advancedConfig.defaultRole || 'user'}' });
+                }
+                alert('Registrazione completata! Controlla la tua email.');
+                if (btn) { btn.disabled = false; btn.textContent = 'Registrati'; }
+            }
+        });
+    });
+    document.querySelectorAll('[data-auth-logout]').forEach(function(btn) {
+        btn,addEventListener('click', async function() {
+            await window._sb.auth.signOut();
+            _u = null; _p = null;
+            _applyGates();
+            var red = btn.dataset.logoutRedirect;
+            if (red) window.location.href = red;
+            else window.location.reload();
+        });
+    });
+    document.querySelectorAll('[data-wb-progress-add]').forEach(function(btn) {
+        btn.addEventListener('click', async function() {
+            if (!_u) { alert('Devi fare login!'); return; }
+            var tr = btn.closest('[data-wb-progress]');
+            if (!tr) return;
+            var key = tr.dataset.wbProgress, amount = parseFloat(btn.dataset.wbProgressAdd) || 1;
+            var max = parseFloat(tr.dataset.wbProgressMax) || 100, unit = tr.dataset.wbProgressUnit || '%';
+            try {
+                var r = await window._sb.from('wb_user_progress').select('value').eq('user_id', _u.id).eq('key', key).maybeSingle();
+                var cur = r.data ? (parseFloat(r.data.value) || 0) : 0;
+                var nv = Math.min(max, cur + amount);
+                await window._sb.from('wb_user_progress').upsert({ user_id: _u.id, key: key, value: nv, update_at: new Date().toISOString() }, { onConflict: 'user_id,key' });
+                
+            }
+        })
+    })
 
 
 
