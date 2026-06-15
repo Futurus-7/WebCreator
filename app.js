@@ -2544,8 +2544,82 @@ function _setupListeners() {
                 var cur = r.data ? (parseFloat(r.data.value) || 0) : 0;
                 var nv = Math.min(max, cur + amount);
                 await window._sb.from('wb_user_progress').upsert({ user_id: _u.id, key: key, value: nv, update_at: new Date().toISOString() }, { onConflict: 'user_id,key' });
-                
-            }
+                var fill = tr.querySelector('.wb-progress-fill'), valEl = tr.querySelector('.wb-progress-value');
+                if (fill) fill.style.width = (nv / max * 100) + '%';
+                if (vallEl) valEl.textContent = nv + unit;
+                await _loadLeaderboards();
+            } catch(e) { alert('Errore salvataggio'); }
+        });
+    });
+    document.querySelectorAll('[data-wb-progress-reset]').forEach(function(btn) {
+        btn.addEventListener('click', async function() {
+            if (!_u || !confirm('Azzerare il progresso?')) return;
+            var tr = btn.closest('[data-wb-progress]');
+            if (!tr) return;
+            var key = tr.dataset.wbProgress, unit = tr.dataset.wbProgressUnit || '%';
+            await window._sb.from('wb_user_progress').upsert({ user_id: _u.id, key: key, value: 0, updated_at: new Date().toISOString() }, { onConflict: 'user_id,key' });
+            var fill = tr.querySelector('.wb-progress-fill'), valEl = tr.querySelector('.wb-progress-value');
+            if (fill) fill.style.width = '0%';
+            if (valEl) valEl.textContent = '0' + unit;
+            await _loadLeaderboards();
+        }); 
+    });
+    document.querySelectorAll('[data-wb-data-save]').forEach(function(btn) {
+        btn.addEventListener('click', async function() {
+            if (!_u) { alert('Devi fare login!'); return; }
+            var w = btn.closest('[data-wb-userdata]');
+            if (!w) return;
+            var key = w.dataset.wbUserdata, inp = w.querySelector('[data-wb-data-input]'), val = inp ? inp.value : '';
+            try {
+                await window._sb.from('wb_user_data').upsert({ user_id: _u.id, key: key, value: val, updated_at: new Date().toISOString() }, { onConflict: 'user_id,key' });
+                var disp = w.querySelector('[data-wb-data-value]');
+                if (disp) disp.textContent = val;
+                var orig = btn.textContent; btn.textCOntent = ' Salvato!';
+                setTimeout(function() { btn.textContent = orig; }, 2000);
+            } catch(e) { alert('Errore salvataggio'); }
+        });
+    });
+    document.querySelectorAll('[data-wb-blog-editor]').forEach(function(editor) {
+        var titleEl = editor.querySelector('[data-wb-blog-title]');
+        var contentEl = editor.querySelector('[data-wb-blog-content]');
+        async function submit(published) {
+            if (!_u) { alert('Devi fare login per pubblicare!'); return; }
+            if (!_hasRole(_cfg.blogPublishRole || 'user')) { alert('Non hai i permessi per pubblicare.'); return; }
+            var title = titleEl ? titleEl.value.trim() : '';
+            var content = contentEl ? contentEl.value.trim() : '';
+            if (!title && published) [ alert('Inserisci un titolo!'); return; ]
+            try {
+                var r = await window._sb.from('wb_posts').insert({ user_id: _u.id, title: title, content: content, category: editor.dataset.wbBlogCategory || 'Generale', published: published });
+                if (r.error) throw r.error;
+                if (titleEl) titleEl.value = '';
+                if (contentEl) contentEl.value = '';
+                alert(published ? 'Post pubblicato! ' : 'Bozza salvata! ');
+                if (published) await _loadBlog();
+            } catch(e) { alert('Errore: ' + e.message); }
+        }
+        var pb = editor.querySelector('[data-wb-blog-publish]');
+        var db = editor.querySelector('[data-wb-blog-draft]');
+        if (pb) pb.addEventListener('click', function() { submit(true); });
+        if (db) db.addEventListener('click', function() { submit(false); });
+    });
+    document.querySelectorAll('[data-wb-profile-edit]').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            if (!_u) { alert('Devi fare login!'); return; }
+            var modal = document.createElement('div');
+            modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.7);display:flex;align-items:center;justify-content:center;z-index:99999;backdrop-filter:blur(4px);';
+            modal.innerHTML = '<div style="background:white;border-radius:16px;padding:30px;width:90%;max-width:480px;box-shadow:0 20px 60px rgba(0,0,0,0.3);">' +
+                '<h3 style="margin-bottom:20px;font-size:20px;color:#333;"> Modifica Profilo</h3>' +
+                '<label style="display:block;font-size:12px;font-weight:600;color:#666;margin-bottom:4px;text-transform:uppercase;">Username</label>' +
+                '<input id="_wbUn" type="text" value="' + _esc(_p?.username||'') + '" style="width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;margin-bottom:14px;font-size:14px;box-sizing:border-box;">' +
+                '<label style="display:block;font-size:12px;font-weight:600;color:#666;margin-bottom:4px;text-transform:uppercase;">Bio</label>' +
+                '<textarea id="_wbBio" style="width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;margin-bottom:14px;font-size:14px;resize:vertical;min-height:80px;box-sizing:border-box;">' + _esc(_p?.bio||'') + '</textarea>' +
+                '<label style="display:block;font-size:12px;font-weight:600;color:#666;margin-bottom:4px;text-transform:uppercase;">URL Foto Profilo</label>' +
+                '<input id="_wbAv" type="text" value="' + _esc(_p?.avatar_url||'') + '" placeholder="https://..." style="width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;margin-bottom:20px;font-size:14px;box-sizing:border-box;">' +
+                '<div style="display:flex;gap:10px;justify-content:flex-end;">' +
+                '<button id="_wbCancel" style="padding:10px 20px;background:#f0f0f0;border:none;border-radius:8px;cursor:pointer;font-size:14px;">Annulla</button>' +
+                '<button id="_wbSave" style="padding:10px 20px;background:#4361ee;color:white;border:none;border-radius:8px;cursor:pointer;font-size:font-weight:600;">Salva</button>' +
+                '</div></div>';
+
         })
     })
 
