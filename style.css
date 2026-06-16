@@ -2063,7 +2063,7 @@ body.has-platform-warning .main-wrapper {
 }
 .canvas .wb-protected-lock i { font-size: 36px; color: #e63946; }
 .canvas .wb-protected-lock h3 { font-size: 18px; font-weight: 700; color: #333; margin: 0; }
-.canvas .wb-protected-lock p { font-size: 13px; color: #666; margin: 0M; }
+.canvas .wb-protected-lock p { font-size: 13px; color: #666; margin: 0; }
 .canvas .wb-protected-content {
     padding: 16px;
     min-height: 60px;
@@ -2120,7 +2120,7 @@ body.has-platform-warning .main-wrapper {
     margin-top: 10px; padding: 7px 14px;
     background: #f0f4ff; border: 1px solid #4361ee;
     color: #4361ee; border-radius: 6px; cursor: pointer;
-    font-size: 12px; font-weight: 600px;
+    font-size: 12px; font-weight: 600;
 }
 .canvas .wb-progress-tracker {
     padding: 20px; background: white;
@@ -2160,7 +2160,7 @@ body.has-platform-warning .main-wrapper {
     border-radius: 8px; background: white;
 }
 .canvas .wb-user-data-label {
-    font-size: 12px; font-weight: 600px; color: #888;
+    font-size: 12px; font-weight: 600; color: #888;
     text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px;
 }
 .canvas .wb-user-data-value { font-size: 28px; font-weight: 800; color: #4361ee; margin-bottom: 10px; }

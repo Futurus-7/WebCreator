@@ -623,6 +623,14 @@ function getElementHTML(type) {
                                 </div>
                             </div>`,
                         'block-blog-list': `
+                            <div class="wb-blog-list" data-wb-blog-list data-wb-blog-limit="10">
+                                <div class="wb-blog-placeholder">
+                                    <i class="fa-solid fa-newspaper"></i>
+                                    <p>I post del blog appariranno qui</p>
+                                    <small style="font-size:12px;">Gli utenti potranno pubblicare e leggere post</small>
+                                </div>
+                            </div>`,
+                        'block-blog-editor': `
                             <div class="wb-blog-editor" data-wb-blog-editor>
                                 <h3> Scrivi un post</h3>
                                 <input type="text" class="wb-input" placeholder="Titolo del post..." data-wb-title style="margin-bottom:10px;">
@@ -633,11 +641,11 @@ function getElementHTML(type) {
                                 </div>
                             </div>`,
                         'block-user-data': `
-                            <div class="wb-user-data-widget" data-wb-userdate="my-data">
+                            <div class="wb-user-data-widget" data-wb-userdata="my-data">
                                 <div class="wb-user-data-label">Il tuo dato</div>
                                 <div class="wb-user-data-value" data-wb-data-value>-</div>
                                 <input type="text" class="wb-input" placeholder="Inserisci il valore..." data-wb-data-input style="margin-top:8px;">
-                                <button class="wb-button" data-wb-data-save style="margin-top:8px;font-size:12px;padding:7px 16px;> Salva</button>
+                                <button class="wb-button" data-wb-data-save style="margin-top:8px;font-size:12px;padding:7px 16px;"> Salva</button>
                             </div>`,
                         'block-leaderboard': `
                             <div class="wb-leaderboard" data-wb-leaderboard="my-progress" data-wb-leaderboard-limit="10">
@@ -666,7 +674,7 @@ function getElementHTML(type) {
                                     <button class="wb-admin-tab" data-wb-admin-tab="stats"> Statistiche</button>
                                 </div>
                                 <div data-wb-admin-content="users" style="color:#999;text-align:center;padding:20px;font-size:13px;">
-                                    <i class="fa-solid fa-users" style=font-size:24px;display:block;;margin-bottom:8px;opacity:0.3;"></i>
+                                    <i class="fa-solid fa-users" style="font-size:24px;display:block;margin-bottom:8px;opacity:0.3;"></i>
                                     Lista utenti caricata in tempo (solo nel sito esportato)
                                 </div>
                                 <div data-wb-admin-content="posts" style="display:none;color:#999;text-align:center;padding:20px;font-size:13px;">
@@ -1404,7 +1412,7 @@ function initPropertyInputs() {
         const p = state.selectedElement.querySelector('.wb-protector-lock p');
         if (p) p.textContent = $('#propProtectedMsg').value;
         saveHistory();
-    }
+    });
     $('#propProtectedRedirect')?.addEventListener('change', () => {
         if (!state.selectedElement) return;
         state.selectedElement.dataset.loginRedirect = $('#propProtectedRedirect').value;
@@ -1412,7 +1420,7 @@ function initPropertyInputs() {
     });
     $('#propRoleGateRole')?.addEventListener('change', () => {
         if (!state.selectedElement) return;
-        const rg = stat.selectedElement.querySelector('[data-wb-role-show]');
+        const rg = state.selectedElement.querySelector('[data-wb-role-show]');
         if (rg) {
             rg.dataset.wbRoleShow = $('#propRoleGateRole').value;
             const lbl = state.selectedElement.querySelector('.wb-role-gate-label');
@@ -1431,7 +1439,7 @@ function initPropertyInputs() {
             if (id === 'propProgressUnit') { tr.dataset.wbProgressUnit = inp.value; const v = state.selectedElement.querySelector('.wb-progress-value'); if (v) v.textContent = '0' + inp.value; }
             if (id === 'propProgressMax') tr.dataset.wbProgressMax = inp.value;
             if (id === 'propProgressLabel') { const l = state.selectedElement.querySelector('.wb-progress-label'); if (l) l.textContent = inp.value; }
-            if (id === 'propProgressIncrement') { const b = state.selectedElement,querySelector('[data-wb-progress-add]'); if (b) { b.dataset.wbProgressAdd = inp.value; b.textContent = '+' + inp.value; } }
+            if (id === 'propProgressIncrement') { const b = state.selectedElement.querySelector('[data-wb-progress-add]'); if (b) { b.dataset.wbProgressAdd = inp.value; b.textContent = '+' + inp.value; } }
             saveHistory();
         });
     });
@@ -1760,7 +1768,7 @@ function updatePropertyPanel() {
             $('#userDataConfig').style.display = 'block';
             const wd = el.querySelector('[data-wb-userdata]');
             $('#propUserDataKey').value = wd?.dataset.wbUserdata || '';
-            $('#propUserDataLabel').value = el.querySeletor('.wb-user-data-label')?.textContent || '';
+            $('#propUserDataLabel').value = el.querySelector('.wb-user-data-label')?.textContent || '';
             break;
         }
         case 'block-leaderboard': {
@@ -2259,10 +2267,10 @@ function _hasRole(req) {
 }
 function _esc(s) { return String(s|| '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
-async function _leadProfile() {
+async function _loadProfile() {
     if (!_u || !window._sb) return;
     try {
-        var r = await window._sb.from('wb-profiles').select('*').eq('id', _u.id).maybeSingle();
+        var r = await window._sb.from('wb_profiles').select('*').eq('id', _u.id).maybeSingle();
         if (r.data) { _p = r.data; }
         else {
             var np = { id: _u.id, username: _u.email.split('@')[0], role: _cfg.defaultRole || 'user', bio: '' };
@@ -2295,7 +2303,7 @@ function _applyGates() {
             if (em) em.textContent = _u.email;
             if (ro) ro.textContent = _p.role || 'user';
             if (bi) bi.textContent = _p.bio || '';
-            if (av) av.textContent = (_p.username || u.email || 'U')[0].toUpperCase();
+            if (av) av.textContent = (_p.username || _u.email || 'U')[0].toUpperCase();
         } else {
             if (nm) nm.textContent = 'Ospite';
             if (em) em.textContent = 'Non connesso';
@@ -2333,11 +2341,11 @@ async function _loadLeaderboards() {
             var r = await window._sb.from('wb_user_progress')
                 .select('user_id, value, wb_profiles(username)')
                 .eq('key', key).order('value', { ascending: false }).limit(limit);
-            if (!r.data || r.data.lenght === 0) { body.innerHTML = '<div style="text-align:center;padding:20px;color:#999;">Nessun dato ancora</div>'; return; }
-            var medals= ['1: ','2: ','3: '];
+            if (!r.data || r.data.length === 0) { body.innerHTML = '<div style="text-align:center;padding:20px;color:#999;">Nessun dato ancora</div>'; return; }
+            var medals= ['🥇','🥈','🥉'];
             body.innerHTML = r.data.map(function(item, i) {
                 return '<div style="display:flex;align-items:center;gap:12px;padding:12px;border-bottom:1px solid #f0f0f0;">' +
-                    '<span style="font-size:18px;min-width:30px;">' + (medal[i] || (i+1)+'.') + '</span>' +
+                    '<span style="font-size:18px;min-width:30px;">' + (medals[i] || (i+1)+'.') + '</span>' +
                     '<span style="flex:1;font-weight:600;color:#333;">' + _esc(item.wb_profiles?.username || 'Utente') + '</span>' +
                     '<span style="font-weight:800;color:#4361ee;">' + item.value + '</span></div>';
             }).join('');      
@@ -2365,11 +2373,11 @@ async function _loadBlog() {
                 return '<div data-post-id="' + post.id + '" style="padding:20px;border:1px solid #eee;border-radius:8px;margin-bottom:16px;background:white;">' +
                     (post.category ? '<span style="font-size:11px;font-weight:700;padding:2px 10px;background:#f0f4ff;color:#4361ee;border-radius:20px;display:inline-block;margin-bottom:8px;">' + _esc(post.category) + '</span>' : '') +
                     '<h3 style="margin-bottom:8px;color:#333;font-size:18px;">' + _esc(post.title) + '</h3>' +
-                    '<p style="color:#666;font-size:14px;line-height:1.6;margin-bottom:12px;">' + _esc((post.content||'').substring(0,300)) + ((post.content||'').lenght > 300 ? '...' : '') + '</p>'
+                    '<p style="color:#666;font-size:14px;line-height:1.6;margin-bottom:12px;">' + _esc((post.content||'').substring(0,300)) + ((post.content||'').length > 300 ? '...' : '') + '</p>' +
                     '<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">' +
                     '<small style="color:#999;"><strong>' + _esc(post.wb_profiles?.username || 'Anonimo') + '</strong> . ' + new Date(post.created_at).toLocaleDateString('it-IT') + '</small>' +
                     '<div style="display:flex;gap:6px;">' +
-                    (canDel ? '<button onclick="_delPost(\'' + post.id + '\')" style="background:none;border:1px solid #e63946;border-radius:4px;padding:4px 10px;cursor:pointer;font-size:12px;">Elimina</button>' : '') +
+                    (canDel ? '<button onclick="_delPost(\'' + post.id + '\')" style="background:none;border:1px solid #e63946;color:#e63946;border-radius:4px;padding:4px 10px;cursor:pointer;font-size:12px;">Elimina</button>' : '') +
                     (canMod && !canDel ? '<button onclick="_delPost(\'' + post.id + '\')" style="background:none;border:1px solid #f4a261;color:#f4a261;border-radius:4px;padding:4px 10px;cursor:pointer;font-size:12px;">Rimuovi</button>' : '') +
                     '</div></div></div>';
             }).join('');
@@ -2619,9 +2627,94 @@ function _setupListeners() {
                 '<button id="_wbCancel" style="padding:10px 20px;background:#f0f0f0;border:none;border-radius:8px;cursor:pointer;font-size:14px;">Annulla</button>' +
                 '<button id="_wbSave" style="padding:10px 20px;background:#4361ee;color:white;border:none;border-radius:8px;cursor:pointer;font-size:font-weight:600;">Salva</button>' +
                 '</div></div>';
-
+            document.body.appendChild(modal);
+            modal.querySelector('#_wbCancel').addEventListener('click', function() { modal.remove(); });
+            modal.addEventListener('click', function(e) { if (e.target === modal) modal.remove(); });
+            modal.querySelector('#_wbSave').addEventListener('click', async function() {
+                var un = modal.querySelector('#_wbUn').value.trim();
+                var bio = modal.querySelector('#_wbBio').value.trim();
+                var av = modal.querySelector('#_wbAv').value.trim();
+                var saveBtn = modal.querySelector('#_wbSave');
+                saveBtn.disabled = true; saveBtn.textContent = 'Salvataggio...';
+                try {
+                    var r = await window._sb.from('wb_profiles').upsert({ id: _u.id, username: un, bio: bio, avatar_url: av, role: _p?.role || 'user }):
+                    if (r.error) throw r.error;
+                    _p = Object.assign({}, _p, { username: un, bio: bio, avatar_url: av });
+                    _applyGates();
+                    modal.remove();
+                } catch(e) { alert('Errore: ' + e.message); saveBtn.disabled = false; saveBtn.textContent = 'Salva'; }
+            });
+        });
+    });
+    document.querySelectorAll('.wb-protected-lock .wb-button').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            var gate = btn.closest('[data-wb-protected]');
+            var red = gate ? gate.dataset.loginRedirect : null;
+            if (red) { window.location.href = red; return; }
+            var loginForm = document.querySelector('[data-auth-login]');
+            if (loginForm) loginForm.scrollIntoView({ behavior: 'smooth' });
+        });
+    });
+    document.addEventListener('click', function(e) {
+        var actionEl = e.target.closest('[data-actions]');
+        if (!actionEl) return;
+        var actions = [];
+        try { actions = JSON.parse(actionEl.dataset.actions); } catch(err) {}
+        actions.forEach(function(action) {
+            if (action.type === 'link' && action.value) {
+                if (action.newTab) window.open(action.value, '_blank');
+                else window.location.href = action.value;
+            } else if (action.type === 'scroll' && action.value) {
+                var t = document.getElementById(action.value) {
+                if (t) t.scrollIntoView({ behavior: 'smooth' });
+            } else if ((action.type === 'show-hide' || action.type === 'summon' || action.type === 'toggle-visibility') && action.value) {
+                var t = document.getElementById(action.value);
+                if (t) {
+                    var h = t.style.visibility = 'hidden' || t.style.opacity === '0';
+                    t.style.transition = 'opacity 0.3s ease';
+                    t.style.visibility = h ? 'visible' : 'hidden';
+                    t.style.opacity = h ? '1' : '0';
+                    t.style.pointerEvents = h ? 'auto' : 'none';
+                }
+            } else if (action.type === 'submit') {
+                var f = actionEl.closest('form');
+                if (f) f.submit();
+            }
+        });
+    });
+    document.addEventListener('click', function(e){
+        var el = e.target.closest('[data-click-anim="true"]');
+        if (!el) return;
+        var t = el.querySelector('.wb-button,.wb-link,.wb-icon,.wb-image') || el;
+        t.classList.remove('animate__animated','animate__pulse');
+        void t.offsetWidth;
+        t.style.setProperty('animation-duration','0.2s','important');
+        t.classList.add('animate__animated','animate__pulse');
+    });
+    document.addEventListener('mouseover', function(e) {
+        var el = e.target.closest('[data-hober-animation]');
+        if (!el) return;
+        var h = el.dataset.hoverAnimation;
+        if (!h || h === 'none' || h === 'hover-grow' || h === 'hover-shrink') return;
+        el.classList.remove('animate__animated','animate__'+h);
+        void el.offsetWidth;
+        el.style.setProperty('animation-duration',(el.dataset.animSpeed||'0.8')+'s','important');
+        el.style.animationFillMode = 'both';
+        el.classList.add('animate__animated','animate__'+h);
+    });
+    document.addEventListener('mouseout', function(e) {
+        var el = e.target.closest('[data-hover-animation]');
+        if (!el) return;
+        var h = el.dataset.hoverAnimation;
+        if (!h || h === 'none' || h === 'hover-grow' || h === 'hover-shrink') return;
+        el.classList.remove('animate__animated','animate__'+h);
+    });
+    document.querySelectorAll('form[data-formspree-url]').forEach(function(form) {
+        form.addEventListener('submit', function(e) {
+            e.prevent();
+            var url = form.dataset.formspreeUrl, msg = form.dataset.formSuccessMsg ||    
         })
-    })
+    });
 
 
 
