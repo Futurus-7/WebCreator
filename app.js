@@ -2405,7 +2405,7 @@ async function _loadUserData() {
             if (disp) disp.textContent = val !== null ? val : '-';
             if (inp && val !== null) inp.value = val;
         } catch(e) {}
-    }):
+    });
 }
 
 async function _loadAdmin() {
@@ -2422,7 +2422,7 @@ async function _loadAdmin() {
                             '<td style="padding:10px;">' + _esc(user.username || '-') + '</td>' +
                             '<td style="padding:10px;color:#888;">' + _esc(user.id.substring(0,8) + '...') + '</td>' +
                             '<td style="padding:10px;text-align:center;"><select onchange="_changeRole(\'' + user.id + '\',this.value)" style="padding:4px 8px;border:1px solid #ddd;border-radius:4px;font-size:12px;">' +
-                            _roles.map(function(role) { return '<option value="' + role + '"' + (user.role === role ? ' selected' : '') + '>' + role '</option>'; }).join('') +
+                            _roles.map(function(role) { return '<option value="' + role + '"' + (user.role === role ? ' selected' : '') + '>' + role + '</option>'; }).join('') +
                             '</select></td>' +
                             '<td style="padding:10px;text-align:center;">' +
                             (user.id !== (_u?.id||'') ? '<button onclick="_banUser(\'' + user.id + '\')" style="background:none;border:1px solid #e63946;color:#e63946;color:#e63946;border-radius:4px;padding:4px 10px;cursor:pointer;font-size:11px;cursor:pointer;font-size:11px;">Ban</button>' : '<em style="color:#999;font-size:11px;">Tu</em>') +
@@ -2436,8 +2436,8 @@ async function _loadAdmin() {
         try {
             var rp = await window._sb.from('wb_posts').select('*, wb_profiles(username)').order('created_at', { ascending: false }).limit(30);
             if (rp.data) {
-                postsEl.innerHTML = '<table style="width:100%;border-collapse;font-size:13px;">' +
-                    '<thead><tr style="background:#f8f9fa;"><th style="padding:10px;text-align:left;border-bottom:2px solid #eee;">Titolo</th><th style="Padding:10px;border-bottom:2px solid #eee;">Autore</th><th style="padding:10px;border-bottom:2px solid #eee;">Stato</th><th style="padding:10px;border-bottom:2px solid #eee;">Azione</th></tr></thead><tbody>' +
+                postsEl.innerHTML = '<table style="width:100%;border-collapse:collapse;font-size:13px;">' +
+                    '<thead><tr style="background:#f8f9fa;"><th style="padding:10px;text-align:left;border-bottom:2px solid #eee;">Titolo</th><th style="padding:10px;border-bottom:2px solid #eee;">Autore</th><th style="padding:10px;border-bottom:2px solid #eee;">Stato</th><th style="padding:10px;border-bottom:2px solid #eee;">Azione</th></tr></thead><tbody>' +
                     rp.data.map(function(post) {
                         return '<tr style="border-bottom:1px solid #f0f0f0;">' +
                             '<td style="padding:10px;">' + _esc((post.title||'').substring(0,40)) + '</td>' +
@@ -2462,12 +2462,12 @@ async function _loadAdmin() {
 }
 
 async function _changeRole(userId, newRole) {
-    if (!hasRole('admin') || !window._sb) return;
+    if (!_hasRole('admin') || !window._sb) return;
     await window._sb.from('wb_profiles').update({ role: newRole }).eq('id', userId);
 }
 async function _banUser(userId) {
     if (!_hasRole('admin') || !window._sb) return;
-    if (!confirm('Impostare questo utente come "banned"?)) return;
+    if (!confirm('Impostare questo utente come "banned"?')) return;
     await window._sb.from('wb_profiles').update({ role: 'banned' }).eq('id', userId);
     await _loadAdmin();
 }
@@ -2475,7 +2475,7 @@ async function _banUser(userId) {
 async function _adminDelPost(id) {
     if (!_hasRole('admin') || !window._sb) return;
     if (!confirm('Eliminare definitivamente questo post?')) return;
-    await window._sb.from('wb_profiles').update({ role: 'banned' }).eq('id', 'userId);
+    await window._sb.from('wb_posts').delete().eq('id', id);
     await _loadAdmin();
 }
 function _setupListeners() {
@@ -2523,7 +2523,7 @@ function _setupListeners() {
                 if (btn) { btn.disabled = false; btn.textContent = 'Registrati'; }
             } else {
                 if (uEl && r.data.user) {
-                    await.window._sb.from('wb_profiles').upsert({ id: r.data.user.id, username: uEl.value.trim(), role: '${advancedConfig.defaultRole || 'user'}' });
+                    await window._sb.from('wb_profiles').upsert({ id: r.data.user.id, username: uEl.value.trim(), role: '${advancedConfig.defaultRole || 'user'}' });
                 }
                 alert('Registrazione completata! Controlla la tua email.');
                 if (btn) { btn.disabled = false; btn.textContent = 'Registrati'; }
@@ -2531,7 +2531,7 @@ function _setupListeners() {
         });
     });
     document.querySelectorAll('[data-auth-logout]').forEach(function(btn) {
-        btn,addEventListener('click', async function() {
+        btn.addEventListener('click', async function() {
             await window._sb.auth.signOut();
             _u = null; _p = null;
             _applyGates();
@@ -2551,10 +2551,10 @@ function _setupListeners() {
                 var r = await window._sb.from('wb_user_progress').select('value').eq('user_id', _u.id).eq('key', key).maybeSingle();
                 var cur = r.data ? (parseFloat(r.data.value) || 0) : 0;
                 var nv = Math.min(max, cur + amount);
-                await window._sb.from('wb_user_progress').upsert({ user_id: _u.id, key: key, value: nv, update_at: new Date().toISOString() }, { onConflict: 'user_id,key' });
+                await window._sb.from('wb_user_progress').upsert({ user_id: _u.id, key: key, value: nv, updated_at: new Date().toISOString() }, { onConflict: 'user_id,key' });
                 var fill = tr.querySelector('.wb-progress-fill'), valEl = tr.querySelector('.wb-progress-value');
                 if (fill) fill.style.width = (nv / max * 100) + '%';
-                if (vallEl) valEl.textContent = nv + unit;
+                if (valEl) valEl.textContent = nv + unit;
                 await _loadLeaderboards();
             } catch(e) { alert('Errore salvataggio'); }
         });
@@ -2582,7 +2582,7 @@ function _setupListeners() {
                 await window._sb.from('wb_user_data').upsert({ user_id: _u.id, key: key, value: val, updated_at: new Date().toISOString() }, { onConflict: 'user_id,key' });
                 var disp = w.querySelector('[data-wb-data-value]');
                 if (disp) disp.textContent = val;
-                var orig = btn.textContent; btn.textCOntent = ' Salvato!';
+                var orig = btn.textContent; btn.textContent = ' Salvato!';
                 setTimeout(function() { btn.textContent = orig; }, 2000);
             } catch(e) { alert('Errore salvataggio'); }
         });
@@ -2595,7 +2595,7 @@ function _setupListeners() {
             if (!_hasRole(_cfg.blogPublishRole || 'user')) { alert('Non hai i permessi per pubblicare.'); return; }
             var title = titleEl ? titleEl.value.trim() : '';
             var content = contentEl ? contentEl.value.trim() : '';
-            if (!title && published) [ alert('Inserisci un titolo!'); return; ]
+            if (!title && published) { alert('Inserisci un titolo!'); return; }
             try {
                 var r = await window._sb.from('wb_posts').insert({ user_id: _u.id, title: title, content: content, category: editor.dataset.wbBlogCategory || 'Generale', published: published });
                 if (r.error) throw r.error;
@@ -2637,7 +2637,7 @@ function _setupListeners() {
                 var saveBtn = modal.querySelector('#_wbSave');
                 saveBtn.disabled = true; saveBtn.textContent = 'Salvataggio...';
                 try {
-                    var r = await window._sb.from('wb_profiles').upsert({ id: _u.id, username: un, bio: bio, avatar_url: av, role: _p?.role || 'user }):
+                    var r = await window._sb.from('wb_profiles').upsert({ id: _u.id, username: un, bio: bio, avatar_url: av, role: _p?.role || 'user' }):
                     if (r.error) throw r.error;
                     _p = Object.assign({}, _p, { username: un, bio: bio, avatar_url: av });
                     _applyGates();
@@ -2670,7 +2670,7 @@ function _setupListeners() {
             } else if ((action.type === 'show-hide' || action.type === 'summon' || action.type === 'toggle-visibility') && action.value) {
                 var t = document.getElementById(action.value);
                 if (t) {
-                    var h = t.style.visibility = 'hidden' || t.style.opacity === '0';
+                    var h = t.style.visibility === 'hidden' || t.style.opacity === '0';
                     t.style.transition = 'opacity 0.3s ease';
                     t.style.visibility = h ? 'visible' : 'hidden';
                     t.style.opacity = h ? '1' : '0';
@@ -2692,7 +2692,7 @@ function _setupListeners() {
         t.classList.add('animate__animated','animate__pulse');
     });
     document.addEventListener('mouseover', function(e) {
-        var el = e.target.closest('[data-hober-animation]');
+        var el = e.target.closest('[data-hover-animation]');
         if (!el) return;
         var h = el.dataset.hoverAnimation;
         if (!h || h === 'none' || h === 'hover-grow' || h === 'hover-shrink') return;
@@ -2734,8 +2734,8 @@ document.addEventListener('click', function(e) {
         if (action.type === 'link' && action.value) {
             if (action.newTab) { window.open(action.value, '_blank'); }
             else { window.location.href = action.value; }
-        } else if (action.type === 'scroll' && action.value) {
-            var target = document.getElementById(action.value);
+        } else if (action.type === 'scroll' && action.value);
+            var target = document.getElementById(action.value) {
             if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
         } else if (action.type === 'show-hide' && action.value) {
             var target = document.getElementById(action.value);
@@ -3897,4 +3897,156 @@ function saveAuth() {
     }
     saveFunctionSettings();
     showFnStatus(status, 'Login attivato! Verrà incluso quando esporti il sito.', 'success');
+}
+
+function initAdvancedFunctions() {
+    const SQL = `-- =====================================================
+-- WebBuilder Advanced User System - Database Setup
+-- Esegui nell'SQL Editor di Supabase (una sola volta)
+-- =====================================================
+
+CREATE TABLE IF NOT EXISTS wb_profiles (
+  id UUID REFERENCES auth.users ON DELETE CASCADE PRIMARY KEY,
+  username TEXT UNIQUE,
+  full_name TEXT,
+  avatar_url TEXT,
+  role TEXT DEFAULT 'user',
+  bio TEXT,
+  creater_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+CREATE TABLE IF NOT EXISTS wb_posts (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id UUID REFERENCES auth.users ON DELETE CASCADE,
+  title TEXT NOT NULL DEFAULT '',
+  content TEXT DEFAULT '',
+  image_url TEXT,
+  category TEXT DEFAULT 'Generale',
+  published BOOLEAN DEFAULT FALSE,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS wb_user_progress (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id UUID REFERENCES auth.users ON DELETE CASCADE,
+  key TEXT NOT NULL,
+  value NUMERIC DEFAULT 0,
+  updated_at TIMESTAMPTZ DEFAULT NOW(),
+  UNIQUE(user_id, key)
+);
+
+CREATE TABLE IF NOT EXISTS wb_user_data (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id UUID REFERENCES auth.users ON DELETE CASCADE,
+  key TEXT NOT NULL,
+  value TEXT,
+  updated_at TIMESTAMPTZ DEFAULT NOW(),
+  UNIQUE(user_id, key)
+);
+
+ALTER TABLE wb_profiles ENABLE ROW LEVEL SECURITY;
+ALTER TABLE wb_posts ENABLE ROW LEVEL SECURITY;
+ALTER TABLE wb_user_progress ENABLE ROW LEVEL SECURITY;
+ALTER TABLE wb_user_data ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Profili pubblici" ON wb_profiles;
+CREATE POLICY "Profili pubblici" ON wb_profiles FOR SELECT USING (TRUE);
+DROP POLICY IF EXISTS "Utente modifica proprio profilo" ON wb_profiles;
+CREATE POLICY "Utente modifica proprio profilo" ON wb_profiles FOR ALL USING (auth.uid() = id);
+
+DROP POLICY IF EXISTS "Post pubblicati visibili" ON wb_posts;
+CREATE POLICY "Post pubblicati visibili" ON wb_posts FOR SELECT USING (published = TRUE);
+DROP POLICY IF EXISTS "Autore gestisce propri post" ON wb_posts;
+CREATE POLICY "Autore gestisce propri post" ON wb_posts FOR ALL USING (auth.uid() = user_id);
+
+DROP POLICY IF EXISTS "Progressi visibili per classifica" ON wb_user_progress;
+CREATE POLICY "Progressi visibili per la classifica" ON wb_user_progress FOR SELECT USING (TRUE);
+DROP POLICY IF EXISTS "Utente gestisce propri progressi" ON wb_user_progress;
+CREATE POLICY "Utente gestisce propri progressi" ON wb_user_progress FOR ALL USING (auth.uid() = user_id);
+
+DROP POLICY IF EXISTS "Dati privati utente" ON wb_user_data;
+CREATE POLICY "Dati privati utente" ON wb_user_data FOR ALL USING (auth.uid() = user_id);
+
+CREATE OR REPLACE FUNCTION public.handle_new_user()
+RETURNS TRIGGER AS $$
+BEGIN
+  INSERT INTO public.wb_profiles (id, username, role)
+  VALUES (NEW.id, split_part(NEW.email, '@', 1), 'user')
+  ON CONFLICT (id) DO NOTHING;
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
+CREATE TRIGGER on_auth_user_created
+  AFTER INSERT ON auth.users
+  FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();`;
+    
+    const squlEl = $('#dbSetupSQL');
+    if (sqlEl) sqlEl.textContent = SQL;
+
+    $('#btnCopySQL')?.addEventListenerr('click', function() {
+        function showCopied() {
+            const btn = $('#btnCopySQL');
+            const orig = btn.innerHTML;
+            btn.innerHTML = '<i class="fa-solid fa-check"></i> Copiato!';
+            setTimeout(() => { btn.iinerHTML = orig; }, 1500);
+        }
+        if (navigator.clipboard) navigator.clipboard.writeText(SQL).then(showCopied).catch(() => fallbackCopy(SQL, showCopied));
+        else fallbackCopy(SQL, showCopied);
+    });
+    $('#btnSaveRoles')?.addEventListener('click', function() {
+        const roles = ($('#rolesConfig').value || 'user\nadmin').split('\n').map(r => r.trim()).filter(r => r);
+        advancedConfig.roles = roles;
+        advancedConfig.defaultRole = $('#defaultUserRole').value;
+        advancedConfig.blogPublishRole = $('#blogPublishRole').value;
+        advancedConfig.blogModerateRole = $('#blogModerateRole').value;
+        saveAdvancedConfig();
+        updateRoleSelects();
+        showFnStatus($('#rolesStatus'). ' Ruoli salvati!', 'success');
+    });
+    $('#btnUpdateRoleSelects')?.addEventListener('click', updateRoleSelects);
+    $('#btnSaveBlog')?.addEventListener('click', function() {
+        advancedConfig.blogEnabled = $('#blogEnabled').checked;
+        advancedConfig.blogPostsPerPage = parseInt($('#blogPostsPerPage').value) || 10;
+        advancedConfig.blogModeration = $('#blogModeration').value;
+        advancedConfig.blogCategories = ($('#blogCategories').value || '').split('\n').map(c => c.trim().filter(c => c);
+        saveAdvancedConfig();
+        showFnStatus($('#blogStatus'), ' Configurazione blog salvata!', 'success');
+    });
+    loadAdvancedConfig();
+    updateRoleSelects();
+}
+function updateRoleSelects() {
+    const roles = advancedConfig.roles || ['user', 'premium', 'moderator', 'admin'];
+    if ($('#rolesConfig')) $('#rolesConfig').value = roles.join('\n');
+    ['defaultUserRole', 'blogPublishRole', 'blogModerateRole', 'propRequireRole', 'propRoleGateRole'].forEach(id => {
+        const sel = document.getElementById(id);
+        if (!sel) return;
+        const cur = sel.value;
+        sel.innerHTML = roles.map(r => '<option value ="${r}">${r}</option>').join('');
+          if (roles.includes(cur)) sel.value = cur;  
+    });
+}
+function saveAdvancedConfig() {
+    try {
+        localStorage.setItem('webbuilder-advanced', JSON.stringify(advancedConfig));
+    } catch(e) {}
+}
+
+function loadAdvancedConfig() {
+    try {
+        const saved = localStorage.getItem('webbuilder-advanced');
+        if (!saved) return;
+        Object.assign(advancedConfig, JSON.parse(saved));
+        if ($('#rolesConfig')) $('#rolesConfig').value = advancedConfig.roles.join('\n');
+        if ($('#blogEnabled')) $('#blogEnabled').checked = advancedConfig.blogEnabled;
+        if ($('#blogPostsPerPage')) $('#blogPostsPerPage').value = advancedConfig.blogPostsPerPage;
+        if ($('#blogModeration')) $('#blogModeration').value = advancedConfig.blogModeration;
+        if ($('#blogCategories')) $('#blogCategories').value = (advancedConfig.blogCategories ||) [].join('\n');
+        if ($('#blogPublishRole')) $('#blogPublishRole').value = advancedConfig.blogPublishRole;
+        if ($('#blogModerateRole')) $('#blogModerateRole').value = advancedConfig.blogModerateRole;
+        if ($('#defaultUserRole')) $('#defaultUserRole').value = advancedConfig.defaultRole;
+    } catch(e) {}
 }
