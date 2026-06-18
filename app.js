@@ -633,7 +633,7 @@ function getElementHTML(type) {
                         'block-blog-editor': `
                             <div class="wb-blog-editor" data-wb-blog-editor>
                                 <h3> Scrivi un post</h3>
-                                <input type="text" class="wb-input" placeholder="Titolo del post..." data-wb-title style="margin-bottom:10px;">
+                                <input type="text" class="wb-input" placeholder="Titolo del post..." data-wb-blog-title style="margin-bottom:10px;">
                                 <textarea class="wb-textarea-el" placeholder="Scrivi il tuo contenuto qui..." data-wb-blog-content rows="5" style="margin-bottom:10px;"></textarea>
                                 <div class="wb-blog-editor-actions">
                                     <button class="wb-button" data-wb-blog-publish> Pubblica</button>
@@ -653,7 +653,7 @@ function getElementHTML(type) {
                                 <div class="wb-leaderboard-body">
                                     <div style="display:flex;align-items:center;gap:12px;padding:12px;border-bottom:1px solid #f0f0f0;">
                                         <span style="font-size:18px;min-width:30px;">1: </span>
-                                        <span style="flex:1;font-weight:600px;color:#333;">Mario Rossi</span>
+                                        <span style="flex:1;font-weight:600;color:#333;">Mario Rossi</span>
                                         <span style="font-weight:800;color:#4361ee;">95</span>
                                     </div>
                                     <div style="display:flex;align-items:center;gap:12px;padding:12px;border-bottom:1px solid #f0f0f0;">
@@ -1409,7 +1409,7 @@ function initPropertyInputs() {
     });
     $('#propProtectedMsg')?.addEventListener('input', () => {
         if (!state.selectedElement) return;
-        const p = state.selectedElement.querySelector('.wb-protector-lock p');
+        const p = state.selectedElement.querySelector('.wb-protected-lock p');
         if (p) p.textContent = $('#propProtectedMsg').value;
         saveHistory();
     });
@@ -2363,7 +2363,7 @@ async function _loadBlog() {
                 .eq('published', true).order('created_at', { ascending: false }).limit(limit);
             if (cat) q = q.eq('category', cat);
             var r = await q;
-            if (!r.data || r.data.lenght === 0) {
+            if (!r.data || r.data.length === 0) {
                 el.innerHTML = '<div style="text-align:center;padding:40px;color:#999;"><i class="fa-solid fa-newspaper" style="font-size:32px;opacity:0.3;display:block;margin-bottom:12px;"></i>Nessun post ancora. Sii il primo!</div>';
                 return;
             }
@@ -2425,7 +2425,7 @@ async function _loadAdmin() {
                             _roles.map(function(role) { return '<option value="' + role + '"' + (user.role === role ? ' selected' : '') + '>' + role + '</option>'; }).join('') +
                             '</select></td>' +
                             '<td style="padding:10px;text-align:center;">' +
-                            (user.id !== (_u?.id||'') ? '<button onclick="_banUser(\'' + user.id + '\')" style="background:none;border:1px solid #e63946;color:#e63946;color:#e63946;border-radius:4px;padding:4px 10px;cursor:pointer;font-size:11px;cursor:pointer;font-size:11px;">Ban</button>' : '<em style="color:#999;font-size:11px;">Tu</em>') +
+                            (user.id !== (_u?.id||'') ? '<button onclick="_banUser(\'' + user.id + '\')" style="background:none;border:1px solid #e63946;color:#e63946;border-radius:4px;padding:4px 10px;cursor:pointer;font-size:11px;" 10px;cursor:pointer;font-size:11px;cursor:pointer;font-size:11px;">Ban</button>' : '<em style="color:#999;font-size:11px;">Tu</em>') +
                             '</td></tr>';
                     }).join('') + '</tbody></table></div>';
             }
@@ -2625,7 +2625,7 @@ function _setupListeners() {
                 '<input id="_wbAv" type="text" value="' + _esc(_p?.avatar_url||'') + '" placeholder="https://..." style="width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;margin-bottom:20px;font-size:14px;box-sizing:border-box;">' +
                 '<div style="display:flex;gap:10px;justify-content:flex-end;">' +
                 '<button id="_wbCancel" style="padding:10px 20px;background:#f0f0f0;border:none;border-radius:8px;cursor:pointer;font-size:14px;">Annulla</button>' +
-                '<button id="_wbSave" style="padding:10px 20px;background:#4361ee;color:white;border:none;border-radius:8px;cursor:pointer;font-size:font-weight:600;">Salva</button>' +
+                '<button id="_wbSave" style="padding:10px 20px;background:#4361ee;color:white;border:none;border-radius:8px;cursor:pointer;font-size:14px;font-weight:600;">Salva</button>' +
                 '</div></div>';
             document.body.appendChild(modal);
             modal.querySelector('#_wbCancel').addEventListener('click', function() { modal.remove(); });
@@ -2637,7 +2637,7 @@ function _setupListeners() {
                 var saveBtn = modal.querySelector('#_wbSave');
                 saveBtn.disabled = true; saveBtn.textContent = 'Salvataggio...';
                 try {
-                    var r = await window._sb.from('wb_profiles').upsert({ id: _u.id, username: un, bio: bio, avatar_url: av, role: _p?.role || 'user' }):
+                    var r = await window._sb.from('wb_profiles').upsert({ id: _u.id, username: un, bio: bio, avatar_url: av, role: _p?.role || 'user' });
                     if (r.error) throw r.error;
                     _p = Object.assign({}, _p, { username: un, bio: bio, avatar_url: av });
                     _applyGates();
@@ -2665,7 +2665,7 @@ function _setupListeners() {
                 if (action.newTab) window.open(action.value, '_blank');
                 else window.location.href = action.value;
             } else if (action.type === 'scroll' && action.value) {
-                var t = document.getElementById(action.value) {
+                var t = document.getElementById(action.value);
                 if (t) t.scrollIntoView({ behavior: 'smooth' });
             } else if ((action.type === 'show-hide' || action.type === 'summon' || action.type === 'toggle-visibility') && action.value) {
                 var t = document.getElementById(action.value);
@@ -2711,235 +2711,74 @@ function _setupListeners() {
     });
     document.querySelectorAll('form[data-formspree-url]').forEach(function(form) {
         form.addEventListener('submit', function(e) {
-            e.prevent();
-            var url = form.dataset.formspreeUrl, msg = form.dataset.formSuccessMsg ||    
-        })
+            e.preventDefault();
+            var url = form.dataset.formspreeUrl, msg = form.dataset.formSuccessMsg || 'Grazie!';
+            fetch(url, { method:'POST', body: new FormData(form), headers: { 'Accept': 'application/json' } })
+            .then(function(r) {
+                if (r.ok) {
+                    if (form.dataset.formMultiple === 'true') { form.reset(); alert(msg); }
+                    else { form.innerHTML = '<div style="text-align:center;padding:30px;color:#2ec4b6;font-size:16px;font-weight:600;">' + msg + '</div>; }
+                } else { alert('Errore invio. Riprova.'); }
+            }).catch(function() { alert('Errore di connessione.'); });
+        });
     });
-
-
-
-
-
-
-
-
-document.addEventListener('click', function(e) {
-    var actionEl = e.target.closest('[data-actions]');
-    if (!actionEl) return;
-    var actionsRaw = actionEl.dataset.actions;
-    if (!actionsRaw) return;
-    var actions = [];
-    try { actions = JSON.parse(actionsRaw); } catch(err) {}
-    actions.forEach(function(action) {
-        if (action.type === 'link' && action.value) {
-            if (action.newTab) { window.open(action.value, '_blank'); }
-            else { window.location.href = action.value; }
-        } else if (action.type === 'scroll' && action.value);
-            var target = document.getElementById(action.value) {
-            if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        } else if (action.type === 'show-hide' && action.value) {
-            var target = document.getElementById(action.value);
-            if (target) {
-                    var hidden = target.style.visibility === 'hidden' || target.style.opacity === '0';
-                    target.style.transition = 'opacity 0.3s ease';
-                    target.style.visibility = hidden ? 'visible' : 'hidden';
-                    target.style.opacity = hidden ? '1' : '0';
-                    target.style.pointerEvents = hidden ? 'auto' : 'none';
-                }
-        } else if (action.type === 'submit') {
-            var form = actionEl.closest('form');
-            if (form) form.submit();
-} else if (action.type === 'summon' && action.value) {
-    var target = document.getElementById(action.value);
-    if (target) {
-        var isHidden = target.style.visibility === 'hidden' || target.style.opacity === '0';
-        target.style.transition = 'opacity 0.35s ease';
-        if (isHidden) {
-            target.style.visibility = 'visible';
-            target.style.opacity = '1';
-            target.style.pointerEvents = 'auto';
-        } else {
-            target.style.visibility = 'hidden';
-            target.style.opacity = '0';
-            target.style.pointerEvents = 'none';
-        }
-    }
-        } else if (action.type === 'toggle-visibility' && action.value) {
-            var target = document.getElementById(action.value);
-            if (target) {
-                var hidden = target.style.visibility === 'hidden' || target.style.opacity === '0';
-                target.style.visibility = hidden ? 'visible' : 'hidden';
-                target.style.opacity = hidden ? '1' : '0';
-                target.style.pointerEvents = hidden ? 'auto' : 'none';
-                target.style.transition = 'opacity 0.3s ease';
-            }
-        }
-    }.bind(actionEl));
-});
-document.addEventListener('click', function(e) {
-    var el = e.target.closest('[data-click-anim="true"]');
-    if (!el) return;
-    var target = el.querySelector('.wb-button, .wb-link, .wb-icon, .wb-image, .wb-hero') || el;
-    target.classList.remove('animate__animated', 'animate__pulse');
-    void target.offsetWidth;
-    target.style.setProperty('animation-duration', '0.2s', 'important');
-    target.classList.add('animate__animated', 'animate__pulse');
-});
-
-document.addEventListener('mouseover', function(e) {
-    var el = e.target.closest('[data-hover-animation]');
-    if (!el) return;
-    var hoverAnim = el.dataset.hoverAnimation;
-    if (!hoverAnim || hoverAnim === 'none' || hoverAnim === 'hover-grow' || hoverAnim === 'hover-shrink') return;
-    el.classList.remove('animate__animated', 'animate__' + hoverAnim);
-    void el.offsetWidth;
-    el.style.setProperty('animation-duration', (el.dataset.animSpeed || '0.8') + 's', 'important');
-    el.style.animationFillMode = 'both';
-    el.classList.add('animate__animated', 'animate__' + hoverAnim);
-});
-document.addEventListener('mouseout', function(e) {
-    var el = e.target.closest('[data-hover-animation]');
-    if (!el) return;
-    var hoverAnim = el.dataset.hoverAnimation;
-    if (!hoverAnim || hoverAnim === 'none' || hoverAnim === 'hover-grow' || hoverAnim === 'hover-shrink') return;
-    el.classList.remove('animate__animated', 'animate__' + hoverAnim);
-});
-document.addEventListener('DOMContentLoaded', function() {
-    var observer = new IntersectionObserver(function(entries) {
+    document.querySelectorAll('form[data-sheets-url]').forEach(function(form) {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            var data = {};
+            new FormData(form).forEach(function(v, k) { data[k] = v; });
+            fetch(form.dataset.sheetsUrl, { method:'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(data) })
+            .then(function(r) { if (r.ok) { form.reset(); alert('Dati salvati!'); } })
+            .catch(function() {});
+        });
+    });
+    var _animObserver = new IntersectionObserver(function(entries) {
         entries.forEach(function(entry) {
             if (entry.isIntersecting) {
-                var el = entry.target;
-                var anim = el.dataset.animation;
-                var speed = (el.dataset.animSpeed || '1') + 's';
+                var el = entry.target, anim = el.dataset.animation, speed = (el.dataset.animSpeed||'1')+'s';
                 if (anim && anim !== 'none') {
-                    el.classList.remove('animate__animated', 'animate__' + anim);
+                    el.classList.remove('animate__animated', 'animate__'+anim);
                     void el.offsetWidth;
                     el.style.setProperty('animation-duration', speed, 'important');
                     el.style.animationFillMode = 'both';
-                    el.classList.add('animate__animated', 'animate__'+ anim);
-                    observer.unobserve(el);
-                    el.addEventListener('animationend', function() {
-                        el.classList.remove('animate__animated', 'animate__' + anim);
-                    }, { once: true });
+                    el.classList.add('animate__animated','animate__'+anim);
+                    _animObserver.unobserve(el);
                 }
             }
         });
     }, { threshold: 0.15 });
     document.querySelectorAll('[data-animation]').forEach(function(el) {
-        if (el.dataset.animation && el.dataset.animation !== 'none') {
-            observer.observe(el);
-        }
+        if (el.dataset.animation && el.dataset.animation !== 'none') _animObserver.observe(el);
     });
-});
-
-    document.addEventListener('click', function(e) {
-    const toggle = e.target.closest('[data-menu-toggle]');
-    if (!toggle) return;
-    const menuId = toggle.dataset.menuToggle;
-    const menu = document.getElementById(menuId);
-    if (!menu) return;
-    const open = menu.classList.toggle('is-open');
-    toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
-});
-document.querySelectorAll('form[data-formspree-url]').forEach(function(form) {
-    form.addEventListener('submit', function(e) {
-        e.preventDefault();
-        var url = form.dataset.formspreeUrl;
-        var msg = form.dataset.formSuccessMsg || 'Grazie!';
-        var data = new FormData(form);
-        fetch(url, {
-            method: 'POST',
-            body: data,
-            headers: { 'Accept': 'application/json' }
-        }).then(function(r) {
-            if (r.ok) {
-                var multiple = form.dataset.formMultiple === 'true';
-                if (multiple) {
-                    form.reset();
-                    alert(msg);
-                } else {
-                    form.innerHTML = '<div style="text-align:center;padding:30px;color:#2ec4b6;font-size:16px;font-weight:600;">' + msg + '</div>';
-                }
-            } else {
-                alert('Errore nell invio. Riprova.');
-            }
-        }).catch(function() {
-            alert('Errore di connessione.');
+}
+async function _initWB() {
+    if (!_sbUrl || !_sbKey) return;
+    var script = document.createElement('script');
+    script.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
+    script.onload = async function() {
+        window._sb = supabase.createClient(_sbUrl, _sbKey);
+        var res = await window._sb.auth.getUser();
+        _u = res.data?.user || null;
+        if (_u) await _loadProfile();
+        _applyGates();
+        _setupListeners();
+        await Promise.all([_loadProgress(), _loadUserData(), _loadBlog(), _loadLeaderboards(), _loadAdmin()]);
+        window._sb.auth.onAuthStateChange(async function(event, session) {
+            _u = session ? session.user : null;
+            if (_u) await _loadProfile(); else _p = null;
+            _applyGates();
+            await Promise.all([_loadProgress(), _loadUserData(), _loadBlog(), _loadLeaderboards(), _loadAdmin()]);
         });
-    });
-});
-var _supUrl = '${$('#supabaseUrl').value || ''}';
-var _supKey = '${$('#supabaseKey').value || ''}';
-var _authLogin = ${$('#authLogin').checked};
-var _authRegister = ${$('#authRegister').checked};
-var _authLogout = ${$('#authLogout').checked};
-if (_supUrl && _supKey) {
-    var supScript = document.createElement('script');
-    supScript.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
-    supScript.onload = function() {
-        window._supabase = supabase.createClient(_supUrl, _supKey);
-        if (_authLogin || _authRegister) {
-            document.querySelectorAll('[data-auth-login]').forEach(function(form) {
-                form.addEventListener('submit', function(e) {
-                    e.preventDefault();
-                    var email = form.querySelector('[name="email"]').value;
-                    var password = form.querySelector('[name="password"]').value;
-                    window._supabase.auth.signInWithPassword({ email: email, password: password })
-                    .then(function(res) {
-                        if (res.error) { alert('Errore: ' + res.error.message); }
-                        else { alert('Login Effettuato!'); window.location.reload(); }
-                    });
-                });
-            });
-            document.querySelectorAll('[data-auth-register]').forEach(function(form) {
-                form.addEventListener('submit', function(e) {
-                    e.preventDefault();
-                    var email = form.querySelector('[name="email"]').value;
-                    var password = form.querySelector('[name="password"]').value;
-                    window._supabase.auth.signUp({ email: email, password: password })
-                    .then(function(res) {
-                        if (res.error) { alert('Errore: ' + res.error.message); }
-                        else { alert('Registrazione completata! Conrolla la tua email.'); }
-                    });
-                });
-            });
-        }
-        if (_authLogout) {
-            document.querySelectorAll('[data-auth-logout]').forEach(function(btn) {
-                btn.addEventListener('click', function() {
-                    window._supabase.auth.signOut().then(function() {
-                        alert('Logout effettuato!');
-                        window.location.reload();
-                    });
-                });
-            });
-        }
     };
-    document.head.appendChild(supScript);
-}           
-document.querySelectorAll('form[data-sheets-url]').forEach(function(form) {
-    form.addEventListener('submit', function(e) {
-        e.preventDefault();
-        var url = form.dataset.sheetsUrl;
-        var data = {};
-        new FormData(form).forEach(function(v, k) { data[k] = v; });
-        fetch(url, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(data)
-        }).then(function(r) {
-            if (r.ok) {
-                form.reset();
-                alert('Dati salvati!');
-            }
-        }).catch(function() {});
-    });
-});
+    document.head.appendChild(script);
+}
+if (document.readyState === 'loading') { document.addEventListener('DOMContentLoaded', _initWB; }
+else { _initWB(); }
 <\/script>
-
 </body>
 </html>`;
 }
+
 function generateInlineStyles() {
     return `
         .wb-section { padding: 60px 20px; }
@@ -3912,7 +3751,7 @@ CREATE TABLE IF NOT EXISTS wb_profiles (
   avatar_url TEXT,
   role TEXT DEFAULT 'user',
   bio TEXT,
-  creater_at TIMESTAMPTZ DEFAULT NOW(),
+  created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 CREATE TABLE IF NOT EXISTS wb_posts (
@@ -3983,15 +3822,15 @@ CREATE TRIGGER on_auth_user_created
   AFTER INSERT ON auth.users
   FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();`;
     
-    const squlEl = $('#dbSetupSQL');
+    const sqlEl = $('#dbSetupSQL');
     if (sqlEl) sqlEl.textContent = SQL;
 
-    $('#btnCopySQL')?.addEventListenerr('click', function() {
+    $('#btnCopySQL')?.addEventListener('click', function() {
         function showCopied() {
             const btn = $('#btnCopySQL');
             const orig = btn.innerHTML;
             btn.innerHTML = '<i class="fa-solid fa-check"></i> Copiato!';
-            setTimeout(() => { btn.iinerHTML = orig; }, 1500);
+            setTimeout(() => { btn.innerHTML = orig; }, 1500);
         }
         if (navigator.clipboard) navigator.clipboard.writeText(SQL).then(showCopied).catch(() => fallbackCopy(SQL, showCopied));
         else fallbackCopy(SQL, showCopied);
@@ -4004,14 +3843,14 @@ CREATE TRIGGER on_auth_user_created
         advancedConfig.blogModerateRole = $('#blogModerateRole').value;
         saveAdvancedConfig();
         updateRoleSelects();
-        showFnStatus($('#rolesStatus'). ' Ruoli salvati!', 'success');
+        showFnStatus($('#rolesStatus'), ' Ruoli salvati!', 'success');
     });
     $('#btnUpdateRoleSelects')?.addEventListener('click', updateRoleSelects);
     $('#btnSaveBlog')?.addEventListener('click', function() {
         advancedConfig.blogEnabled = $('#blogEnabled').checked;
         advancedConfig.blogPostsPerPage = parseInt($('#blogPostsPerPage').value) || 10;
         advancedConfig.blogModeration = $('#blogModeration').value;
-        advancedConfig.blogCategories = ($('#blogCategories').value || '').split('\n').map(c => c.trim().filter(c => c);
+        advancedConfig.blogCategories = ($('#blogCategories').value || '').split('\n').map(c => c.trim()).filter(c => c);
         saveAdvancedConfig();
         showFnStatus($('#blogStatus'), ' Configurazione blog salvata!', 'success');
     });
@@ -4025,7 +3864,7 @@ function updateRoleSelects() {
         const sel = document.getElementById(id);
         if (!sel) return;
         const cur = sel.value;
-        sel.innerHTML = roles.map(r => '<option value ="${r}">${r}</option>').join('');
+        sel.innerHTML = roles.map(r => `<option value="${r}">${r}</option>`).join('');
           if (roles.includes(cur)) sel.value = cur;  
     });
 }
@@ -4044,7 +3883,7 @@ function loadAdvancedConfig() {
         if ($('#blogEnabled')) $('#blogEnabled').checked = advancedConfig.blogEnabled;
         if ($('#blogPostsPerPage')) $('#blogPostsPerPage').value = advancedConfig.blogPostsPerPage;
         if ($('#blogModeration')) $('#blogModeration').value = advancedConfig.blogModeration;
-        if ($('#blogCategories')) $('#blogCategories').value = (advancedConfig.blogCategories ||) [].join('\n');
+        if ($('#blogCategories')) $('#blogCategories').value = (advancedConfig.blogCategories || []).join('\n');
         if ($('#blogPublishRole')) $('#blogPublishRole').value = advancedConfig.blogPublishRole;
         if ($('#blogModerateRole')) $('#blogModerateRole').value = advancedConfig.blogModerateRole;
         if ($('#defaultUserRole')) $('#defaultUserRole').value = advancedConfig.defaultRole;

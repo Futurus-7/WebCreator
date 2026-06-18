@@ -2184,3 +2184,45 @@ body.has-platform-warning .main-wrapper {
     border-bottom: 2px solid transparent;
 }
 .canvas .wb-admin-tab.active { color: #f4a261; border-bottom-color: #f4a261; }
+.canvas .wb-product-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 20px; padding: 16px; min-height: 120px;
+}
+.canvas .wb-product-placeholder {
+    grid-column: 1 / -1;
+    display: flex; flex-direction: column; align-items: center;
+    justify-content: center; padding: 40px; color: #bbb; text-align: center; gap: 10px;
+}
+.canvas .wb-product-placeholder i { font-size: 36px; }
+.canvas .wb-product-card-static {
+    background: white; border: 1px solid #eee;
+    border-radius: 8px; overflow: hidden; max-width: 280px;
+    transition: box-shadow 0.2s;
+}
+.canvas .wb-product-img-wrap {
+    width: 100%; height: 180px; background: #f0f0f0;
+    display: flex; align-items: center; justify-content: center;
+    color: #bbb; font-size: 32px; overflow: hidden;
+}
+.canvas .wb-product-img-wrap img { width: 100%; height: 100%; object-fit: cover; }
+.canvas .wb-product-info { padding: 14px; }
+.canvas .wb-product-name { font-size: 15px; font-weight: 700; color: #333; margin-bottom: 4px; }
+.canvas .wb-product-desc { font-size: 13px; color: #777; line-height: 1.4; margin-bottom: 10px; }
+.canvas .wb-product-price { font-size: 22px; font-weight: 800; color: #4361ee; margin-bottom: 12px; }
+.canvas .wb-product-category {
+    display: inline-block; font-size: 10px; font-weight: 700;
+    padding: 2px 8px; background: #f0f4ff; color: #4361ee;
+    border-radius: 20px; text-transform: uppercase; margin-bottom: 6px;
+}
+.canvas .wb-cart-widget {
+    background: white; border: 1px solid #eee;
+    border-radius: 8px; padding: 20px;
+}
+.canvas .wb-cart-title { font-size: 18px; font-weight: 700; color: #333; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
+.canvas .wb-cart-count { background: #e63946; color: white; border-radius: 50%; width: 22px; height: 22px; display: inline-flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; }
+.canvas .wb-cart-empty { text-align: center; padding: 20px; color: #bbb; font-size: 14px; }
+.canvas .wb-cart-total-row { display: flex; justify-content: space-between; padding: 14px 0; border-top: 2px solid #eee; margin-top: 8px; font-weight: 700; font-size: 16px; color: #333; }
+/* ==========================================
+   Prenotazioni
+   ==========================================
