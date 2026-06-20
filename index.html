@@ -246,6 +246,57 @@
                     </div>
                 </div>
             </div>
+            <div class="panel-section">
+                <h4 class="section-title" data-toggle="products">Prodotti & Catalogo</h4>
+                <div class="section-content" id="products">
+                    <div class="draggable-items" draggable="true" data-type="block-product-list">
+                        <i class="fa-solid fa-store"></i>
+                        <span>Catalogo</span>
+                    </div>
+                    <div class="draggable-item" draggable="true" data-type="block-product-card">
+                        <i class="fa-solid fa-box-open"></i>
+                        <span>Prodotto</span>
+                    </div>
+                    <div class="draggable-item" draggable="true" data-type="block-product-card">
+                        <i class="fa-solid fa-box-open"></i>
+                        <span>Prodotto</span>
+                    </div>
+                    <div class="draggable-item" draggable="true" data-type="block-cart">
+                        <i class="fa-solid fa-cart-shopping"></i>
+                        <span>Carrello</span>
+                    </div>
+                </div>
+            </div>
+            <div class="panel-section">
+                <h4 class="section-title" data-toggle="bookings">Prenotazioni</h4>
+                <div class="section-content" id="bookings">
+                    <div class="draggable-item" draggable="true" data-type="block-booking-form">
+                        <i class="fa-solid fa-calendar-check"></i>
+                        <span>Form Prenota</span>
+                    </div>
+                    <div class="draggable-item" draggable="true" data-type="block-booking-admin">
+                        <i class="fa-solid fa-calendar-days"></i>
+                        <span>Gestione Prenot.</span>
+                    </div>
+                </div>
+            </div>
+            <div class="panel-section">
+                <h4 class="section-title" data-toggle="payments">Pagamenti</h4>
+                <div class="section-content" id="payments">
+                    <div class="draggable-item" draggable="true" data-type="block-payment">
+                        <i class="fa-solid fa-credit-card"></i>
+                        <span>Widget Pagamento</span>
+                    </div>
+                    <div class="panel-section">
+                        <h4 class="section-title" data-toggle="newsletter">Newsletter</h4>
+                        <div class="section-content" id="newsletter">
+                            <div class="dragging-item" draggable="true" data-type="block-newsletter">
+                                <i class="fa-solid fa-envelope-open-text"></i>
+                                <span>Newsletter</span>
+                            </div>
+                        </div>
+                    </div>
+
         </aside>
 
     <main class="canvas-area">
@@ -857,6 +908,18 @@
                         <div class="fn-menu-item" data-fn="dbsetup">
                             <i class="fa-solid fa-database"></i> Setup Database
                         </div>
+                        <div class="fn-menu-item" data-fn="products">
+                            <i class="fa-solid fa-store"></i> Prodotti
+                        </div>
+                        <div class="fn-menu-item" data-fn="bookings">
+                            <i class="fa-solid fa-calendar-check"></i> Prenotazioni
+                        </div>
+                        <div class="fn-menu-item" data-fn="payments">
+                            <i class="fa-solid fa-credit-card"></i> Pagamenti
+                        </div>
+                        <div class="fn-menu-item" data-fn="newsletter">
+                            <i class="fa-solid fa-envelope-open-text"></i> Newsletter
+                        </div>
                         <div class="fn-menu-item" data-fn="coming">
                             <i class="fa-solid fa-clock"></i> Prossimamente
                         </div>
@@ -1084,6 +1147,125 @@ admin</textarea>
                                 <p style="font-size:11px;color:var(--text-secondary);margin-top:4px;line-height:1.8;">Se lo esegui di nuovo non causa problemi (usa IF NOT EXISTS). Assicurati di aver prima configurato <strong>Login & Utenti</strong> con le credenziali Supabase.</p>
                             </div>
                         </div>
+                        <div class="fn-panel" id="fn-products">
+                            <h2 style="font-size:18px;margin-bottom:6px;"> Prodotti & Catalogo</h2>
+                            <p style="color:var(--text-secondary);font-size:13px;margin-bottom:20px;">Configura il catalogo prodotti del tuo sito. I prodotti vengono gestiti nel database Supabase.</p>
+                            <div style="background:rgba(67,97,238,0.1);border:1px solid var(--accent);border-radius:8px;padding:14px;margin-bottom:16;">
+                                <strong style="color:var(--accent);font-size:13px;">Come aggiungere prodotti</strong>
+                                <ol style="color:var(--text-secondary);font-size:12px;margin-top:8px;padding-left:18px;line-height:2.2;">
+                                    <li>Configura Login & Utenti e Setup Database</li>
+                                    <li>Vai su Supabase -> Table Editor -> <strong>wb_products</strong></li>
+                                    <li>Aggiungi le righe con nome, prezzo, immagine, ecc.</li>
+                                    <li>Imposta <strong>published = true</strong> per renderli visibili</li>
+                                </ol>
+                                </div>
+                                <div class="prop-group">
+                                    <label class="prop-label">Valuta predefinita</label>
+                                    <select class="prop-input" id="productCurrency">
+                                        <option value="€">€ Euro</option>
+                                        <option value="$">$ Dollaro</option>
+                                        <option value="£">£ Sterlina</option>
+                                        <option value="CHF">CHF Franco</option>
+                                    </select>
+                                </div>
+                                <div class="prop-group">
+                                    <label class="prop-label">Testo bottone "Aggiungi al carrello"</label>
+                                    <input type="text" class="prop-input" id="productAddToCartText" value=" Aggiungi al carrello">
+                                </div>
+                                <div class="prop-group">
+                                    <label class="prop-label">Messaggio carrello vuoto</label>
+                                    <input type="text" class="prop-input" id="productCartEmpty" value="Il carrello è vuoto">
+                                </div>
+                                <button class="toolbar-btn btn-primary" id="btnSaveProduct" style="width:100%;justify-content:center;padding:10px;margin-top:8px;">
+                                    <i class="fa-solid fa-check"></i> Salva impostazioni prodotti
+                                </button>
+                                <div id="productsStatus" style="display:none;margin-top:12px;padding:10px;border-radius:6px;font-size:13px;text-align:center;"></div>
+                            </div>
+                            <div class="fn-panel" id="fn-bookings">
+                                <h2 style="font-size:18px;margin-bottom:6pz;"> Prenotazioni</h2>
+                                <p style="color:var(--text-secondary);font-size:13px;margin-bottom:20px;">Configura il sistema di prenotazioni. Gli utenti compilano il form e le prenotazioni vengono salvate in Supabase.</p>
+                                <div class="prop-group">
+                                    <label class="prop-label">Servizi disponibili (uno per riga)</label>
+                                    <textarea class="prop-input prop-textarea" id="bookingServices" rows="5" placeholder="Taglio Capelli&#10;Consulenza&#10;Appuntamento generico"></textarea>
+                                </div>
+                                <div class="prop-group">
+                                    <label class="prop-label">Orari disponibili (separati da virgola)</label>
+                                    <input type="text" class="prop-input" id="bookingTimes" placeholder="09:00, 10:00, 14:00, 15:00, 16:00">
+                                </div>
+                                <div class="prop-group">
+                                    <label class="prop-label">Messaggio di conferma prenotazione</label>
+                                    <input type="text" class="prop-input" id="bookingSuccessMsg" value=" Prenotazione confermata! Ti contatteremo presto." placeholder="Messaggio dopo invio">
+                                </div>
+                                <div class="prop-group">
+                                    <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:12;color:var(--text-secondary);">
+                                        <input type="checkbox" id="bookingRequireLogin" style="width:16px;height:16px;cursor:pointer;">
+                                        Richiedi login per prenotare
+                                    </label>
+                                </div>
+                                <button class="toolbar-btn btn-primary" id="btnSaveBookings" style="width:100%;justify-content:center;padding:10px;margin-top:8px;">
+                                    <i class="fa-solid fa-check"></i> Salva impostazioni prenotazioni
+                                </button>
+                                <div id="bookingsStatus" style="display:none;margin-top:12px;padding:10px;border-radius:6px;font-size:13px;text-align:center;"></div>
+                            </div>
+                            <div class="fn-panel" id="fn-payments">
+                                <h2 style="font-size:18px;margin-bottom:6px;"> Pagamenti</h2>
+                                <p style="color:var(--text-secondary);font-size:13px;margin-bottom:16px;">Integra pagamenti Stripe e/o PayPal nel tuo sito. Entrambi gratuiti da configurare, paghi solo una % sulla transazioni.</p>
+                                <div style="background:rgba(99,91,255,0.1);border:1px solid #635bff;border-radius:8px;padding:14px;margin-bottom:16px;">
+                                    <strong style="color:#635bff;font-size:13px;">Stripe</strong>
+                                    <ol style="color:var(--text-secondary);font-size:12px;margin-top:8px;padding-left:18px;line-height:2.2;">
+                                        <li>Vai su <a href="https://stripe.com" target="_blank" style="color:var(--accent);">stripe.com</a> e crea account</li>
+                                        <li>Dashboard -> API Keys -> copia <strong>Publishable key</strong></li>
+                                        <li>Crea un prodotto in Stripe -> copia il <strong>Price ID</strong> (price_xxx)</li>
+                                        <li>Incolla qui sotto</li>
+                                    </ol>
+                                </div>
+                                <div class="prop-group">
+                                    <label class="prop-label">PayPal Client ID</label>
+                                    <input type="text" class="prop-input" id="paypalClientId" placeholder="AXxxx... (Client ID sandbox o live)">
+                                </div>
+                                <div class="prop-group">
+                                    <label class="prop-label">PayPal Client ID</label>
+                                    <input type="text" class="prop-input" id="paypalClientId" placeholder="AXxxx... (Client ID sandbox o live)">
+                                </div>
+                                <div class="prop-group">
+                                    <label class="prop-label">Valuta pagamenti</label>
+                                    <select class="prop-input" id="paymentCurrency">
+                                        <option value="EUR">EUR (Euro)</option>
+                                        <option value="USD">USD (Dollaro)</option>
+                                        <option value="GBP">GBP (Sterlina)</option>
+                                        <option value="CHF">CHF (Franco)</option>
+                                    </select>
+                                </div>
+                                <button class="toolbar-btn btn-primary" id="btnSavePayments" style="width:100%;justify-content:center;padding:10px;margin-top:8px;">
+                                    <i class="fa-solid fa-check"></i> Salva impostazioni pagamenti
+                                </button>
+                                <div id="paymentsStatus" style="display:none;margin-top:12px;padding:10px;border-radius:6px;font-size:13px;text-align:center;"></div>
+                            </div>
+                            <div class="fn-panel" id="fn-newsletter">
+                                <h2 style="font-size:18px;margin-bottom:6px;"> Newsletter</h2>
+                                <p style="color:var(--text-secondary);font-size:13px;margin-bottom:20px;">Raccogli email e costruisci la tua mailing list. Le email vengolo salvate in Supabase. Gratuito.</p>
+                                <div class="prop-group">
+                                    <label class="prop-label">Messaggio dopo iscrizione</label>
+                                    <input type="text" class="prop-input" id="newsletterSuccessMsg" value=" Iscritto! Grazie per esserti unito." placeholder="Messaggio di conferma">
+                                </div>
+                                <div class="prop-group">
+                                    <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:12px;color:var(--text-secondary);">
+                                        <input type="checkbox" id="newsletterDoubleOption" style="width:16px;height:16px;cursor:pointer;">
+                                        Abilita double opt-in (conferma via email)
+                                        <small style="display:block;color:var(--text-secondary);font-size:10px;margin-top:2px;">Richiede configurazione Supabase email templates</small>
+                                    </label>
+                                </div>
+                                <div class="prop-group">
+                                    <label class="prop-label">Esporta iscritti</label>
+                                    <p style="font-size:12px;color:var(--text-secondary);margin-bottom:8px;">Vai su Supabase -> Table Editor -> wb_newsletter per vedere e scaricare gli iscritti.</p>
+                                    <a href="#" onclick="window.open('https://supabase.com', '_blank')" class="prop-btn-secondary" style="display:flex;align-items:center;justify-content:center;gap:6px;text-decoration:none;">
+                                        <i class="fa-solid fa-external-link-alt"></i> Apri Supabase
+                                    </a>
+                                </div>
+                                <button class="toolbar-btn btn-primary" id="btnSaveNewsletter" style="width:100%;justify-content:center;padding:10px;margin-top:8px;">
+                                    <i class="fa-solid fa-check"></i> Salva impostazioni newsletter
+                                </button>
+                                <div id="newsletterStatus" style="display:none;margin-top:12px;padding:10px;border-radius:6px;font-size:13px;text-align:center;"></div>
 
                         <div class="fn-panel" id="fn-coming">
                             <h2 style="font-size:18px;margin-bottom:20px;"> Prossimamente</h2>
