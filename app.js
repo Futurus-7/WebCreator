@@ -415,7 +415,16 @@ function getTypeLabel(type) {
         'block-blog-editor': 'Editor Blog',
         'block-user-data': 'Dato Utente',
         'block-leaderboard': 'Classifica',
-        'block-admin': 'Pannello Admin'
+        'block-admin': 'Pannello Admin',
+        'block-product-list': 'Catalogo Prodotti',
+        'block-product-card': 'Prodotto Singolo',
+        'block-cart': 'Carrello',
+        'block-booking-form': 'Form Prenotazione',
+        'block-booking-admin': 'Gestione Prenotazione',
+        'block-payment': 'Widget Pagamento',
+        'block-stripe-btn': 'Bottone Stripe',
+        'block-paypal-btn': 'Bottone PayPal',
+        'block-newsletter': 'Newsletter'
     };
     return labels[type] || type;
 }
@@ -2034,7 +2043,18 @@ const icons = {
     'block-blog-editor': 'fa-solid fa-pen-to-square',
     'block-user-data': 'fa-solid fa-database',
     'block-leaderboard': 'fa-solid fa-ranking-star',
-    'block-admin': 'fa-solid fa-user-shield'
+    'block-admin': 'fa-solid fa-user-shield',
+    'block-product-list': 'fa-solid fa-store',
+    'block-product-card': 'fa-solid fa-box-open',
+    'block-cart': 'fa-solid fa-cart-shopping',
+    'block-booking-form': 'fa-solid fa-calendar-check',
+    'block-booking-admin': 'fa-solid fa-calendar-days',
+    'block-payment': 'fa-solid fa-credit-card',
+    'block-stripe-btn': 'fa-brands fa-stripe-s',
+    'block-payment': 'fa-solid fa-credit-card',
+    'block-stripe-btn': 'fa-brands fa-stripe-s',
+    'block-paypal-btn': 'fa-brands fa-paypal',
+    'block-newsletter': 'fa-solid fa-envelope-open-text'
     };
     return icons[type] || 'fa-solid fa-cube';
 }
@@ -2254,6 +2274,8 @@ ${bodyContent}
 var _sbUrl = '${sbUrl}';
 var _sbKey = '${sbKey}';
 var _cfg = ${cfg};
+var _wbStripeKey = '${$('#stripeKey')?.value || ''}';
+var _wbPaypalKey = '${$('#paypalClientId')?.value || ''}';
 var _roles = _cfg.roles || ['user','premium','moderator','admin'];
 var _u = null;
 var _p = null;
@@ -2752,6 +2774,10 @@ function _setupListeners() {
     });
 }
 async function _initWB() {
+    _updateCarts();
+    _setupBookings();
+    _setupPayments();
+    _setupNewsletter();
     if (!_sbUrl || !_sbKey) return;
     var script = document.createElement('script');
     script.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';

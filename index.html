@@ -512,6 +512,71 @@
                             L'utente può modificarlo
                         </label>
                     </div>
+                    <div class="prop-group" id="productListConfig" style="display:none;">
+                        <label class="prop-label" style="color:var(--accent);"> Configurazioni Catalogo</label>
+                        <label class="prop-label" style="margin-top:8px;">Numero prodotto da mostrare</label>
+                        <input type="number" class="prop-input" id="propProductLimit" value="12" min="1" max="100">
+                        <label class="prop-label" style="margin-top:8px;">Categoria (vuoto = tutte)</label>
+                        <input type="text" class="prop-input" id="propProductCaegory" placeholder="es: Abbigliamento">
+                        <label class="prop-label" style="margin-top:8px;">Valuta</label>
+                        <input type="text" class="prop-input" id="propProductCurrency" placeholder="€" style="max-width:80px;">
+                        <label class="prop-label" style="margin-top:8px;">Colonne griglia</label>
+                        <select class="prop-input" id="propProductCols">
+                            <option value="auto">Auto (adattiva)</option>
+                            <option value="2">2 colonne</option>
+                            <option value="3">3 colonne</option>
+                            <option value="4">4 colonne</option>
+                        </select>
+                    </div>
+                    <div class="prop-group" id="bookingFormConfig" style="display:none;">
+                        <label class="prop-label" style="color:var(--accent);"> Configurazione Form Prenotazione</label>
+                        <label class="prop-label" style="margin-top:8px;">Titolo form</label>
+                        <input type="text" class="prop-inpu" id="propBookingTitle" placeholder="Prenota un appuntamento">
+                        <label class="prop-label" style="margin-top:8px;">Messaggio di conferma</label>
+                        <input type="text" class="prop-input" id="propBookingSuccess" placeolder="Prenotazione confermata!">
+                        <label class="prop-label" style="margin-top:8px;">Orari (separati da virgola)</label>
+                        <input type="text" class="prop-input" id="propBookingTimes" placeholder="09:00, 10:00, 11:00, 15:00">
+                    </div>
+                    <div class="prop-group" id="paymentConfig" style="display:none;">
+                        <label class="prop-label" style="color:var(--accent);"> Configurazione Pagamento</label>
+                        <label class="prop-label" style="margin-top:8px;">Nome prodotto/servizio</label>
+                        <input type="text" class="prop-input" id="propPaymentName" placeholder="Piano Premium">
+                        <label class="prop-label" style="margin-top:8px;">Descizione breve</label>
+                        <input type="text" class="prop-input" id="propPaymentDesc" placeholder="Accesso illimitato per 1 mese">
+                        <label class="prop-label" style="margin-top:8px;">Prezzo (es: 29.99)</label>
+                        <input type="text" class="prop-input" id="propPaymentAmount" placeholder="29.99">
+                        <label class="prop-label" style="margin-top:8px;">Valuta</label>
+                        <input type="text" class="prop-input" id="propPaymentCurrency" placeholder="€" style="max-width:80;">
+                        <label class="prop-label" style="margin-top:8px;">Stripe Price ID (per Stripe)</label>
+                        <input type="text" class="prop-input" id="propStripePrice" placeholder="price_xxx">
+                        <label class="prop-label" style="margin-top:8px;">URL successo pagamento</label>
+                        <input type="text" class="prop-input" id="propPaymentSuccess" placeholder="https://... (opzionale)">
+                        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:12px;color:var(--text-secondary);margin-top:8px;">
+                            <input type="checkbox" id="propShowStripe" style="width:14px;height:14px;" checked>
+                            Mostra bottone Stripe
+                        </label>
+                        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:12px;color:var(--text-secondary);margin-top:6px;">
+                            <input type="checkbox" id="propShowPaypal" style="width:14;height:14px;" checked>
+                            Mostra bottone PayPal
+                        </label>
+                    </div>
+                    <div class="prop-group" id="newsletterConfig" style="display:none;">
+                        <label class="prop-label" style="color:var(--accent);"> Configurazione Newsletter</label>
+                        <label class="prop-label" style="margin-top:8px;">Titolo</label>
+                        <input type="text" class="prop-input" id="propNewsletterTitle" placeholder="Iscriviti alla newsletter">
+                        <label class="prop-label" style="margin-top:8px;">Sottotitolo</label>
+                        <input type="text" class="prop-input" id="propNewsletterSubtitle" placeholder="Ricevi le nostre novità">
+                        <label class="prop-label" style="margin-top:8px;">Testo bottone</label>
+                        <input type="text" class="prop-input" id="propNewsletterBtn" placeholder="Iscriviti">
+                        <label class="prop-label" style="margin-bottom:8px;">Messaggio di conferma</label>
+                        <input type="text" class="prop-input" id="propNewsletterSuccess" placeholder=" Iscritto! Grazie.">
+                        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:12px;color:var(--text-secondary);margin-top:8px;">
+                            <input type="checkbox" id="propNewsletterShowName" style="width:14px;height:14px;">
+                            Mostra campo nome
+                        </label>
+                    </div>
+
+
                     <div class="prop-group" id="leaderboardConfig" style="display:none;">
                         <label class="prop-label" style="color:var(--accent);"> Configurazione Classifica</label>
                         <label class="prop-label" style="margin-top:8px;">Chiave progresso da mostrare</label>
@@ -1266,7 +1331,7 @@ admin</textarea>
                                     <i class="fa-solid fa-check"></i> Salva impostazioni newsletter
                                 </button>
                                 <div id="newsletterStatus" style="display:none;margin-top:12px;padding:10px;border-radius:6px;font-size:13px;text-align:center;"></div>
-
+                            </div>
                         <div class="fn-panel" id="fn-coming">
                             <h2 style="font-size:18px;margin-bottom:20px;"> Prossimamente</h2>
                             <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
