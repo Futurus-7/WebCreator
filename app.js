@@ -694,7 +694,127 @@ function getElementHTML(type) {
                                     <i class="fa-solid fa-chart-bar" style="font-size:24px;display:block;margin-bottom:8px;opacity:0.3;"></i>
                                     Statistiche caricate in tempo reale
                                 </div>
-                            </div>`
+                            </div>`,
+                        'block-product-list': `
+                            <div class="wb-product-list" data-wb-product-list data-wb-product-limit="12" data-wb-currency"€">
+                                <div class="wb-product-placeholder">
+                                    <i class="fa-solid fa-store"></i>
+                                    <p>I prodotti appariranno qui</p>
+                                    <small style="font-size:12px;">Aggiungi prodotti da Supabase -> wb_products</small>
+                                </div>
+                            </div>`,
+                        'block-product-card': `
+                            <div class="wb-product-card-static" data-wb-product-static>
+                                <div class="wb-produc-img-wrap">
+                                    <i class="fa-solid fa-box-open"></i>
+                                </div>
+                                <div class="wb-produc-info">
+                                    <div class="wb-product-category">Categoria</div>
+                                    <div class="wb-product-name" conenteditable="true">Nome Prodotto</div>
+                                    <div class="wb-product-desc" contenteditable="true">Descrizione breve del prodotto. Modifica questo testo.</div>
+                                    <div class="wb-product-price" contenteditable="true">€29.99</div>
+                                    <button class="wb-add-to-cart-btn" data-wb-static-cart> Aggiungi al carrello</button>
+                                </div>
+                            </div>`,
+                        'block-cart': ` 
+                            <div class="wb-cart-widget" data-wb-cart data-wb-currency="€">
+                                <div class="wb-cart-title">
+                                    Carrello
+                                    <span class="wb-cart-count" data-wb-cart-count>0</span>
+                                </div>
+                                <div data-wb-cart-body>
+                                    <div class="wb-cart-empty">Il carrello è vuoto</div>
+                                </div>
+                                <div class="wb-cart-total-row">
+                                    <span>Totale</span>
+                                    <span data-wb-cart-total>€0.00</span>
+                                </div>
+                                <button class="wb-button" data-wb-checkout style="width:100%;margin-top:12px;cursor:pointer;">
+                                    Procedi al pagamento ->
+                                </button>
+                            </div>`,
+                        'block-booking-form': `
+                            <form class="wb-booking-form" data-wb-booking-form data-success-msg=" Prenotazione Confermata! Ti contateremo presto.">
+                                <h3> Prenota un appuntamento</h3>
+                                <div class="wb-booking-row">
+                                    <input type="text" name="name" class="wb-input" placeholder="Il tuo nome *" required>
+                                    <input type="email" name="email" class="wb-input" placeholder="Email *" required>
+                                </div>
+                                <div style="margin-boottom:12px;">
+                                    <label style="display:block;font-size:13px;color:#555;margin-bottom:4px;">Servizio *</label>
+                                    <select name="service" class="wb-select" required>
+                                        <option value="">Seleziona un servizio...</option>
+                                        <option>Consulenza</option>
+                                        <option>Appuntamento</option>
+                                    </select>
+                                </div>
+                                <div class="wb-booking-row">
+                                    <div>
+                                        <label style="display:block;font-size:13px;color:#555;margin-bottom:4px;">Data *</label>
+                                        <input type="date" name="date" class="wb-input" required>
+                                    </div>
+                                    <div>
+                                        <label style="display:block;font-size:13px;color:#555;margin-bottom:4px;">Orario *</label>
+                                        <select name="time" class="wb-select" required>
+                                            <option value="">Seleziona...</option>
+                                            <option>09.00</option>
+                                            <option>10.00</option>
+                                            <option>11:00</option>
+                                            <option>14:00</option>
+                                            <option>15:00</option>
+                                            <option>16:00</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div style="margin-bottom:16px;">
+                                    <label style="display:block;font-size:13px:color:#555;margin-bottom:4px;">Note (opzionale)</label>
+                                    <textarea name="notes" class="wb-textarea-el" placeholder="Informazioni aggiuntive..." rows="3"></textarea>
+                                </div>
+                                <button type="submit" class="wb-button" style="width:100%; cursor:pointer;"> Prenota ora</button>
+                            </form>`,
+                        'block-booking-admin': `
+                            <div class="wb-booking-admin" data-wb-booking-admin data-wb-role-show="admin">
+                                <h3> Gestione Prenotazioni</h3>
+                                <div data-wb-booking-table style="color:#999;text-align:center;padding:20px;font-size:13px;">
+                                    <i class="fa-solid fa-calendar-days" style="font-size:24px;display:block;margin-bottom:8px;opacity:0.3;"></i>
+                                    Le prenotazioni vengono caricate nel sito esportato (solo admin)
+                                </div>
+                            </div>`,
+                        'block-payment': `
+                            <div class="wb-payment-widget" data-wb-payment data-wb-amount="29.99" data-wb-currency="€" data-wb-stripe-price="">
+                                <div class="wb-payment-product" contenteditable="true">Piano Premium</div>
+                                <div class="wb-payment-desc" contenteditable="true">Accesso completo per 1 mese</div>
+                                <div class="wb-payment-amount">€29.99</div>
+                                <hr class="wb-payment-divider">
+                                <div style="display:flex;flex-direcion:column;gap:10px;align-items:center;">
+                                    <button class="wb-stripe-btn" data-wb-stripe>
+                                        <i class="fa-brands fa-stripe-s"></i> Paga con Stripe
+                                    </button>
+                                    <div data-wb-paypal-container style="width:100%;">
+                                        <button class="wb-paypal-bn" data-wb-paypal-static>
+                                            <i class="fa-brands fa-paypal"></i> Paga con PayPal
+                                        </button>
+                                    </div>
+                                </div>
+                                <div style="font-size:11px;color:#999;margin-top:12px;">
+                                    Pagamento sicuro - SSL crittografato
+                                </div>
+                            </div>`,
+                        'block-stripe-btn': `
+                            <div style="tex-align:center;">
+                                <button class="wb-stripe-btn" data-wb-stripe style="display:inline-flex;width:auto;">
+                                    <i class="fa-brands fa-stripe-s"></i> Paga con Stripe
+                                </button>
+                            </div>`,
+                        'block-paypal-btn': `
+                            <div style="text-align:center;" data-wb-paypal-container>
+                                <button class="wb-paypal-btn" data-wb-paypal-static style="display:inline-flex;width:auto;">
+                                    <i class="fa-brands fa-paypal"></i> Paga con PayPal
+                                </button>
+                            </div>`,
+                        'block-newsletter': `
+                            <div class="wb-newsletter">
+                        `
                         };
 
     return templates[type] || '<div>Elemento</div>';
