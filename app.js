@@ -813,10 +813,16 @@ function getElementHTML(type) {
                                 </button>
                             </div>`,
                         'block-newsletter': `
-                            <div class="wb-newsletter">
-                        `
+                            <div class="wb-newsletter" data-wb-newsletter data-success-msg=" Iscritto! Grazie per esserti unito.">
+                                <h3 contenteditable="true"> Rimani aggiornato</h3>
+                                <p contenteditable="true">Iscriviti alla nostra newsletter e ricevi le ultime novità direttamente nella tua casella.</p>
+                                <div class="wb-newsletter-form">
+                                    <input type="email" data-wb-newsletter-email placeholder="La tua email..." class="wb-newsletter-input">
+                                    <button data-wb-newsletter-btn>Iscriviti</button>
+                                </div>
+                                <div class="wb-newsletter-small">Nessuno spam. Puoi disiscriverti in qualsiasi momento.</div>
+                            </div>`
                         };
-
     return templates[type] || '<div>Elemento</div>';
 }
 
@@ -1614,7 +1620,67 @@ function initPropertyInputs() {
         if (lb) lb.dataset.wbLeaderboardLimit = $('#propLeaderboardLimit').value;
         saveHistory();
     });
-}
+    $('#propProductLimit')?.addEventListener('change', () => {
+        if (!state.selectedElement) return;
+        const pl = state.selectedElement.querySelector('[data-wb-product-list]');
+        if (pl) pl.dataset.wbProductCategory = $('#propProductCategory').value;
+        saveHistory();
+    });
+    $('#propProductCategory')?.addEventListener('change', () => {
+        if (!state.selectedElement) return;
+        const pl = state.selectedElement.querySelector('[data-wb-product-list]');
+        if (pl) pl.dataset.wbProductCategory = $('#propProductCategory').value;
+        saveHistory();
+    });
+    $('#propProductCurrency')?.addEventListener('input', () => {
+        if (!state.selectedElement) return;
+        const pl = state.selectedElement.querySelector('[data-wb-product-list]');
+        if (pl) pl.dataset.wbCurrency = $('#propProductCurrency').value;
+        saveHistory();
+    });
+    $('#propBookingTitle')?.addEventListener('input', () => {
+        if (!state.selectedElement) return;
+        const h3 = state.selectedElement.querySelector('h3');
+        if (h3) h3.textContent = $('#propBookingTitle').value;
+        saveHistory();
+    });
+    $('#propBookingSuccess')?.addEventListener('change', () => {
+        if (!state.selectedElement) return;
+        const bf = state.selectedElement.querySelector('[data-wb-booking-form]');
+        if (bf) bf.dataset.successMsg = $('#propBookingSuccess').value;
+        saveHistory();
+    });
+    $('#propBookingTimes')?.addEventListener('change', () => {
+        if (!state.selectedElement) return;
+        const timeSelect = state.selectedElement.querySelector('[name="time"]');
+        if (!timeSelect) return;
+        const times = $('#propBookingTimes').value.split(',').map(t => t.trim()).filter(t => t);
+        timeSelect.innerHTML = '<option value="">Seleziona...</option>' +
+            times.map(t => '<option>${t}</option>').join('');
+        saveHistory();
+    });
+    $('#propPaymentName')?.addEventListener('input', () => {
+        if (!state.selectedElement) return;
+        const n = state.selectedElement.querySelector('.wb-payment-product');
+        if (n) n.textContent = $('#propPaymenName').value;
+        saveHistory();
+    });
+    $('#propPaymentDesc')?.addEventListener('input', () => {
+        if (!state.selectedElement) return;
+        const d = state.selectedElement.querySelector('.wb-payment-desc');
+        if (d) d.textContent = $('#propPaymentDesc').value;
+        saveHistory();
+    });
+    ['propPaymentAmount','propPaymentCurrency','propStripePrice', 'propPaymentSuccess'].forEach(id => {
+        document.getElementById(id)?.addEventListener('change', () => {
+            if (!state.selectedElement) return;
+            const pm = state.selectedElement.querySelector('[data-wb-payment]');
+            if (!pm) return;
+            if (id === 'propPaymentAmount') {
+                
+            }
+        })
+    })
 
 function buildActionRow(action, index) {
     const row = document.createElement('div');
@@ -1854,7 +1920,7 @@ function updatePropertyPanel() {
         propStartHidden.checked = el.dataset.startHidden === 'true';
     }
 
-    ['protectedConfig', 'roleGateConfig', 'progressConfig','blogListConfig','userDataConfig','leaderboardConfig'].forEach(id => {
+    ['protectedConfig', 'roleGateConfig', 'progressConfig','blogListConfig','userDataConfig','leaderboardConfig','productListConfig','bookingFormConfig','paymentConfig','newsletterConfig'].forEach(id => {
         const cfgEl = document.getElementById(id);
         if (cfgEl) cfgEl.style.display = 'none';
     });
@@ -1900,6 +1966,44 @@ function updatePropertyPanel() {
             $('#propUserDataLabel').value = el.querySelector('.wb-user-data-label')?.textContent || '';
             break;
         }
+        case 'block-product-list': {
+            const ppc = document.getElementBydId('productListConfig');
+            if (ppc) ppc.style.display = 'block';
+            const pll = el.querySelector('[data-wb-product-list');
+            if ($('#propProductLimit')) $('#propProductLimit').value = pll?.dataset.wbProductLimit || 12;
+            if ($('#propProductCategory')) $('#propProductCategory').value = pll?.dataset.wbProductCategory || '';
+            if ($('#propProductCurrency')) $('#propProductCurrency').value = pll?.dataset.wbCurrency || '€';
+            break;
+        }
+        case 'block-booking-form': {
+            const bfc = document.getElementById('bookingFormConfig');
+            if (bfc) bfc.style.display = 'block';
+            if ($('#propBookingTitle')) $('#propBookingTitle').value = el.querySelector('h3')?.texContent || '';
+            if ($('#propBookingSuccess')) $('#propBookingSuccess').value = el.querySelector('[data-wb-booking-form]')?.dataset.successMsg || '';
+            break;
+        }
+        case 'block-payment': {
+            const pmc = document.getElementById('paymentConfig');
+            if (pmc) pmc.style.display = 'block';
+            const pmEl = el.querySelector('[data-wb-payment]');
+            if ($('#propPaymentName')) $('#propPaymentName').value = el.querySelector('.wb-payment-product')?.textContent || '';
+            if ($('#propPaymentDesc')) $('#propPaymentDesc').value = el.querySelector('.wb-payment-desc')?.texContent || '';
+            if ($('#propPaymentAmount')) $('#propPaymentAmount').value = pmEl?.dataset.wbAmount || '';
+            if ($('#propPaymentCurrency')) $('#propPaymentCurrency').value = pmEl?.dataset.wbCurrency || '€';
+            if ($('#propStripePrice')) $('#propStripePrice').value = pmEl?.dataset.wbStripePrice || '';
+            break;
+        }
+        case 'block-newsletter': {
+            const nlc = document.getElementById('newsletterConfig');
+            if (nlc) nlc.style.display = 'block';
+            if ($('#propNewsletterTitle')) $('#propNewsletterTitle').value = el.querySelector('h3')?.textContent || '';
+            if ($('#propNewsletterSubtitle')) $('#propNewsletterSubTitle').value = el.querySelector('p')?.textContent || '';
+            if ($('#propNewsletterBtn')) $('#propNewsletterBtn').value = el.querySelector('[data-wb-newsletter-btn]')?.textContent || '';
+            if ($('#propNewsletterSuccess')) $('#propNewsletterSuccess'). value = el.querySelector('#[data-wb-newsletter]')?.dataset.successMsg || '';
+            break;
+        }
+
+
         case 'block-leaderboard': {
             $('#leaderboardConfig').style.display = 'block';
             const lb = el.querySelector('[data-wb-leaderboard]');
