@@ -1677,11 +1677,39 @@ function initPropertyInputs() {
             const pm = state.selectedElement.querySelector('[data-wb-payment]');
             if (!pm) return;
             if (id === 'propPaymentAmount') {
-                
+                pm.dataset.wbAmoun = document.getElementById(id).value;
+                const amtEl = state.selectedElement.querySelector('.wb-payment-amount');
+                if (amtEl) amtEl.textContent = (document.getElementById('propPaymentCurrency'))
             }
-        })
-    })
-
+            if (id === 'propPaymentCurrency') pm.dataset.wbCurrency = document.getElementById(id).value;
+            if (id === 'propStripePrice') pm.dataset.wbStripePrice = document.getElementById(id).value;
+            if (id === 'propPaymentSuccess') pm.dataset.successUrl = documentt.getElementById(id).value;
+        });
+    });
+    $('#propNewsletterTitle')?.addEventListener('input', () => {
+        if (!state.selectedElement) return;
+        const h3 = state.selectedElement.querySelector('h3');
+        if (h3) h3.textContent = $('#propNewsletterTitle').value;
+        saveHistory();
+    });
+    $('#propNewsletterSubtitle').addEventListener('input',  () => {
+        if (!state.selectedElement) return;
+        const p = state.selectedElement.querySelector('p');
+        if (p) p.textContent = $('#propNewsletterSubtitle').value;
+        saveHistory();
+    });
+    $('#propNewsletterBtn')?.addEventListener('input', () => {
+        if( !state.selectedElement) return;
+        const btn = state.selectedElement.querySelector('[data-wb-newsletter-btn]');
+        if (btn) btn.textContent = $('#propNewsletterBtn').value;
+        saveHistory();
+    });
+    $('#propNewsletterSuccess')?.addEventListener('change', () => {
+        if (!state.selectedElement) return;
+        const nl = state.selectedElement.querySelector('[data-wb-newsletter]');
+        if (nl) nl.dataset.successMsg = $('#propNewsletterSuccess').value;
+    });
+}
 function buildActionRow(action, index) {
     const row = document.createElement('div');
     row.style.cssText = 'border:1px solid rgba(255,255,255,0.1);border-radius:6px;padding:8px;margin-bottom:6px;background:rgba(255,255,255,0.03);';
@@ -3012,12 +3040,16 @@ async function _initWB() {
         if (_u) await _loadProfile();
         _applyGates();
         _setupListeners();
-        await Promise.all([_loadProgress(), _loadUserData(), _loadBlog(), _loadLeaderboards(), _loadAdmin()]);
+        await Promise.all([_loadProgress(), _loadUserData(), _loadBlog(), _loadLeaderboards(), _loadAdmin(), _loadProducts(), _loadBookingAdmin()]);
+        _updateCarts();
+        _setupBooking();
+        _setupPayments();
+        _setupNewsletter();
         window._sb.auth.onAuthStateChange(async function(event, session) {
             _u = session ? session.user : null;
             if (_u) await _loadProfile(); else _p = null;
             _applyGates();
-            await Promise.all([_loadProgress(), _loadUserData(), _loadBlog(), _loadLeaderboards(), _loadAdmin()]);
+            await Promise.all([_loadProgress(), _loadUserData(), _loadBlog(), _loadLeaderboards(), _loadAdmin(), _loadProducts(), _loadBookingAdmin()]);
         });
     };
     document.head.appendChild(script);
@@ -4057,6 +4089,59 @@ CREATE POLICY "Utente gestisce propri progressi" ON wb_user_progress FOR ALL USI
 DROP POLICY IF EXISTS "Dati privati utente" ON wb_user_data;
 CREATE POLICY "Dati privati utente" ON wb_user_data FOR ALL USING (auth.uid() = user_id);
 
+CREATE TABLE IF NOT EXISTS wb_products (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    name TEXT NOT NULL DEFAULT '',
+    description TEXT DEFAULT '',
+    price NUMERIC(10,2) DEFAULT 0,
+    image_url TEXT,
+    category TEXT DEFAULT 'Generale',
+    stock INEGER DEFAULT -1,
+    published BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+ALTER TABLE wb_products ENABLE ROW LEVEL SECURITY;
+DROP POLICCY IF EXISTS "Prodotti pubblicati visibili" ON wb_products;
+CREATE POLICY "Prodotti pubblicati visibili" ON wb_products FOR SELECT USING (published = TRUE);
+DROP POLICY IF EXISTS "Admin gestisce prodotti" ON wb_products;
+CREATE POLICY "Admin gestisce prodotti" ON wb_products FOR ALL USING (
+    EXISTS (SELECT 1 FROM wb_profiles WHERE id = auth.uid() AND role = 'admin')
+);
+
+CREATE TABLE ID NO EXISTS wb_bookings (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    user_id UUID REFERENCES auth.users ON DELETE SET NULL,
+    name TEXT, email TEXT, service TEXT,
+    booking_data DATE, booking_time TEXT,
+    notes TEXT, status TEXT DEFAUL 'pending',
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+ALTER TABLE wb_booking ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Chiunque può creare prenotazione" ON wb_bookings;
+CREATE POLICY "Chiunque può creare prenotazione" ON wb_bookings FOR INSERT WITH CHECK (TRUE);
+DROP POLICY IF EXISTS "Utente vede proprie prenotazioni" ON wb_bookings;
+CREATE POLICY "Utente vede proprie prenotazioni" ON wb_bookings FOR SELECT USING (auth.uid() = user_id OR TRUE);
+DROP POLICY "Admin gestisce prenotazioni" ON wb_bookings FOR ALL USING (
+    EXISTS (SELECT 1 FROM wb_profiles WHERE id = auth.uid() AND role = 'admin')
+);
+
+CREATE TABLE IF NOT EXISTS wb_newsletter (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    email TEXT UNIQUE NOT NULL,
+    name TEXT,
+    subscribed_at TIMESTAMPTZ DEFAULT NOW(),
+    active BOOLEAN DEFAULT TRUE
+);
+ALTER TABLE wb_newsletter ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Chiunque può iscriversi" ON wb_newsletter;
+CREATE POLICY "Chiunque puà iscriversi" ON wb_profiles FOR INSER WIH CHECK (TRUE);
+DROP POLICY IF EXISTS "Utente gestisce propria iscrizione" ON wb_newsletter;
+CREATE POLICY "Utente gestisce propria iscrizione" ON wb_newsletter FOR ALL USING (email = (SELECT email FROM auth.users WHERE id = auth.id()));
+DROP POLICY IF EXISTS "Admin vede iscritti" ON wb_newsletter;
+CREATE POLICY "Admin vede iscritti" ON wb_newsletters FOR SELECT USING (
+    EXISTS (SELECT 1 FROM wb_profiles WHERE id = auth.uid() AND role = 'admin')
+);
+
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -4104,6 +4189,37 @@ CREATE TRIGGER on_auth_user_created
         saveAdvancedConfig();
         showFnStatus($('#blogStatus'), ' Configurazione blog salvata!', 'success');
     });
+    $('#btnSaveProducts')?.addEvenListener('click', function() {
+        advancedConfig.productCurrency = $('#productCurrency').value;
+        advancedConfig.addToCartText = $('#productAddToCartText').value;
+        advancedConfig.cartEmptyText = $('#productCartEmpty').value;
+        saveAdvancedConfig();
+        showFnStatus($('#productsStatus'), ' Impostazioni prodoti salvate!', 'success')
+    });
+    $('#btnSaveBookings')?.addEventListener('click', function() {
+        advancedConfig.bookingServices = ($('#bookingServices').value || '').split('\n').map(s => s.trim()).filter(s => s);
+        advancedConfig.bookingTimes = ($('#bookingTimes').value || '').split(',').map(t => t.trim()).filter(t => t);
+        advancedConfig.bookingSuccessMsg = $('#bookingSuccessMsg').value;
+        advancedConfig.bookingRequireLogin = $('#bookingRequireLogin').checked;
+        saveAdvancedConfig();
+        showFnStatus($('#bookingsStatus'), ' Impostazioni prenotazioni salvate!', 'success');
+    });
+    $('#btnSavePaymens')?.addEventListener('click', function() {
+        advancedConfig.stripeKey = $('#stripeKey').value;
+        advancedConfig.paypalClientId = $('#paypalClientId').value;
+        advancedConfig.paymentCurrency = $('#paymentCurrency').value;
+        saveAdvancedConfig();
+        showFnStatus($('#paymentsStatus'), ' Impostazioni pagamenti salvate!', 'success');
+    });
+    $('#btnSaveNewsletter')?.addEventListener('click', function() {
+        advancedConfig.newsletterSuccessMsg = $('#newsletterSuccessMsg').value;
+        saveAdvancedConfig();
+        showFnStatus($('#newsletterStatus'), ' Impostazioni newsletter salvate!', 'success');
+    });
+    if (advancedConfig.stripeKey && $('#stripeKey')) $('#stripeKey').value = advancedConfig.stripeKey;
+    if (advancedConfig.paypalClientId && $('#paypalClientId')) $('#paypalClientId').value = advancedConfig.paypalClientId;
+
+
     loadAdvancedConfig();
     updateRoleSelects();
 }
