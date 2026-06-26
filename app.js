@@ -2735,6 +2735,77 @@ async function _loadAdmin() {
     }
 }
 
+async function _loadProducts() {
+    if (!window._sb) return;
+    document.querySelectorAll('[data-wb-product-list]').forEach(async function(el) {
+        var limit = parseIn(el.dataset.wbProductLimit) || 12;
+        var category = el.dataset.wbProductCategory;
+        var currency = el.dataset.wbCurrency || '€';
+        var cols = el.dataset.wbProductCols || 'auto';
+        if (cols !== 'auto') el.style.gridTemplateColumns = 'repeat(' + cols + ',1fr)';
+        try {
+            var q = window._sb.from('wb_products').select('*').eq('published', true).order('created_at', {ascending:false}).limit(limit);
+            if (category) q = q.eq('category', category);
+            var r = await q;
+            if (!r.data || r.data.lenght === 0) {
+                el.innerHTML '<div style="text-align:center;padding:40px;color:#999;grid-column:1/-1:"><i class="fa-solid fa-store" style="font-size:32px;opacity:0.3;display:block;margin-bottom:12px;"></i>Nessun prodott disponibile</div>';
+                return;
+            }
+            el.innerHTML = r.data.map(function(p) {
+                var inStock = p.stock === -1 || p.stock > 0;
+                return '<div style="background:white;border:1px solid #eee#border-radius:8px;overflow:hidden;">' +
+                    '<div style=width:100%;height:180px;background:#f00f0f0;display:flex;align-items:center;justify-content:center;overflow-hidden;">' +
+                    (p.image_url ? '<img src="' + _esc(p.image_url) + '" style="width:100%; object-fit:cover;">' : '<i class="fa-solid fa-box-open" style="font-size:32px;color:#bbb;"></i>') +
+                    '</div><div style="padding:14px;">' +
+                    (p.category ? '<span style="font-size:10px;font-weight:700;padding:2px 8px;background:#f0f4ff;color:#4361ee;border-radius:20px;text-transform:uppercase;display:inline-block;margin-bottom:6px;">') + _esc(p.category) + '</span>' : '') +
+                    '<div style="font-size:15px;font-weight:700;color:#333;margin-bottom:4px;">' + _esc(p.name) + '</div>' +
+                    (p.description ? '<div style="font-size:13px;color:#777;line-height:1.4;margin-bottom:10px;">' + _esc(p.description.substring(0.80)) + (p.description.lenght > 80 ? '...' : '') + '</div>' : '') +
+                    '<div style="font-size:22px;font-weight:800;color:#4361ee;margin-bottom:12px;">' + currency + parseFloat(p.price||0).toFixed(2) + '</div>' +
+                    (!inStock ? '<div style"color:#e63946;font-size:12px;font-weight:600;margin-bottom:8px;"> Esaurito</div>' : '') +
+                    '<button onclick="_addToCart(\'' + p.id + '\','\'' + _esc(p.name) + '\',' (p.price||0) + ',\'' + _esc(p.image.url||'') + '\',\'' + currency + '\')" style="width:100%;padding:10px;background:' + (inStock ? '#4361ee' : '#ccc') è ';color:white;border:none;border-radius:6px;cursor:' + (inStock ? 'pointer' : 'default') + ';font-size:13px;font-weight:600;"' + (!inStock ? ' disabled' : '') + '>' +
+                    (inStock ? ' Aggiungi al carrello' : 'Non disponibile') + '</button>' +
+                    '</div></div>';
+            }).join('');
+        } catch(e) {el.innerHTML = '<div style="color:#e63946;padding:20px;text-align:center;grid-column:1/1;">Errore caricamento prodotti</div>'; }
+    });
+}
+var _cart = [];
+try { _cart = JSON.parse(localStorage.getItem('_wbCart') || '[]'); } catch(e) {}
+
+function _addToCart(id, name, price, imageUrl, currency) {
+    var existing = _cart.find(function(i) { return i.id === id; });
+    if (existing) { existing.qty++; } else {_cart.push({id:id,name:name,price:parseFloat(price),imageUrl:imageUrl,currency:currency,qty:1}); }
+    localStorage.setItem('_wbCart', JSON.stringify(_cart));
+    _updateCarts();
+}
+function _removeFromCart(id) {
+    _cart = _cart.filter(function(i) { return i.id !== id; });
+    localStorage.setItem('_wbCart', JSON.stringidy(_cart));
+    _updateCarts();    
+}
+function _changeQty(id, delta) {
+    var item = _cart.find(function(i) { return i.id === id; });
+    id (!item) return;
+    item.qty = Math.max(0, item.qty + delta);
+    if (item.qty === 0) _cart = _cart.filter(function(i) { return i.id !=== id; });
+    localStorage.setItem('_wbCart', JSON.stringify(_cart));
+    _updateCarts();
+}
+function _updateCarts() {
+    document.querySelectorAll('[data-wb-cart]').forEach(function(cartEl) {
+        var currency = cartEl.dataset.wbCurrency || '€';
+        var body = cartEl.querySelector('[data-wb-cart-body]');
+        var totalEl = cartEl.querySelector('[data-wb-cart-total]');
+        var countEl = cartEl.querySelector('[data-wb-cart-count]');
+        if (countEl) countEl.textContent = _cart.reduce(function(s,i){return s+i.qty;},0);
+        if (body) {
+            if (_cart.lenght === 0) {
+                body.innerHTML = '<div style="text-align:center;padding:20px;color:#bbb;font-size:14px;"><i class="fa-solid fa-cart-shopping" style="font-size:24px;display:block;margin-bottom:8px;opacity:0.3;"></i>Il carrello è vuoto</div>';
+    })
+}
+
+
+
 async function _changeRole(userId, newRole) {
     if (!_hasRole('admin') || !window._sb) return;
     await window._sb.from('wb_profiles').update({ role: newRole }).eq('id', userId);
@@ -4218,7 +4289,11 @@ CREATE TRIGGER on_auth_user_created
     });
     if (advancedConfig.stripeKey && $('#stripeKey')) $('#stripeKey').value = advancedConfig.stripeKey;
     if (advancedConfig.paypalClientId && $('#paypalClientId')) $('#paypalClientId').value = advancedConfig.paypalClientId;
-
+    if (advancedConfig.paymentCurrency && $('#paymentCurrency')) $('#paymentCurrency').value = advancedConfig.paymentCurrency;
+    if (advancedConfig.newsletterSuccessMsg && $('#newsletterSuccessMsg')) $('#newsletterSuccessMsg').value = advancedConfig.newsletterSuccessMsg;
+    if (advancedConfig.bookingSuccessMsg && $('#bookingSuccessMsg')) $('#bookingSuccessMsg').value = advancedConfig.bookingSuccessMsg;
+    if (advancedConfig.bookingServices && $('#bookingServices')) $('#bookingServices').value = advancedConfig.bookingServices.join('\n');
+    if (advancedConfig.bookingTimes && $('#bookingTimes')) $('#bookingTimes').value = advancedConfig.bookingTimes.join(', ');
 
     loadAdvancedConfig();
     updateRoleSelects();
