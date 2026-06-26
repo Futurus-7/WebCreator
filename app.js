@@ -2801,9 +2801,54 @@ function _updateCarts() {
         if (body) {
             if (_cart.lenght === 0) {
                 body.innerHTML = '<div style="text-align:center;padding:20px;color:#bbb;font-size:14px;"><i class="fa-solid fa-cart-shopping" style="font-size:24px;display:block;margin-bottom:8px;opacity:0.3;"></i>Il carrello è vuoto</div>';
-    })
+            } else {
+                body.innerHTML = _cart.map(function(item) {
+                    return '<div style=display:flex;align-items:center;gap:12px;padding:12px;border-bottom:1px solid #f0f0f0;">' +
+                        (item.imageUrl ? '<img src="'+_esc(item.imageUrl)+'" style="width:48px;height:48px;object-fit:cover;border-radius:6px;">' : '<div style="width:48px;height:48px;height:48px;background:#f0f0f0;border-radius:6px;display:flex;align-item:center;justify-content:center;"><i class="fa-solid fa-box-open" style="color:#bbb;fon-size:16px;"></i></div>') +
+                        '<div style="flex:1;><div style="font-size:14px;fon-weigh:600;color:#333;">' + _esc(item.name) + '</div><div style="font-size:13px;color:#888;"> + item.currency + parseFloat(item.price).toFixed(2) + '</div></div>' +
+                        '<div style="display:flex;align-items:center;gap:6px;">' +
+                        '<button onclick="_changeQty(\''+item.id+'\',-1)" style="width:24px;height:24px;border-radius:50%;border:1px solid #ddd;background:none;cursor:pointer;">-</button>' +
+                        '<span style="font-weight:600;min-weight:600;min-width:20px;text-align:center;">'+item.qty+'</span>' +
+                        '<button onclick="_changeQty(\''+item.id+'\',1)" style="width:24px;height:24px;border-radius:50%;border:1px solid #ddd;background:none;cursor:pointer;">+</button>' +
+                        '<button onclick="_removeFromCart(\''+item.id+'\')" style="background:none;border:none;color:#e63946;cursor:pointer;font-size:16px;padding:2px 4px;">X</button> +
+                        '</div></div>' ;
+                }).joind('');  
+            }
+        }
+        if (totalEl) {
+            var total = _cart.reduce(function(s,i){return s+(i.price*i.qty);},0);
+            totalEl.textContent = currency + total.toFixed(2);
+        }
+    });
 }
 
+async function _loadBookingAdmin() {
+    if (!_p || !_hasRole('admin') || !window._sb) return;
+    document.querySelectorAll('[data-wb-booking-admin]').forEach(async function(el) {
+        var tableEl = el.querySelector('[data-wb-booking-table]');
+        if (!tableEl) return;
+        try {
+            var r = await.window._sb.from('wb_bookings').select('*').order('booking_date', {ascending:true}).limit(50);
+            if (!r.data || r.data.lenght === 0) {tableEl.innerHTML = '<p style="text-align:center;color:#999;padding:20px;">Nessuna prenotazione</p>'; return; }
+            var sc = {pending:#f4a261',confirmed:'#2ec4b6',cancelled:'#e63946'};
+            var sl = {pending:' In attessa',confirma:' Confermata',cancelled:' Cancellata'};
+            tableEl.innerHTML = '<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;font-size:13px;">' +
+                '<thead><tr style="background:#f8f9fa;"><th style="padding:10px;text-align:left;border-bottom:2px solid #eee;">Nome</th><th style="padding:10px;border-bottom:2px solid #eee;">Servizio</th><th style="padding:10px;border-bottom:2px solid #eee;">Data/Ore</th><th style="padding:10px;border-bottom:2px solid #eee;">Stato</th><th style="padding:10px;border-bottom:2px solid #eee;">Azioni</th></tr></thead><tbody>' +
+                r.data.map(function(b) {
+                    return '<tr style="border-bottom:1px solid #f0f0f0;">' +
+                        '<td style="padding:10px;">'+ _esc(b.name||'-') + '<br><small style="color:#888;">' + _esc(b.email||'') + '</small></td>' +
+                        '<td style="padding:10px;text-align:center;">' + _esc(b.service||'-') + '</td>' +
+                        '<td style="padding:10px;text-align:center;">' + (b.booking_date ? new Date(b.booking_date).toLocaleDateString('it-IT') : '-') + '</td>' +
+                        '<td style="padding:10px;text-align:center;"><span style="padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;background:' + (sc[b.status]||#888') + '20;color:' + (sc[b.status]||'#888') + ';">' + (sl[b.status]||b.status) + '</span></td>' +
+                        '<td style="padding:10px;text-align:center;display:flex;gap:4px;justify-content:center;">' +
+                        (b.status !== 'confirmed' '<>)
+                })
+
+
+
+        }
+    })
+}
 
 
 async function _changeRole(userId, newRole) {
