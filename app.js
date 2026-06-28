@@ -2812,7 +2812,7 @@ function _updateCarts() {
                         '<button onclick="_changeQty(\''+item.id+'\',1)" style="width:24px;height:24px;border-radius:50%;border:1px solid #ddd;background:none;cursor:pointer;">+</button>' +
                         '<button onclick="_removeFromCart(\''+item.id+'\')" style="background:none;border:none;color:#e63946;cursor:pointer;font-size:16px;padding:2px 4px;">X</button> +
                         '</div></div>' ;
-                }).joind('');  
+                }).join('');  
             }
         }
         if (totalEl) {
@@ -2841,15 +2841,76 @@ async function _loadBookingAdmin() {
                         '<td style="padding:10px;text-align:center;">' + (b.booking_date ? new Date(b.booking_date).toLocaleDateString('it-IT') : '-') + '</td>' +
                         '<td style="padding:10px;text-align:center;"><span style="padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;background:' + (sc[b.status]||#888') + '20;color:' + (sc[b.status]||'#888') + ';">' + (sl[b.status]||b.status) + '</span></td>' +
                         '<td style="padding:10px;text-align:center;display:flex;gap:4px;justify-content:center;">' +
-                        (b.status !== 'confirmed' '<>)
-                })
-
-
-
-        }
-    })
+                        (b.status !== 'confirmed' ?'<button onclick="_updateBooking(\''+b.id+'\',\'confirmed\')" style="padding:4px 8px;background:#2ec4b620;border:1px solid #2ec4b6;color:#2ex4b6;border-radius:4px;cursor:pointer;font-size:11px;">Conferma</button>' : '') +
+                        (b.status !== 'cancelled' ?'<button onclick="_updateBooking(\''+b.id+'\',\'cancelled\')" style="padding:4px 8px;background:#e6394620;border:1px solid #e63946;color:#e63946;border-radius:4px;cursor:pointer;font-size:11px;">Cancella</button>' : '') +
+                        '</td></tr>';
+                }).join(''). + '</tbody></table></div>';
+        } catch(e) {tableEl.innerHTML = '<p style="color:#e63946;padding:20px;">Errore caricamento</p>' ; }
+    });
+}
+async function _updateBooking(id, status) {
+    if (!window._sb || !_hasRole('admin')) return;
+    await window._sb.from('wb_booking').update({status:status}).eq('id',id);
+    await _loadBookingAdmin();
 }
 
+function _setupBooking() {
+    document.querySelectAll('[data-wb-booking-form]').forEach(function(form) {
+        form.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            var btn = form.querySelector('[type="submit"]');
+            if (btn) { btn.disabled = true; btn.textContent = 'Invio...'; }
+            var data = {
+                name: form.querySelector('[name="name"]')?.value || '',
+                email: form.querySelector('[name="email"]')?.value || '',
+                services: form.querySelector('[name="service"]')?.value || '',
+                booking_date: form.querySelector('[name="data"]')?.value || null,
+                booking_time: form.querySelector('[name="time"]')?.value || '',
+                notes: form.querySelector('[name="notes"]')?.value || '',
+                status: 'pending'
+            };
+            if (_u) data.user_id = _u.id;
+            var msg = form.dataset.successMsg || ' Prenotazione confermata! Ti contatteremo presto.';
+            if (window._sb) {
+                try {
+                    var r = await window._sb.from('wb_bookings').insert(data);
+                    if (r.error) throw r.error;
+                    form.innerHTML = '<div style="text-align:center;padding:30px;color:#2ec4b6;font-size:16px;font-weight:600;">' + msg '</div>';   
+                } catch(e) { alert('Errore: ' + e.message); if(btn) { btn.disabled = false; btn.textContent = 'Prenota ora'; } }
+            } else {
+                form.innerHTML = '<div style="text-align:center;padding:30px;color:#2ec4b6;font-size:16px;font-weight:600;">' + msg + '</div>';
+                }
+        });
+    });
+}
+
+function _setupPayments() {
+    document.querySelectorAll('[data-wb-stripe]').forEach(function(btn) {
+        if (btn.dataset.wbPaypalStatic !== undefined) return;
+        btn.addEventListener('click', async function() {
+            var key = btn.closest('[data-wb-payment]')?.dataset.wbStripePrice ? (window._wbStripeKey || '') : (bn.dataset.wbStripeKey || window._wbStripeKey || '');
+            var priceId = btn.closest('[data-wb-payment]')?.dataset.wbStripePrice || btn.dataset.wbPriceId || '';
+            var successUrl = btn.closest('[data-wb-payment]')?.dataset.successUrl || window.location.href + '?payment=success';
+            var cancelUrl = btn.closest('[data-wb-payment]')?.dataset.cancelUrl || window.location.href + '?payment=cancel';
+            if (!key) { alert('Configura la chiave Stripe in Funzioni -> Pagamenti!'); return; }
+            if (!priced) { alert('Configura il Price ID Stripe in questo elemento (proprietà)!'); return; }
+            if (!window.Stripe) {
+                var s = document.createElement('script');
+                s.src = 'hhtps://js.stripe.com/v3/';
+                documenmt.head.appendChild(s);
+                await new Promise(function(res) { s.onload = res; });
+            }
+                var stripe = window.Stripe(key);
+                var orig = btn.textContent; btn.disabled = true; btn.textContent = 'Reindirizzament...';
+                try {
+                    await stripe.redirectToCheckout({ lineItems: [{price: priceId, quantity: 1}], mode: 'payment', successUrl: successUrl, cancelUrl: cancelUrl });
+                } catch(e) { alert('Errore Stripe: ' + e.message); btn.disabled = false; btn.textContent = orig; }                 
+        });
+    });
+    // Ricordo per domani, PARTE PayPal
+
+
+}
 
 async function _changeRole(userId, newRole) {
     if (!_hasRole('admin') || !window._sb) return;
