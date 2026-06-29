@@ -696,7 +696,7 @@ function getElementHTML(type) {
                                 </div>
                             </div>`,
                         'block-product-list': `
-                            <div class="wb-product-list" data-wb-product-list data-wb-product-limit="12" data-wb-currency"€">
+                            <div class="wb-product-list" data-wb-product-list data-wb-product-limit="12" data-wb-currency="€">
                                 <div class="wb-product-placeholder">
                                     <i class="fa-solid fa-store"></i>
                                     <p>I prodotti appariranno qui</p>
@@ -705,12 +705,12 @@ function getElementHTML(type) {
                             </div>`,
                         'block-product-card': `
                             <div class="wb-product-card-static" data-wb-product-static>
-                                <div class="wb-produc-img-wrap">
+                                <div class="wb-product-img-wrap">
                                     <i class="fa-solid fa-box-open"></i>
                                 </div>
-                                <div class="wb-produc-info">
+                                <div class="wb-product-info">
                                     <div class="wb-product-category">Categoria</div>
-                                    <div class="wb-product-name" conenteditable="true">Nome Prodotto</div>
+                                    <div class="wb-product-name" contenteditable="true">Nome Prodotto</div>
                                     <div class="wb-product-desc" contenteditable="true">Descrizione breve del prodotto. Modifica questo testo.</div>
                                     <div class="wb-product-price" contenteditable="true">€29.99</div>
                                     <button class="wb-add-to-cart-btn" data-wb-static-cart> Aggiungi al carrello</button>
@@ -740,7 +740,7 @@ function getElementHTML(type) {
                                     <input type="text" name="name" class="wb-input" placeholder="Il tuo nome *" required>
                                     <input type="email" name="email" class="wb-input" placeholder="Email *" required>
                                 </div>
-                                <div style="margin-boottom:12px;">
+                                <div style="margin-bottom:12px;">
                                     <label style="display:block;font-size:13px;color:#555;margin-bottom:4px;">Servizio *</label>
                                     <select name="service" class="wb-select" required>
                                         <option value="">Seleziona un servizio...</option>
@@ -757,8 +757,8 @@ function getElementHTML(type) {
                                         <label style="display:block;font-size:13px;color:#555;margin-bottom:4px;">Orario *</label>
                                         <select name="time" class="wb-select" required>
                                             <option value="">Seleziona...</option>
-                                            <option>09.00</option>
-                                            <option>10.00</option>
+                                            <option>09:00</option>
+                                            <option>10:00</option>
                                             <option>11:00</option>
                                             <option>14:00</option>
                                             <option>15:00</option>
@@ -767,7 +767,7 @@ function getElementHTML(type) {
                                     </div>
                                 </div>
                                 <div style="margin-bottom:16px;">
-                                    <label style="display:block;font-size:13px:color:#555;margin-bottom:4px;">Note (opzionale)</label>
+                                    <label style="display:block;font-size:13px;color:#555;margin-bottom:4px;">Note (opzionale)</label>
                                     <textarea name="notes" class="wb-textarea-el" placeholder="Informazioni aggiuntive..." rows="3"></textarea>
                                 </div>
                                 <button type="submit" class="wb-button" style="width:100%; cursor:pointer;"> Prenota ora</button>
@@ -786,12 +786,12 @@ function getElementHTML(type) {
                                 <div class="wb-payment-desc" contenteditable="true">Accesso completo per 1 mese</div>
                                 <div class="wb-payment-amount">€29.99</div>
                                 <hr class="wb-payment-divider">
-                                <div style="display:flex;flex-direcion:column;gap:10px;align-items:center;">
+                                <div style="display:flex;flex-direction:column;gap:10px;align-items:center;">
                                     <button class="wb-stripe-btn" data-wb-stripe>
                                         <i class="fa-brands fa-stripe-s"></i> Paga con Stripe
                                     </button>
                                     <div data-wb-paypal-container style="width:100%;">
-                                        <button class="wb-paypal-bn" data-wb-paypal-static>
+                                        <button class="wb-paypal-btn" data-wb-paypal-static>
                                             <i class="fa-brands fa-paypal"></i> Paga con PayPal
                                         </button>
                                     </div>
@@ -801,7 +801,7 @@ function getElementHTML(type) {
                                 </div>
                             </div>`,
                         'block-stripe-btn': `
-                            <div style="tex-align:center;">
+                            <div style="text-align:center;">
                                 <button class="wb-stripe-btn" data-wb-stripe style="display:inline-flex;width:auto;">
                                     <i class="fa-brands fa-stripe-s"></i> Paga con Stripe
                                 </button>
@@ -2888,12 +2888,12 @@ function _setupPayments() {
     document.querySelectorAll('[data-wb-stripe]').forEach(function(btn) {
         if (btn.dataset.wbPaypalStatic !== undefined) return;
         btn.addEventListener('click', async function() {
-            var key = btn.closest('[data-wb-payment]')?.dataset.wbStripePrice ? (window._wbStripeKey || '') : (bn.dataset.wbStripeKey || window._wbStripeKey || '');
+            var key = btn.closest('[data-wb-payment]')?.dataset.wbStripePrice ? (window._wbStripeKey || '') : (btn.dataset.wbStripeKey || window._wbStripeKey || '');
             var priceId = btn.closest('[data-wb-payment]')?.dataset.wbStripePrice || btn.dataset.wbPriceId || '';
             var successUrl = btn.closest('[data-wb-payment]')?.dataset.successUrl || window.location.href + '?payment=success';
             var cancelUrl = btn.closest('[data-wb-payment]')?.dataset.cancelUrl || window.location.href + '?payment=cancel';
             if (!key) { alert('Configura la chiave Stripe in Funzioni -> Pagamenti!'); return; }
-            if (!priced) { alert('Configura il Price ID Stripe in questo elemento (proprietà)!'); return; }
+            if (!priceId) { alert('Configura il Price ID Stripe in questo elemento (proprietà)!'); return; }
             if (!window.Stripe) {
                 var s = document.createElement('script');
                 s.src = 'hhtps://js.stripe.com/v3/';
@@ -2907,9 +2907,60 @@ function _setupPayments() {
                 } catch(e) { alert('Errore Stripe: ' + e.message); btn.disabled = false; btn.textContent = orig; }                 
         });
     });
-    // Ricordo per domani, PARTE PayPal
-
-
+    document.querySelectorAll('[data-wb-paypal]').forEach(function(container) {
+        var clientId = window._wbPaypalKey || '';
+        var amount = container.closest('[data-wb-payment]')?.dataset.wbAmount || container.dataset.wbAmount || '10.00';
+        var currency = container.closest('[data-wb-payment]')?.dataset.wbCurrency || container.dataset.wbCurrency || 'EUR';
+        if (!clientId) return;
+        var staticBtn = container.querySelector('[data-wb-paypal-static]');
+        if (staticBtn) staticBtn.style.display = 'none';
+        var divEl = document.createElement('div');
+        divEl.id = '_wb_pp_' + Math.random().toSring(36).slice(2);
+        container.appendChild(divEl);
+        if (!document.querySelector('script[src*="paypal.com/sdk"]')) {
+            var s = document.createElement('script');
+            s.src = 'https://www.paypal.com/sdk/js?client-id=' + clientId + '&currency=' + currency.replace('€','EUR').replace('$','USD').replace('£','GBP');
+            s.onload = function() { _renderPayPal(divEl, amount, currency, container.dataset.successMsg); };
+            document.head.appendChild(s);
+        } else if (window.paypal) {
+            _renderPayPal(divEl, amount, currency, container.dataset.successMsg); 
+        }
+    });
+}
+function _renderPayPal(el, amount, currency, successMsg) {
+    if (!window.paypal) return;
+    window.paypal.Buttons({
+        createOrder: function(data, actions) {
+            return actions.order.create({ purchase_units: [{ amount: { value: String(amount), currency_code: currency.replace('€','EUR').replace('$','USD').replace('£','GBP')
+        },
+        onApprove: function(data, actions) {
+            return actions.order.capture().then(function(details) {
+                alert(successMsg || ' Pagamento completato! Grazie ' + details.payer.name.given_name + '.');
+            });
+        }
+    }).render(el);
+}
+function _setupNewsletter() {
+    document.querySelectorAll('[data-wb-newsletter]').forEach(function(widget) {
+        var btn = widget.querySelector('[data-wb-newsleter-btn]');
+        var emailInput = widget.querySelector('[data-wb-newsletter-email]');
+        if (!btn) return;
+        btn.addEventListener('click', async function() {
+            var email = emailInput ? emailInput.value.trim() : '';
+            if (!email || !email.includer('@')) { alert('Inserisci un\'email valida!); return; }
+            var orig = btn.textContent; btn.disabled = true; btn.textContent = '...';
+            var msg = widget.dataset.successMsg || ' Iscritto! Grazie.';
+            if (window._sb) {
+                try {
+                    var r = await window._sb.from('wb_newsletter').upsert({ email: email, subscribed_at: new Date().toISOString(), active: true }, { onConflict: 'email' });
+                    if (r.error) throw r.error;
+                    widget.innerHTML = '<div style="text-align:center;padding:24px;color:white;font-size:16px;font-weight:600;opacity:0.95;"> + msg + '</div>';
+                } catch(e) { alert('Errore: ' + e.message); btn.disabled = false; btn.textContent = orig; }    
+            } else {
+                widget.innerHTML = '<div style="text-align:center;padding:24px;color:white;font-size:16px;font-weight:600;opacity:0.95;">' + msg + '</div>';
+            }
+        });
+    });
 }
 
 async function _changeRole(userId, newRole) {

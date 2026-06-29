@@ -249,13 +249,9 @@
             <div class="panel-section">
                 <h4 class="section-title" data-toggle="products">Prodotti & Catalogo</h4>
                 <div class="section-content" id="products">
-                    <div class="draggable-items" draggable="true" data-type="block-product-list">
+                    <div class="draggable-item" draggable="true" data-type="block-product-list">
                         <i class="fa-solid fa-store"></i>
                         <span>Catalogo</span>
-                    </div>
-                    <div class="draggable-item" draggable="true" data-type="block-product-card">
-                        <i class="fa-solid fa-box-open"></i>
-                        <span>Prodotto</span>
                     </div>
                     <div class="draggable-item" draggable="true" data-type="block-product-card">
                         <i class="fa-solid fa-box-open"></i>
@@ -287,18 +283,26 @@
                         <i class="fa-solid fa-credit-card"></i>
                         <span>Widget Pagamento</span>
                     </div>
-                    <div class="panel-section">
-                        <h4 class="section-title" data-toggle="newsletter">Newsletter</h4>
-                        <div class="section-content" id="newsletter">
-                            <div class="dragging-item" draggable="true" data-type="block-newsletter">
-                                <i class="fa-solid fa-envelope-open-text"></i>
-                                <span>Newsletter</span>
-                            </div>
-                        </div>
+                    <div class="draggable-item" draggable="true" data-type="block-stripe-btn">
+                        <i class="fa-brands fa-stripe-s"></i>
+                        <span>Stripe</span>
                     </div>
-
+                    <div class="draggable-item" draggable="true" data-type="block-paypal-btn">
+                        <i class="fa-brands fa-paypal"></i>
+                        <span>PayPal</span>
+                    </div>
+                </div>
+            </div>
+            <div class="panel-section">
+                <h4 class="section-title" data-toggle="newsletter">Newsletter</h4>
+                <div class="section-content" id="newsletter">
+                    <div class="dragging-item" draggable="true" data-type="block-newsletter">
+                        <i class="fa-solid fa-envelope-open-text"></i>
+                        <span>Newsletter</span>
+                    </div>
+                </div>
+            </div>
         </aside>
-
     <main class="canvas-area">
         <div class="canvas-wrapper" id="canvasWrapper">
            <div class="free-toolbar" id="freeToolbar" style="display:none;">
@@ -517,7 +521,7 @@
                         <label class="prop-label" style="margin-top:8px;">Numero prodotto da mostrare</label>
                         <input type="number" class="prop-input" id="propProductLimit" value="12" min="1" max="100">
                         <label class="prop-label" style="margin-top:8px;">Categoria (vuoto = tutte)</label>
-                        <input type="text" class="prop-input" id="propProductCaegory" placeholder="es: Abbigliamento">
+                        <input type="text" class="prop-input" id="propProductCategory" placeholder="es: Abbigliamento">
                         <label class="prop-label" style="margin-top:8px;">Valuta</label>
                         <input type="text" class="prop-input" id="propProductCurrency" placeholder="€" style="max-width:80px;">
                         <label class="prop-label" style="margin-top:8px;">Colonne griglia</label>
@@ -531,9 +535,9 @@
                     <div class="prop-group" id="bookingFormConfig" style="display:none;">
                         <label class="prop-label" style="color:var(--accent);"> Configurazione Form Prenotazione</label>
                         <label class="prop-label" style="margin-top:8px;">Titolo form</label>
-                        <input type="text" class="prop-inpu" id="propBookingTitle" placeholder="Prenota un appuntamento">
+                        <input type="text" class="prop-input" id="propBookingTitle" placeholder="Prenota un appuntamento">
                         <label class="prop-label" style="margin-top:8px;">Messaggio di conferma</label>
-                        <input type="text" class="prop-input" id="propBookingSuccess" placeolder="Prenotazione confermata!">
+                        <input type="text" class="prop-input" id="propBookingSuccess" placeholder="Prenotazione confermata!">
                         <label class="prop-label" style="margin-top:8px;">Orari (separati da virgola)</label>
                         <input type="text" class="prop-input" id="propBookingTimes" placeholder="09:00, 10:00, 11:00, 15:00">
                     </div>
@@ -546,7 +550,7 @@
                         <label class="prop-label" style="margin-top:8px;">Prezzo (es: 29.99)</label>
                         <input type="text" class="prop-input" id="propPaymentAmount" placeholder="29.99">
                         <label class="prop-label" style="margin-top:8px;">Valuta</label>
-                        <input type="text" class="prop-input" id="propPaymentCurrency" placeholder="€" style="max-width:80;">
+                         <input type="text" class="prop-input" id="propPaymentCurrency" placeholder="€" style="max-width:80px;">
                         <label class="prop-label" style="margin-top:8px;">Stripe Price ID (per Stripe)</label>
                         <input type="text" class="prop-input" id="propStripePrice" placeholder="price_xxx">
                         <label class="prop-label" style="margin-top:8px;">URL successo pagamento</label>
@@ -556,7 +560,7 @@
                             Mostra bottone Stripe
                         </label>
                         <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:12px;color:var(--text-secondary);margin-top:6px;">
-                            <input type="checkbox" id="propShowPaypal" style="width:14;height:14px;" checked>
+                            <input type="checkbox" id="propShowPaypal" style="width:14px;height:14px;" checked>
                             Mostra bottone PayPal
                         </label>
                     </div>
@@ -1215,7 +1219,7 @@ admin</textarea>
                         <div class="fn-panel" id="fn-products">
                             <h2 style="font-size:18px;margin-bottom:6px;"> Prodotti & Catalogo</h2>
                             <p style="color:var(--text-secondary);font-size:13px;margin-bottom:20px;">Configura il catalogo prodotti del tuo sito. I prodotti vengono gestiti nel database Supabase.</p>
-                            <div style="background:rgba(67,97,238,0.1);border:1px solid var(--accent);border-radius:8px;padding:14px;margin-bottom:16;">
+                            <div style="background:rgba(67,97,238,0.1);border:1px solid var(--accent);border-radius:8px;padding:14px;margin-bottom:16px;">
                                 <strong style="color:var(--accent);font-size:13px;">Come aggiungere prodotti</strong>
                                 <ol style="color:var(--text-secondary);font-size:12px;margin-top:8px;padding-left:18px;line-height:2.2;">
                                     <li>Configura Login & Utenti e Setup Database</li>
@@ -1247,7 +1251,7 @@ admin</textarea>
                                 <div id="productsStatus" style="display:none;margin-top:12px;padding:10px;border-radius:6px;font-size:13px;text-align:center;"></div>
                             </div>
                             <div class="fn-panel" id="fn-bookings">
-                                <h2 style="font-size:18px;margin-bottom:6pz;"> Prenotazioni</h2>
+                                <h2 style="font-size:18px;margin-bottom:6px;"> Prenotazioni</h2>
                                 <p style="color:var(--text-secondary);font-size:13px;margin-bottom:20px;">Configura il sistema di prenotazioni. Gli utenti compilano il form e le prenotazioni vengono salvate in Supabase.</p>
                                 <div class="prop-group">
                                     <label class="prop-label">Servizi disponibili (uno per riga)</label>
@@ -1262,7 +1266,7 @@ admin</textarea>
                                     <input type="text" class="prop-input" id="bookingSuccessMsg" value=" Prenotazione confermata! Ti contatteremo presto." placeholder="Messaggio dopo invio">
                                 </div>
                                 <div class="prop-group">
-                                    <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:12;color:var(--text-secondary);">
+                                    <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:12px;color:var(--text-secondary);">
                                         <input type="checkbox" id="bookingRequireLogin" style="width:16px;height:16px;cursor:pointer;">
                                         Richiedi login per prenotare
                                     </label>
@@ -1285,8 +1289,8 @@ admin</textarea>
                                     </ol>
                                 </div>
                                 <div class="prop-group">
-                                    <label class="prop-label">PayPal Client ID</label>
-                                    <input type="text" class="prop-input" id="paypalClientId" placeholder="AXxxx... (Client ID sandbox o live)">
+                                    <label class="prop-label">Stripe Publishable Key</label>
+                                    <input type="text" class="prop-input" id="stripeKey" placeholder="pk_live_... oppure pk_test_...">
                                 </div>
                                 <div class="prop-group">
                                     <label class="prop-label">PayPal Client ID</label>
