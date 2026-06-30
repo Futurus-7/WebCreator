@@ -1623,7 +1623,7 @@ function initPropertyInputs() {
     $('#propProductLimit')?.addEventListener('change', () => {
         if (!state.selectedElement) return;
         const pl = state.selectedElement.querySelector('[data-wb-product-list]');
-        if (pl) pl.dataset.wbProductCategory = $('#propProductCategory').value;
+        if (pl) pl.dataset.wbProductLimit = $('#propProductLimit').value;
         saveHistory();
     });
     $('#propProductCategory')?.addEventListener('change', () => {
@@ -1662,7 +1662,7 @@ function initPropertyInputs() {
     $('#propPaymentName')?.addEventListener('input', () => {
         if (!state.selectedElement) return;
         const n = state.selectedElement.querySelector('.wb-payment-product');
-        if (n) n.textContent = $('#propPaymenName').value;
+        if (n) n.textContent = $('#propPaymentName').value;
         saveHistory();
     });
     $('#propPaymentDesc')?.addEventListener('input', () => {
@@ -1677,13 +1677,14 @@ function initPropertyInputs() {
             const pm = state.selectedElement.querySelector('[data-wb-payment]');
             if (!pm) return;
             if (id === 'propPaymentAmount') {
-                pm.dataset.wbAmoun = document.getElementById(id).value;
+                pm.dataset.wbAmount = document.getElementById(id).value;
                 const amtEl = state.selectedElement.querySelector('.wb-payment-amount');
-                if (amtEl) amtEl.textContent = (document.getElementById('propPaymentCurrency'))
+                if (amtEl) amtEl.textContent = (document.getElementById('propPaymentCurrency')?.value || '€') + document.getElementById(id).value;
             }
             if (id === 'propPaymentCurrency') pm.dataset.wbCurrency = document.getElementById(id).value;
             if (id === 'propStripePrice') pm.dataset.wbStripePrice = document.getElementById(id).value;
-            if (id === 'propPaymentSuccess') pm.dataset.successUrl = documentt.getElementById(id).value;
+            if (id === 'propPaymentSuccess') pm.dataset.successUrl = document.getElementById(id).value;
+            saveHistory();
         });
     });
     $('#propNewsletterTitle')?.addEventListener('input', () => {
@@ -1708,6 +1709,7 @@ function initPropertyInputs() {
         if (!state.selectedElement) return;
         const nl = state.selectedElement.querySelector('[data-wb-newsletter]');
         if (nl) nl.dataset.successMsg = $('#propNewsletterSuccess').value;
+        saveHistory();
     });
 }
 function buildActionRow(action, index) {
@@ -1995,9 +1997,9 @@ function updatePropertyPanel() {
             break;
         }
         case 'block-product-list': {
-            const ppc = document.getElementBydId('productListConfig');
+            const ppc = document.getElementById('productListConfig');
             if (ppc) ppc.style.display = 'block';
-            const pll = el.querySelector('[data-wb-product-list');
+            const pll = el.querySelector('[data-wb-product-list]');
             if ($('#propProductLimit')) $('#propProductLimit').value = pll?.dataset.wbProductLimit || 12;
             if ($('#propProductCategory')) $('#propProductCategory').value = pll?.dataset.wbProductCategory || '';
             if ($('#propProductCurrency')) $('#propProductCurrency').value = pll?.dataset.wbCurrency || '€';
@@ -2006,7 +2008,7 @@ function updatePropertyPanel() {
         case 'block-booking-form': {
             const bfc = document.getElementById('bookingFormConfig');
             if (bfc) bfc.style.display = 'block';
-            if ($('#propBookingTitle')) $('#propBookingTitle').value = el.querySelector('h3')?.texContent || '';
+            if ($('#propBookingTitle')) $('#propBookingTitle').value = el.querySelector('h3')?.textContent || '';
             if ($('#propBookingSuccess')) $('#propBookingSuccess').value = el.querySelector('[data-wb-booking-form]')?.dataset.successMsg || '';
             break;
         }
@@ -2015,7 +2017,7 @@ function updatePropertyPanel() {
             if (pmc) pmc.style.display = 'block';
             const pmEl = el.querySelector('[data-wb-payment]');
             if ($('#propPaymentName')) $('#propPaymentName').value = el.querySelector('.wb-payment-product')?.textContent || '';
-            if ($('#propPaymentDesc')) $('#propPaymentDesc').value = el.querySelector('.wb-payment-desc')?.texContent || '';
+            if ($('#propPaymentDesc')) $('#propPaymentDesc').value = el.querySelector('.wb-payment-desc')?.textContent || '';
             if ($('#propPaymentAmount')) $('#propPaymentAmount').value = pmEl?.dataset.wbAmount || '';
             if ($('#propPaymentCurrency')) $('#propPaymentCurrency').value = pmEl?.dataset.wbCurrency || '€';
             if ($('#propStripePrice')) $('#propStripePrice').value = pmEl?.dataset.wbStripePrice || '';
@@ -2027,7 +2029,7 @@ function updatePropertyPanel() {
             if ($('#propNewsletterTitle')) $('#propNewsletterTitle').value = el.querySelector('h3')?.textContent || '';
             if ($('#propNewsletterSubtitle')) $('#propNewsletterSubTitle').value = el.querySelector('p')?.textContent || '';
             if ($('#propNewsletterBtn')) $('#propNewsletterBtn').value = el.querySelector('[data-wb-newsletter-btn]')?.textContent || '';
-            if ($('#propNewsletterSuccess')) $('#propNewsletterSuccess'). value = el.querySelector('#[data-wb-newsletter]')?.dataset.successMsg || '';
+            if ($('#propNewsletterSuccess')) $('#propNewsletterSuccess').value = el.querySelector('[data-wb-newsletter]')?.dataset.successMsg || '';
             break;
         }
 
@@ -2638,7 +2640,7 @@ async function _loadBlog() {
             if (cat) q = q.eq('category', cat);
             var r = await q;
             if (!r.data || r.data.length === 0) {
-                el.innerHTML = '<div style="text-align:center;padding:40px;color:#999;"><i class="fa-solid fa-newspaper" style="font-size:32px;opacity:0.3;display:block;margin-bottom:12px;"></i>Nessun post ancora. Sii il primo!</div>';
+                el.innerHTML = '<div style="text-align:center;padding:40px;color:#999;grid-column:1/-1;"><i class="fa-solid fa-store" style="font-size:32px;opacity:0.3;display:block;margin-bottom:12px;"></i>Nessun prodotto disponibile</div>';
                 return;
             }
             el.innerHTML = r.data.map(function(post) {
@@ -2699,7 +2701,7 @@ async function _loadAdmin() {
                             _roles.map(function(role) { return '<option value="' + role + '"' + (user.role === role ? ' selected' : '') + '>' + role + '</option>'; }).join('') +
                             '</select></td>' +
                             '<td style="padding:10px;text-align:center;">' +
-                            (user.id !== (_u?.id||'') ? '<button onclick="_banUser(\'' + user.id + '\')" style="background:none;border:1px solid #e63946;color:#e63946;border-radius:4px;padding:4px 10px;cursor:pointer;font-size:11px;" 10px;cursor:pointer;font-size:11px;cursor:pointer;font-size:11px;">Ban</button>' : '<em style="color:#999;font-size:11px;">Tu</em>') +
+                            (user.id !== (_u?.id||'') ? '<button onclick="_banUser(\'' + user.id + '\')" style="background:none;border:1px solid #e63946;color:#e63946;border-radius:4px;padding:4px 10px;cursor:pointer;font-size:11px;">Ban</button>' : '<em style="color:#999;font-size:11px;">Tu</em>') +                            
                             '</td></tr>';
                     }).join('') + '</tbody></table></div>';
             }
@@ -2738,7 +2740,7 @@ async function _loadAdmin() {
 async function _loadProducts() {
     if (!window._sb) return;
     document.querySelectorAll('[data-wb-product-list]').forEach(async function(el) {
-        var limit = parseIn(el.dataset.wbProductLimit) || 12;
+        var limit = parseInt(el.dataset.wbProductLimit) || 12;
         var category = el.dataset.wbProductCategory;
         var currency = el.dataset.wbCurrency || '€';
         var cols = el.dataset.wbProductCols || 'auto';
@@ -2753,20 +2755,20 @@ async function _loadProducts() {
             }
             el.innerHTML = r.data.map(function(p) {
                 var inStock = p.stock === -1 || p.stock > 0;
-                return '<div style="background:white;border:1px solid #eee#border-radius:8px;overflow:hidden;">' +
-                    '<div style=width:100%;height:180px;background:#f00f0f0;display:flex;align-items:center;justify-content:center;overflow-hidden;">' +
-                    (p.image_url ? '<img src="' + _esc(p.image_url) + '" style="width:100%; object-fit:cover;">' : '<i class="fa-solid fa-box-open" style="font-size:32px;color:#bbb;"></i>') +
+                return '<div style="background:white;border:1px solid #eee;border-radius:8px;overflow:hidden;">' +
+                    '<div style="width:100%;height:180px;background:#f0f0f0;display:flex;align-items:center;justify-content:center;overflow:hidden;">' +
+                    (p.image_url ? '<img src="' + _esc(p.image_url) + '" style="width:100%;height:100%;object-fit:cover;">' : '<i class="fa-solid fa-box-open" style="font-size:32px;color:#bbb;"></i>') +
                     '</div><div style="padding:14px;">' +
-                    (p.category ? '<span style="font-size:10px;font-weight:700;padding:2px 8px;background:#f0f4ff;color:#4361ee;border-radius:20px;text-transform:uppercase;display:inline-block;margin-bottom:6px;">') + _esc(p.category) + '</span>' : '') +
+                    (p.category ? '<span style="font-size:10px;font-weight:700;padding:2px 8px;background:#f0f4ff;color:#4361ee;border-radius:20px;text-transform:uppercase;display:inline-block;margin-bottom:6px;">' + _esc(p.category) + '</span>' : '') +
                     '<div style="font-size:15px;font-weight:700;color:#333;margin-bottom:4px;">' + _esc(p.name) + '</div>' +
-                    (p.description ? '<div style="font-size:13px;color:#777;line-height:1.4;margin-bottom:10px;">' + _esc(p.description.substring(0.80)) + (p.description.lenght > 80 ? '...' : '') + '</div>' : '') +
+                    (p.description ? '<div style="font-size:13px;color:#777;line-height:1.4;margin-bottom:10px;">' + _esc(p.description.substring(0,80)) + (p.description.length > 80 ? '...' : '') + '</div>' : '') +
                     '<div style="font-size:22px;font-weight:800;color:#4361ee;margin-bottom:12px;">' + currency + parseFloat(p.price||0).toFixed(2) + '</div>' +
-                    (!inStock ? '<div style"color:#e63946;font-size:12px;font-weight:600;margin-bottom:8px;"> Esaurito</div>' : '') +
-                    '<button onclick="_addToCart(\'' + p.id + '\','\'' + _esc(p.name) + '\',' (p.price||0) + ',\'' + _esc(p.image.url||'') + '\',\'' + currency + '\')" style="width:100%;padding:10px;background:' + (inStock ? '#4361ee' : '#ccc') è ';color:white;border:none;border-radius:6px;cursor:' + (inStock ? 'pointer' : 'default') + ';font-size:13px;font-weight:600;"' + (!inStock ? ' disabled' : '') + '>' +
+                    (!inStock ? '<div style="color:#e63946;font-size:12px;font-weight:600;margin-bottom:8px;"> Esaurito</div>' : '') +
+                    '<button onclick="_addToCart(\'' + p.id + '\',\'' + _esc(p.name) + '\',' + (p.price||0) + ',\'' + _esc(p.image_url||'') + '\',\'' + currency + '\')" style="width:100%;padding:10px;background:' + (inStock ? '#4361ee' : '#ccc') + ';color:white;border:none;border-radius:6px;cursor:' + (inStock ? 'pointer' : 'default') + ';font-size:13px;font-weight:600;"' + (!inStock ? ' disabled' : '') + '>' +
                     (inStock ? ' Aggiungi al carrello' : 'Non disponibile') + '</button>' +
                     '</div></div>';
             }).join('');
-        } catch(e) {el.innerHTML = '<div style="color:#e63946;padding:20px;text-align:center;grid-column:1/1;">Errore caricamento prodotti</div>'; }
+        } catch(e) { el.innerHTML = '<div style="color:#e63946;padding:20px;text-align:center;grid-column:1/-1;">Errore caricamento prodotti</div>'; }
     });
 }
 var _cart = [];
@@ -2780,14 +2782,14 @@ function _addToCart(id, name, price, imageUrl, currency) {
 }
 function _removeFromCart(id) {
     _cart = _cart.filter(function(i) { return i.id !== id; });
-    localStorage.setItem('_wbCart', JSON.stringidy(_cart));
+    localStorage.setItem('_wbCart', JSON.stringify(_cart));
     _updateCarts();    
 }
 function _changeQty(id, delta) {
     var item = _cart.find(function(i) { return i.id === id; });
     id (!item) return;
     item.qty = Math.max(0, item.qty + delta);
-    if (item.qty === 0) _cart = _cart.filter(function(i) { return i.id !=== id; });
+    if (item.qty === 0) _cart = _cart.filter(function(i) { return i.id !== id; });
     localStorage.setItem('_wbCart', JSON.stringify(_cart));
     _updateCarts();
 }
@@ -2799,19 +2801,19 @@ function _updateCarts() {
         var countEl = cartEl.querySelector('[data-wb-cart-count]');
         if (countEl) countEl.textContent = _cart.reduce(function(s,i){return s+i.qty;},0);
         if (body) {
-            if (_cart.lenght === 0) {
+            if (_cart.length === 0) {
                 body.innerHTML = '<div style="text-align:center;padding:20px;color:#bbb;font-size:14px;"><i class="fa-solid fa-cart-shopping" style="font-size:24px;display:block;margin-bottom:8px;opacity:0.3;"></i>Il carrello è vuoto</div>';
             } else {
                 body.innerHTML = _cart.map(function(item) {
-                    return '<div style=display:flex;align-items:center;gap:12px;padding:12px;border-bottom:1px solid #f0f0f0;">' +
-                        (item.imageUrl ? '<img src="'+_esc(item.imageUrl)+'" style="width:48px;height:48px;object-fit:cover;border-radius:6px;">' : '<div style="width:48px;height:48px;height:48px;background:#f0f0f0;border-radius:6px;display:flex;align-item:center;justify-content:center;"><i class="fa-solid fa-box-open" style="color:#bbb;fon-size:16px;"></i></div>') +
-                        '<div style="flex:1;><div style="font-size:14px;fon-weigh:600;color:#333;">' + _esc(item.name) + '</div><div style="font-size:13px;color:#888;"> + item.currency + parseFloat(item.price).toFixed(2) + '</div></div>' +
+                    return '<div style="display:flex;align-items:center;gap:12px;padding:12px;border-bottom:1px solid #f0f0f0;">' +
+                        (item.imageUrl ? '<img src="'+_esc(item.imageUrl)+'" style="width:48px;height:48px;object-fit:cover;border-radius:6px;">' : '<div style="width:48px;height:48px;background:#f0f0f0;border-radius:6px;display:flex;align-items:center;justify-content:center;"><i class="fa-solid fa-box-open" style="color:#bbb;font-size:16px;"></i></div>') +
+                        '<div style="flex:1;"><div style="font-size:14px;font-weight:600;color:#333;">' + _esc(item.name) + '</div><div style="font-size:13px;color:#888;">' + item.currency + parseFloat(item.price).toFixed(2) + '</div></div>' +
                         '<div style="display:flex;align-items:center;gap:6px;">' +
                         '<button onclick="_changeQty(\''+item.id+'\',-1)" style="width:24px;height:24px;border-radius:50%;border:1px solid #ddd;background:none;cursor:pointer;">-</button>' +
-                        '<span style="font-weight:600;min-weight:600;min-width:20px;text-align:center;">'+item.qty+'</span>' +
+                        '<span style="font-weight:600;min-width:20px;text-align:center;">'+item.qty+'</span>' +
                         '<button onclick="_changeQty(\''+item.id+'\',1)" style="width:24px;height:24px;border-radius:50%;border:1px solid #ddd;background:none;cursor:pointer;">+</button>' +
-                        '<button onclick="_removeFromCart(\''+item.id+'\')" style="background:none;border:none;color:#e63946;cursor:pointer;font-size:16px;padding:2px 4px;">X</button> +
-                        '</div></div>' ;
+                        '<button onclick="_removeFromCart(\''+item.id+'\')" style="background:none;border:none;color:#e63946;cursor:pointer;font-size:16px;padding:2px 4px;">✕</button>' +
+                        '</div></div>';
                 }).join('');  
             }
         }
@@ -2828,34 +2830,34 @@ async function _loadBookingAdmin() {
         var tableEl = el.querySelector('[data-wb-booking-table]');
         if (!tableEl) return;
         try {
-            var r = await.window._sb.from('wb_bookings').select('*').order('booking_date', {ascending:true}).limit(50);
-            if (!r.data || r.data.lenght === 0) {tableEl.innerHTML = '<p style="text-align:center;color:#999;padding:20px;">Nessuna prenotazione</p>'; return; }
-            var sc = {pending:#f4a261',confirmed:'#2ec4b6',cancelled:'#e63946'};
-            var sl = {pending:' In attessa',confirma:' Confermata',cancelled:' Cancellata'};
+            var r = await window._sb.from('wb_bookings').select('*').order('booking_date', {ascending:true}).limit(50);
+            if (!r.data || r.data.length === 0) {tableEl.innerHTML = '<p style="text-align:center;color:#999;padding:20px;">Nessuna prenotazione</p>'; return; }
+            var sc = {pending:'#f4a261',confirmed:'#2ec4b6',cancelled:'#e63946'};
+            var sl = {pending:' In attesa',confirmed:' Confermata',cancelled:' Cancellata'};
             tableEl.innerHTML = '<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;font-size:13px;">' +
                 '<thead><tr style="background:#f8f9fa;"><th style="padding:10px;text-align:left;border-bottom:2px solid #eee;">Nome</th><th style="padding:10px;border-bottom:2px solid #eee;">Servizio</th><th style="padding:10px;border-bottom:2px solid #eee;">Data/Ore</th><th style="padding:10px;border-bottom:2px solid #eee;">Stato</th><th style="padding:10px;border-bottom:2px solid #eee;">Azioni</th></tr></thead><tbody>' +
                 r.data.map(function(b) {
                     return '<tr style="border-bottom:1px solid #f0f0f0;">' +
                         '<td style="padding:10px;">'+ _esc(b.name||'-') + '<br><small style="color:#888;">' + _esc(b.email||'') + '</small></td>' +
                         '<td style="padding:10px;text-align:center;">' + _esc(b.service||'-') + '</td>' +
-                        '<td style="padding:10px;text-align:center;">' + (b.booking_date ? new Date(b.booking_date).toLocaleDateString('it-IT') : '-') + '</td>' +
-                        '<td style="padding:10px;text-align:center;"><span style="padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;background:' + (sc[b.status]||#888') + '20;color:' + (sc[b.status]||'#888') + ';">' + (sl[b.status]||b.status) + '</span></td>' +
+                        '<td style="padding:10px;text-align:center;">' + (b.booking_date ? new Date(b.booking_date).toLocaleDateString('it-IT') : '-') + ' ' + _esc(b.booking_time||'') + '</td>' +
+                        '<td style="padding:10px;text-align:center;"><span style="padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;background:' + (sc[b.status]||'#888') + '20;color:' + (sc[b.status]||'#888') + ';">' + (sl[b.status]||b.status) + '</span></td>' +
                         '<td style="padding:10px;text-align:center;display:flex;gap:4px;justify-content:center;">' +
-                        (b.status !== 'confirmed' ?'<button onclick="_updateBooking(\''+b.id+'\',\'confirmed\')" style="padding:4px 8px;background:#2ec4b620;border:1px solid #2ec4b6;color:#2ex4b6;border-radius:4px;cursor:pointer;font-size:11px;">Conferma</button>' : '') +
-                        (b.status !== 'cancelled' ?'<button onclick="_updateBooking(\''+b.id+'\',\'cancelled\')" style="padding:4px 8px;background:#e6394620;border:1px solid #e63946;color:#e63946;border-radius:4px;cursor:pointer;font-size:11px;">Cancella</button>' : '') +
+                        (b.status !== 'confirmed' ? '<button onclick="_updateBooking(\''+b.id+'\',\'confirmed\')" style="padding:4px 8px;background:#2ec4b620;border:1px solid #2ec4b6;color:#2ec4b6;border-radius:4px;cursor:pointer;font-size:11px;">Conferma</button>' : '') +
+                        (b.status !== 'cancelled' ? '<button onclick="_updateBooking(\''+b.id+'\',\'cancelled\')" style="padding:4px 8px;background:#e6394620;border:1px solid #e63946;color:#e63946;border-radius:4px;cursor:pointer;font-size:11px;">Cancella</button>' : '') +
                         '</td></tr>';
-                }).join(''). + '</tbody></table></div>';
-        } catch(e) {tableEl.innerHTML = '<p style="color:#e63946;padding:20px;">Errore caricamento</p>' ; }
+                }).join('') + '</tbody></table></div>';
+        } catch(e) { tableEl.innerHTML = '<p style="color:#e63946;padding:20px;">Errore caricamento</p>'; }
     });
 }
 async function _updateBooking(id, status) {
     if (!window._sb || !_hasRole('admin')) return;
-    await window._sb.from('wb_booking').update({status:status}).eq('id',id);
+    await window._sb.from('wb_bookings').update({status:status}).eq('id',id);
     await _loadBookingAdmin();
 }
 
-function _setupBooking() {
-    document.querySelectAll('[data-wb-booking-form]').forEach(function(form) {
+function _setupBookings() {
+    document.querySelectorAll('[data-wb-booking-form]').forEach(function(form) {
         form.addEventListener('submit', async function(e) {
             e.preventDefault();
             var btn = form.querySelector('[type="submit"]');
@@ -2863,8 +2865,8 @@ function _setupBooking() {
             var data = {
                 name: form.querySelector('[name="name"]')?.value || '',
                 email: form.querySelector('[name="email"]')?.value || '',
-                services: form.querySelector('[name="service"]')?.value || '',
-                booking_date: form.querySelector('[name="data"]')?.value || null,
+                service: form.querySelector('[name="service"]')?.value || '',
+                booking_date: form.querySelector('[name="date"]')?.value || null,
                 booking_time: form.querySelector('[name="time"]')?.value || '',
                 notes: form.querySelector('[name="notes"]')?.value || '',
                 status: 'pending'
@@ -2896,18 +2898,18 @@ function _setupPayments() {
             if (!priceId) { alert('Configura il Price ID Stripe in questo elemento (proprietà)!'); return; }
             if (!window.Stripe) {
                 var s = document.createElement('script');
-                s.src = 'hhtps://js.stripe.com/v3/';
-                documenmt.head.appendChild(s);
+                s.src = 'https://js.stripe.com/v3/';
+                document.head.appendChild(s);
                 await new Promise(function(res) { s.onload = res; });
             }
                 var stripe = window.Stripe(key);
-                var orig = btn.textContent; btn.disabled = true; btn.textContent = 'Reindirizzament...';
+                var orig = btn.textContent; btn.disabled = true; btn.textContent = 'Reindirizzamento...';
                 try {
                     await stripe.redirectToCheckout({ lineItems: [{price: priceId, quantity: 1}], mode: 'payment', successUrl: successUrl, cancelUrl: cancelUrl });
                 } catch(e) { alert('Errore Stripe: ' + e.message); btn.disabled = false; btn.textContent = orig; }                 
         });
     });
-    document.querySelectorAll('[data-wb-paypal]').forEach(function(container) {
+    document.querySelectorAll('[data-wb-paypal-container]').forEach(function(container) {
         var clientId = window._wbPaypalKey || '';
         var amount = container.closest('[data-wb-payment]')?.dataset.wbAmount || container.dataset.wbAmount || '10.00';
         var currency = container.closest('[data-wb-payment]')?.dataset.wbCurrency || container.dataset.wbCurrency || 'EUR';
@@ -2915,7 +2917,7 @@ function _setupPayments() {
         var staticBtn = container.querySelector('[data-wb-paypal-static]');
         if (staticBtn) staticBtn.style.display = 'none';
         var divEl = document.createElement('div');
-        divEl.id = '_wb_pp_' + Math.random().toSring(36).slice(2);
+        divEl.id = '_wb_pp_' + Math.random().toString(36).slice(2);
         container.appendChild(divEl);
         if (!document.querySelector('script[src*="paypal.com/sdk"]')) {
             var s = document.createElement('script');
@@ -2931,7 +2933,7 @@ function _renderPayPal(el, amount, currency, successMsg) {
     if (!window.paypal) return;
     window.paypal.Buttons({
         createOrder: function(data, actions) {
-            return actions.order.create({ purchase_units: [{ amount: { value: String(amount), currency_code: currency.replace('€','EUR').replace('$','USD').replace('£','GBP')
+            return actions.order.create({ purchase_units: [{ amount: { value: String(amount), currency_code: currency.replace('€','EUR').replace('$','USD').replace('£','GBP') } }] });
         },
         onApprove: function(data, actions) {
             return actions.order.capture().then(function(details) {
@@ -2942,12 +2944,12 @@ function _renderPayPal(el, amount, currency, successMsg) {
 }
 function _setupNewsletter() {
     document.querySelectorAll('[data-wb-newsletter]').forEach(function(widget) {
-        var btn = widget.querySelector('[data-wb-newsleter-btn]');
+        var btn = widget.querySelector('[data-wb-newsletter-btn]');
         var emailInput = widget.querySelector('[data-wb-newsletter-email]');
         if (!btn) return;
         btn.addEventListener('click', async function() {
             var email = emailInput ? emailInput.value.trim() : '';
-            if (!email || !email.includer('@')) { alert('Inserisci un\'email valida!); return; }
+            if (!email || !email.includes('@')) { alert('Inserisci un\'email valida!'); return; }
             var orig = btn.textContent; btn.disabled = true; btn.textContent = '...';
             var msg = widget.dataset.successMsg || ' Iscritto! Grazie.';
             if (window._sb) {
@@ -3219,7 +3221,7 @@ function _setupListeners() {
             .then(function(r) {
                 if (r.ok) {
                     if (form.dataset.formMultiple === 'true') { form.reset(); alert(msg); }
-                    else { form.innerHTML = '<div style="text-align:center;padding:30px;color:#2ec4b6;font-size:16px;font-weight:600;">' + msg + '</div>; }
+                    else { form.innerHTML = '<div style="text-align:center;padding:30px;color:#2ec4b6;font-size:16px;font-weight:600;">' + msg + '</div>'; }
                 } else { alert('Errore invio. Riprova.'); }
             }).catch(function() { alert('Errore di connessione.'); });
         });
@@ -3270,7 +3272,7 @@ async function _initWB() {
         _setupListeners();
         await Promise.all([_loadProgress(), _loadUserData(), _loadBlog(), _loadLeaderboards(), _loadAdmin(), _loadProducts(), _loadBookingAdmin()]);
         _updateCarts();
-        _setupBooking();
+        _setupBookings();
         _setupPayments();
         _setupNewsletter();
         window._sb.auth.onAuthStateChange(async function(event, session) {
@@ -3282,7 +3284,7 @@ async function _initWB() {
     };
     document.head.appendChild(script);
 }
-if (document.readyState === 'loading') { document.addEventListener('DOMContentLoaded', _initWB; }
+if (document.readyState === 'loading') { document.addEventListener('DOMContentLoaded', _initWB); }
 else { _initWB(); }
 <\/script>
 </body>
@@ -4324,32 +4326,33 @@ CREATE TABLE IF NOT EXISTS wb_products (
     price NUMERIC(10,2) DEFAULT 0,
     image_url TEXT,
     category TEXT DEFAULT 'Generale',
-    stock INEGER DEFAULT -1,
+    stock INTEGER DEFAULT -1,
     published BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
 ALTER TABLE wb_products ENABLE ROW LEVEL SECURITY;
-DROP POLICCY IF EXISTS "Prodotti pubblicati visibili" ON wb_products;
+DROP POLICY IF EXISTS "Prodotti pubblicati visibili" ON wb_products;
 CREATE POLICY "Prodotti pubblicati visibili" ON wb_products FOR SELECT USING (published = TRUE);
 DROP POLICY IF EXISTS "Admin gestisce prodotti" ON wb_products;
 CREATE POLICY "Admin gestisce prodotti" ON wb_products FOR ALL USING (
     EXISTS (SELECT 1 FROM wb_profiles WHERE id = auth.uid() AND role = 'admin')
 );
 
-CREATE TABLE ID NO EXISTS wb_bookings (
+CREATE TABLE IF NOT EXISTS wb_bookings (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     user_id UUID REFERENCES auth.users ON DELETE SET NULL,
     name TEXT, email TEXT, service TEXT,
-    booking_data DATE, booking_time TEXT,
-    notes TEXT, status TEXT DEFAUL 'pending',
+    booking_date DATE, booking_time TEXT,
+    notes TEXT, status TEXT DEFAULT 'pending',
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
-ALTER TABLE wb_booking ENABLE ROW LEVEL SECURITY;
+ALTER TABLE wb_bookings ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "Chiunque può creare prenotazione" ON wb_bookings;
 CREATE POLICY "Chiunque può creare prenotazione" ON wb_bookings FOR INSERT WITH CHECK (TRUE);
 DROP POLICY IF EXISTS "Utente vede proprie prenotazioni" ON wb_bookings;
 CREATE POLICY "Utente vede proprie prenotazioni" ON wb_bookings FOR SELECT USING (auth.uid() = user_id OR TRUE);
-DROP POLICY "Admin gestisce prenotazioni" ON wb_bookings FOR ALL USING (
+DROP POLICY IF EXISTS "Admin gestisce prenotazioni" ON wb_bookings;
+CREATE POLICY "Admin gestisce prenotazioni" ON wb_bookings FOR ALL USING (
     EXISTS (SELECT 1 FROM wb_profiles WHERE id = auth.uid() AND role = 'admin')
 );
 
@@ -4362,11 +4365,11 @@ CREATE TABLE IF NOT EXISTS wb_newsletter (
 );
 ALTER TABLE wb_newsletter ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "Chiunque può iscriversi" ON wb_newsletter;
-CREATE POLICY "Chiunque puà iscriversi" ON wb_profiles FOR INSER WIH CHECK (TRUE);
+CREATE POLICY "Chiunque può iscriversi" ON wb_newsletter FOR INSERT WITH CHECK (TRUE);
 DROP POLICY IF EXISTS "Utente gestisce propria iscrizione" ON wb_newsletter;
-CREATE POLICY "Utente gestisce propria iscrizione" ON wb_newsletter FOR ALL USING (email = (SELECT email FROM auth.users WHERE id = auth.id()));
+CREATE POLICY "Utente gestisce propria iscrizione" ON wb_newsletter CREATE POLICY "Utente gestisce propria iscrizione" ON wb_newsletter FOR ALL USING (email = (SELECT email FROM auth.users WHERE id = auth.uid()));
 DROP POLICY IF EXISTS "Admin vede iscritti" ON wb_newsletter;
-CREATE POLICY "Admin vede iscritti" ON wb_newsletters FOR SELECT USING (
+CREATE POLICY "Admin vede iscritti" ON wb_newsletter FOR SELECT USING (
     EXISTS (SELECT 1 FROM wb_profiles WHERE id = auth.uid() AND role = 'admin')
 );
 
@@ -4417,12 +4420,12 @@ CREATE TRIGGER on_auth_user_created
         saveAdvancedConfig();
         showFnStatus($('#blogStatus'), ' Configurazione blog salvata!', 'success');
     });
-    $('#btnSaveProducts')?.addEvenListener('click', function() {
+    $('#btnSaveProduct')?.addEventListener('click', function() {
         advancedConfig.productCurrency = $('#productCurrency').value;
         advancedConfig.addToCartText = $('#productAddToCartText').value;
         advancedConfig.cartEmptyText = $('#productCartEmpty').value;
         saveAdvancedConfig();
-        showFnStatus($('#productsStatus'), ' Impostazioni prodoti salvate!', 'success')
+        showFnStatus($('#productsStatus'), ' Impostazioni prodotti salvate!', 'success');
     });
     $('#btnSaveBookings')?.addEventListener('click', function() {
         advancedConfig.bookingServices = ($('#bookingServices').value || '').split('\n').map(s => s.trim()).filter(s => s);
@@ -4432,7 +4435,7 @@ CREATE TRIGGER on_auth_user_created
         saveAdvancedConfig();
         showFnStatus($('#bookingsStatus'), ' Impostazioni prenotazioni salvate!', 'success');
     });
-    $('#btnSavePaymens')?.addEventListener('click', function() {
+    $('#btnSavePayments')?.addEventListener('click', function() {
         advancedConfig.stripeKey = $('#stripeKey').value;
         advancedConfig.paypalClientId = $('#paypalClientId').value;
         advancedConfig.paymentCurrency = $('#paymentCurrency').value;
