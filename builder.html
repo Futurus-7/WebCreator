@@ -1,0 +1,1433 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web Builder</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+</head>
+<body>
+    <div class="platform-warning" id="platformWarning">
+        <div class="platform-warning-inner">
+            <div class="platform-warning-icon">
+                <i class="fa-solid fa-desktop"></i>
+            </div>
+            <div class="platform-warning-text">
+                <strong>WebBuilder è ottimizzato per desktop</strong>
+                <span>Stai usando un dispositivo mobile o tablet. per la migliore esperienza, apri questo sito da un computer altrimenti, alcune funzionalità potrebbero non funzionare correttamente.</span>
+            </div>
+            <button class="platform-warning-close" id="platformWarningClose" title="Chiudi avviso">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+    </div>
+    <header class="toolbar">
+        <div class="toolbar-left">
+            <span class="logo">WebBuilder</span>
+            <button class="toolbar-btn" id="btnUndo" title="Annulla" aria-label="Annulla"><i class="fa-solid fa-rotate-left"></i></button>
+            <button class="toolbar-btn" id="btnRedo" title="Ripeti"><i class="fa-solid fa-rotate-right"></i></button>
+            <button class="toolbar-btn btn-reset" id="btnReset" title="Resetta progetto"><i class="fa-solid fa-triangle-exclamation"></i> Reset</button>
+        </div>
+        <div class="toolbar-pages">
+            <div class="pages-tabs" id="pagesTabs">
+                <button class="page-tab active" data-page="0">Pagina 1</button>
+            </div>
+            <button class="page-add-btn" id="btnAddPage" title="Aggiungi pagina"><i class="fa-solid fa-plus"></i></button>
+        </div>
+        <div class="toolbar-center">
+            <button class="viewport-btn active" data-view="desktop" title="Desktop"><i class="fa-solid fa-desktop"></i></button>
+            <button class="viewport-btn" data-view="tablet" title="Tablet"><i class="fa-solid fa-tablet-screen-button"></i></button>
+            <button class="viewport-btn" data-view="mobile" title="Telefono"><i class="fa-solid fa-mobile-screen-button"></i></button>
+            <div class="toolbar-modes">
+                <button class="mode-btn active" data-mode="structure" title="Modalita Strutture"><i class="fa-solid fa-layer-group"></i> Struttura</button>
+                <button class="mode-btn" data-mode="free" title="Modalita Libera"><i class="fa-solid fa-arrows-up-down-left-right"></i> Libero</button>
+            </div>        
+            </div>
+        <div class="toolbar-right">
+            <button class="toolbar-btn" id="btnFunctions" title="Funzioni del sito"><i class="fa-solid fa-bolt"></i>Funzioni</button>
+            <button class="toolbar-btn" id="btnPreview" title="Anteprima"><i class="fa-solid fa-eye"></i>Anteprima</button>
+            <button class="toolbar-btn btn-primary" id="btnExport" title="Esporta"><i class="fa-solid fa-download"></i> Esporta</button>
+        </div>
+    </header>
+    <div class="main-wrapper">
+        <aside class="panel-left" id="panelLeft">
+            <div class="panel-header">
+                <h3>Elementi</h3>
+            </div>
+
+            <div class="panel-section">
+                <h4 class="section-title" data-toggle="layout">Layout</h4>
+                <div class="section-content" id="layout">
+                    <div class="draggable-item" draggable="true" data-type="section">
+                        <i class="fa-solid fa-layer-group"></i>
+                        <span>Sezione</span>
+                    </div>
+                    <div class="draggable-item" draggable="true" data-type="container">
+                        <i class="fa-solid fa-box"></i>
+                        <span>Contenitore</span>
+                    </div>
+                    <div class="draggable-item" draggable="true" data-type="columns-2">
+                        <i class="fa-solid fa-columns"></i>
+                        <span>2 Colonne</span>
+                    </div>
+                    <div class="draggable-item" draggable="true" data-type="columns-3">
+                        <i class="fa-solid fa-columns"></i>
+                        <span>3 Colonne</span>
+                    </div>
+                    <div class="draggable-item" draggable="true" data-type="grid">
+                        <i class="fa-solid fa-grip"></i>
+                        <span>Griglia</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel-section">
+                <h4 class="section-title" data-toggle="basic">Fondamentali</h4>
+                <div class="section-content" id="basic">
+                    <div class="draggable-item" draggable="true" data-type="heading">
+                        <i class="fa-solid fa-heading"></i>
+                        <span>Titolo</span>
+                    </div>
+                    <div class="draggable-item" draggable="true" data-type="paragraph">
+                        <i class="fa-solid fa-paragraph"></i>
+                        <span>Paragrafo</span>
+                    </div>
+                    <div class="draggable-item" draggable="true" data-type="image">
+                        <i class="fa-solid fa-image"></i>
+                        <span>Immagine</span>
+                    </div>
+                    <div class="draggable-item" draggable="true" data-type="button">
+                        <i class="fa-solid fa-hand-pointer"></i>
+                        <span>Bottone</span>
+                    </div>
+                    <div class="draggable-item" draggable="true" data-type="link">
+                        <i class="fa-solid fa-link"></i>
+                        <span>Link</span>
+                    </div>
+                    <div class="draggable-item" draggable="true" data-type="divider">
+                        <i class="fa-solid fa-minus"></i>
+                        <span>Divisore</span>
+                    </div>
+                    <div class="draggable-item" draggable="true" data-type="spacer">
+                        <i class="fa-solid fa-arrows-up-down"></i>
+                        <span>Spazio</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel-section">
+                <h4 class="section-title" data-toggle="media">Media</h4>
+                <div class="section-content" id="media">
+                    <div class="draggable-item" draggable="true" data-type="video">
+                        <i class="fa-solid fa-video"></i>
+                        <span>Video</span>
+                    </div>
+                    <div class="draggable-item" draggable="true" data-type="icon">
+                        <i class="fa-solid fa-icons"></i>
+                        <span>Icona</span>
+                    </div>
+                    <div class="draggable-item" draggable="true" data-type="map">
+                        <i class="fa-solid fa-map-location-dot"></i>
+                        <span>Mappa</span>
+                    </div>
+                    <div class="draggable-item" draggable="true" data-type="background">
+                        <i class="fa-solid fa-fill-drip"></i>
+                        <span>Background</span>
+                    </div>
+                </div>
+            </div>
+            <div class="panel-section">
+                <h4 class="section-title" data-toggle="forms">Moduli</h4>
+                <div class="section-content" id="forms">
+                    <div class="draggable-item" draggable="true" data-type="form-contact">
+                        <i class="fa-solid fa-envelope"></i>
+                        <span>Modulo Contatti</span>
+                    </div>
+                    <div class="draggable-item" draggable="true" data-type="input">
+                        <i class="fa-solid fa-align-left"></i>
+                        <span>Campo testo</span>
+                    </div>
+                    <div class="draggable-item" draggable="true" data-type="textarea">
+                        <i class="fa-solid fa-align-left"></i>
+                        <span>Area testo</span>
+                    </div>
+                    <div class="draggable-item" draggable="true" data-type="select">
+                        <i class="fa-solid fa-caret-down"></i>
+                        <span>Menu a tendina</span>
+                    </div>
+                    <div class="draggable-item" draggable="true" data-type="checkbox">
+                        <i class="fa-solid fa-square-check"></i>
+                        <span>Checkbox</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel-section">
+                <h4 class="section-title" data-toggle="blocks">Blocchi pronti</h4>
+                <div class="section-content" id="blocks">
+                    <div class="draggable-item" draggable="true" data-type="block-hero">
+                        <i class="fa-solid fa-panorama"></i>
+                        <span>Hero</span>
+                    </div>
+                    <div class="draggable-item" draggable="true" data-type="block-navbar">
+                        <i class="fa-solid fa-bars"></i>
+                        <span>Navbar</span>
+                    </div>
+                    <div class="draggable-item" draggable="true" data-type="block-footer">
+                        <i class="fa-solid fa-shoe-prints"></i>
+                        <span>Footer</span>
+                    </div>
+                    <div class="draggable-item" draggable="true" data-type="block-card">
+                        <i class="fa-solid fa-id-card"></i>
+                        <span>Card</span>
+                    </div>
+                    <div class="draggable-item" draggable="true" data-type="block-pricing">
+                        <i class="fa-solid fa-tags"></i>
+                        <span>Pricing</span>
+                    </div>
+                    <div class="draggable-item" draggable="true" data-type="block-testimonial">
+                        <i class="fa-solid fa-tags"></i>
+                        <span>Testimonial</span>
+                    </div>
+                    <div class="draggable-item" draggable="true" data-type="block-login">
+                        <i class="fa-solid fa-right-to-bracket"></i>
+                        <span>Form Login</span>
+                    </div>
+                    <div class="draggable-item" draggable="true" data-type="block-register">
+                        <i class="fa-solid fa-user-plus"></i>
+                        <span>Form Registrazione</span>
+                    </div>
+                    <div class="draggable-item" draggable="true" data-type="block-logout">
+                        <i class="fa-solid fa-right-from-bracket"></i>
+                        <span>Bottone Logout</span>
+                    </div>
+                </div>
+            </div>
+            <div class="panel-section">
+                <h4 class="section-title" data-toggle="users">Utenti & Contenuti</h4>
+                <div class="section-content" id="users">
+                    <div class="draggable-item" draggable="true" data-type="block-protected">
+                        <i class="fa-solid fa-lock"></i>
+                        <span>Sezione Protetta</span>
+                    </div>
+                    <div class="draggable-item" draggable="true" data-type="block-role-gate">
+                        <i class="fa-solid fa-shield-halved"></i>
+                        <span>Gate Ruolo</span>
+                    </div>
+                    <div class="draggable-item" draggable="true" data-type="block-user-profile">
+                        <i class="fa-solid fa-circle-user"></i>
+                        <span>Profilo Utente</span>
+                    </div>
+                    <div class="draggable-item" draggable="true" data-type="block-progress">
+                        <i class="fa-solid fa-chart-line"></i>
+                        <span>Progressi</span>
+                    </div>
+                    <div class="draggable-item" draggable="true" data-type="block-blog-list">
+                        <i class="fa-solid fa-newspaper"></i>
+                        <span>Lista Blog</span>
+                    </div>
+                    <div class="draggable-item" draggable="true" data-type="block-blog-editor">
+                        <i class="fa-solid fa-pen-to-square"></i>
+                        <span>Editor Blog</span>
+                    </div>
+                    <div class="draggable-item" draggable="true" data-type="block-user-data">
+                        <i class="fa-solid fa-database"></i>
+                        <span>Dato Utente</span>
+                    </div>
+                    <div class="draggable-item" draggable="true" data-type="block-leaderboard">
+                        <i class="fa-solid fa-ranking-star"></i>
+                        <span>Classifica</span>
+                    </div>
+                    <div class="draggable-item" draggable="true" data-type="block-admin">
+                        <i class="fa-solid fa-user-shield"></i>
+                        <span>Pannello Admin</span>
+                    </div>
+                </div>
+            </div>
+            <div class="panel-section">
+                <h4 class="section-title" data-toggle="products">Prodotti & Catalogo</h4>
+                <div class="section-content" id="products">
+                    <div class="draggable-item" draggable="true" data-type="block-product-list">
+                        <i class="fa-solid fa-store"></i>
+                        <span>Catalogo</span>
+                    </div>
+                    <div class="draggable-item" draggable="true" data-type="block-product-card">
+                        <i class="fa-solid fa-box-open"></i>
+                        <span>Prodotto</span>
+                    </div>
+                    <div class="draggable-item" draggable="true" data-type="block-cart">
+                        <i class="fa-solid fa-cart-shopping"></i>
+                        <span>Carrello</span>
+                    </div>
+                </div>
+            </div>
+            <div class="panel-section">
+                <h4 class="section-title" data-toggle="bookings">Prenotazioni</h4>
+                <div class="section-content" id="bookings">
+                    <div class="draggable-item" draggable="true" data-type="block-booking-form">
+                        <i class="fa-solid fa-calendar-check"></i>
+                        <span>Form Prenota</span>
+                    </div>
+                    <div class="draggable-item" draggable="true" data-type="block-booking-admin">
+                        <i class="fa-solid fa-calendar-days"></i>
+                        <span>Gestione Prenot.</span>
+                    </div>
+                </div>
+            </div>
+            <div class="panel-section">
+                <h4 class="section-title" data-toggle="payments">Pagamenti</h4>
+                <div class="section-content" id="payments">
+                    <div class="draggable-item" draggable="true" data-type="block-payment">
+                        <i class="fa-solid fa-credit-card"></i>
+                        <span>Widget Pagamento</span>
+                    </div>
+                    <div class="draggable-item" draggable="true" data-type="block-stripe-btn">
+                        <i class="fa-brands fa-stripe-s"></i>
+                        <span>Stripe</span>
+                    </div>
+                    <div class="draggable-item" draggable="true" data-type="block-paypal-btn">
+                        <i class="fa-brands fa-paypal"></i>
+                        <span>PayPal</span>
+                    </div>
+                </div>
+            </div>
+            <div class="panel-section">
+                <h4 class="section-title" data-toggle="newsletter">Newsletter</h4>
+                <div class="section-content" id="newsletter">
+                    <div class="draggable-item" draggable="true" data-type="block-newsletter">
+                        <i class="fa-solid fa-envelope-open-text"></i>
+                        <span>Newsletter</span>
+                    </div>
+                </div>
+            </div>
+        </aside>
+    <main class="canvas-area">
+        <div class="canvas-wrapper" id="canvasWrapper">
+           <div class="free-toolbar" id="freeToolbar" style="display:none;">
+                <div class="ft-group">
+                    <label class="ft-label">Testo</label>
+                    <input type="number" class="ft-input" id="ftFontSize" placeholder="16" min="8" max="200" title="Dimensione testo">
+                    <input type="color" class="ft-color" id="ftColor" value="#333333" title="Colore testo">
+                    <input type="color" class="ft-color" id="ftBgColor" value="#ffffff" title="Colore sfondo">
+                </div>
+                <div class="ft-group">
+                    <button class="ft-btn" id="ftBold" title="Grassetto"><i class="fa-solid fa-bold"></i></button>
+                    <button class="ft-btn" id="ftItalic" title="Corsivo"><i class="fa-solid fa-italic"></i></button>
+                    <button class="ft-btn" id="ftAlignLeft" title="Sinistra"><i class="fa-solid fa-align-left"></i></button>
+                    <button class="ft-btn" id="ftAlignCenter" title="Centro"><i class="fa-solid fa-align-center"></i></button>
+                    <button class="ft-btn" id="ftAlignRight" title="Destra"><i class="fa-solid fa-align-right"></i></button>
+                </div>
+                <div class="ft-group">
+                    <label class="ft-label">Dimensione</label>
+                    <input type="number" class="ft-input" id="ftWidth" placeholder="W" title="Larghezza">
+                    <span class="ft-separator"></span>
+                    <input type="number" class="ft-input" id="ftHeight" placeholder="H" title="Altezza">
+                </div>
+                <div class="ft-group">
+                    <label class="ft-label">Posizione</label>
+                    <input type="number" class="ft-input" id="ftPosX" placeholder="X" title="Posizione X">
+                    <input type="number" class="ft-input" id="ftPosY" placeholder="Y" title="Posizione Y">
+                </div>
+                <div class="ft-group">
+                    <input type="number" class="ft-input" id="ftRotation" placeholder="0" title="Rotazione" min="-360" max="360">
+                    <span class="ft-unit">deg</span>
+                    <input type="number" class="ft-input" id="ftOpacity" placeholder="100" title="Opacita" min="0" max="100">
+                    <span class="ft-unit">%</span>
+                </div>
+                <div class="ft-group">
+                    <input type="number" class="ft-input" id="ftBorderRadius" placeholder="0" title="Raggio bordo" min="0">
+                    <span class="ft-unit">px</span>
+                    <button class="ft-btn ft-danger" id="ftDelete" title="Elimina"><i class="fa-solid fa-trash"></i></button>
+                </div>
+            </div>
+        <div class="canvas" id="canvas">
+            <div class="canvas-empty" id="canvasEmpty">
+
+                    <i class="fa-solid fa-plus-circle"></i>
+                    <p>Trascina un elemento qui per iniziare</p>
+                    <p class="hint">oppure scegli un blocco pronto dal pannello a sinistra</p>
+                </div>
+            </div>
+            <div class="canvas-height-control" id="canvasHeightControl">
+                <i class="fa-solid fa-arrows-up-down"></i>
+                <span style="margin-left:6px">Trascina per allungare il canvas</span>
+            </div>
+        </div>
+    </main>
+
+    <aside class="panel-right" id="panelRight">
+        <div class="panel-header">
+            <h3>Proprieta</h3>
+        </div>
+
+        <div class="panel-empty" id="panelEmpty">
+            <i class="fa-solid fa-mouse-pointer"></i>
+            <p>Seleziona un elemento nel canvas per modificarlo</p>
+        </div>
+        <div class="properties-content" id="propertiesContent" style="display:none;">
+                <div class="prop-tabs">
+                    <button class="prop-tab active" data-tab="content">Contenuto</button>
+                    <button class="prop-tab" data-tab="style">Stile</button>
+                    <button class="prop-tab" data-tab="advanced">Avanzato</button>
+                </div>
+
+                <div class="prop-panel active" id="tab-content">
+                    <div class="prop-group">
+                        <label class="prop-label" for="propText">Testo</label>
+                        <textarea class="prop-input prop-textarea" id="propText" rows="3"></textarea>
+                    </div>
+                    <div class="prop-group">
+                        <label class="prop-label">URL link</label>
+                        <input type="text" class="prop-input" id="propLink" placeholder="https://...">
+                    </div>
+                    <div class="prop-group">
+                        <label class="prop-label">Sorgente immagine</label>
+                        <input type="text" class="prop-input" id="propImageSrc" placeholder="URL immagine">
+                        <button class="prop-btn-small" id="btnUploadImage">Carica file</button>
+                    </div>
+                    <div class="prop-group">
+                        <label class="prop-label">Testo alternativo</label>
+                        <input type="text" class="prop-input" id="propAlt" placeholder="Descrizione immagine">
+                    </div>
+
+                    <div class="prop-group" id="backgroundImageGroup" style="display:none;">
+                        <label class="prop-label">Immagine di sfondo</label>
+                        <input type="text" class="prop-input" id="propBgImage" placeholder="URL immagine sfondo">
+                        <button class="prop-btn-small" id="btnUploadBgImage" style="margin-top:6px;">Carica file</button>
+                        <label class="prop-label" style="margin-top:8px;">Dimensione sfondo</label>
+                        <select class="prop-input" id="propBgSize">
+                            <option value="cover">Copri tutto (cover)</option>
+                            <option value="contain">Contieni (contain)</option>
+                            <option value="auto">Automatico</option>
+                        </select>
+                        <label class="prop-label" style="margin-top:8px;">Ripeti sfondo</label>
+                        <select class="prop-input" id="propBgRepeat">
+                            <option value="no-repeat">Non ripetere</option>
+                            <option value="repeat">Ripeti</option>
+                            <option value="repeat-x">Ripeti orizzontale</option>
+                            <option value="repeat-y">Ripeti verticale</option>
+                        </select>
+                    </div>
+                    <div class="prop-group" id="selectOptionsGroup">
+                        <label class="prop-label" for="propSelectOptions">Opzioni del menu (scrivi una per riga)</label>
+                        <textarea class="prop-input prop-textarea" id="propSelectOptions" rows="4" placeholder="Opzione 1&#10;Opzione 2&#10;Opzione 3"></textarea>
+                        <p style="font-size:10px;color:var(--text-secondary);margin-top:4px;line-height:1.4;">Scrivi ogni opzione su una riga separata. L'utente vedra queste opzioni nel menu a tendina.</p>
+                        <label class="prop-label" for="propSelectOptionActions" style="margin-top:12px;">Cosa succede quando si sceglie un'opzione?</label>
+                        <p style="font-size:10px;color:var(--text-secondary);margin-bottom:6px;line-height:1.4;">Per ogni opzione puoi decidere cosa succede. Scrivi cosi:<br><strong>Nome opzione | azione | valore</strong><br>Esempio: <em>Google | link | https://google.com</em></p>
+                        <textarea class="prop-input prop-textarea" id="propSelectOptionActions" rows="5" placeholder="Google | link | https://google.com&#10;Contatti | scroll | contatti&#10;Info | show-hide | box-info" style="font-size:12px;"></textarea>
+                            <div style="font-size:10px;color:var(--text-secondary);margin-top:6px;line-height:1.5;padding:8px;background:rgba(255,255,255,0.03);border-radius:4px;">
+                                <strong>Azioni disponibili:</strong><br>
+                                <strong>link</strong> = apre una pagina web<br>
+                                <strong>scroll</strong> = scorre fino a una sezione<br>
+                                <strong>show-hide</strong> = mostra/nasconde un elemento
+                            </div>
+                        </div>
+                    <div class="prop-group" id="actionGroup" style="display:none;">
+                        <label class="prop-label">Cosa succede quando ci clicchi?</label>
+                        <div id="actionsContainer"></div>
+                        <button id="addActionBtn" style="margin-top:6px;width:100%;padding:6px;background:rgba(255,255,255,0.06);border:1px dashed rgba(255,255,255,0.15);border-radius:6px;color:var(--text-secondary);font-size:12px;cursor:pointer;">+ Aggiungi azione</button>
+                        <div style="display:none;">
+                            <input type="checkbox" id="propActionNewTab">
+                        </div>
+                    </div>
+                    <div class="prop-group" id="protectedConfig" style="display:none;">
+                        <label class="prop-label" style="color:var(--danger);"> Configurazione Sezione Protetta</label>
+                        <label class="prop-label" style="margin-top:8px;">Ruolo minimo richiesto</label>
+                        <select class="prop-input" id="propRequireRole">
+                            <option value="user">Utente registrato (qualsiasi)</option>
+                            <option value="premium">Premium e superiori</option>
+                            <option value="moderator">Moderatore e superiori</option>
+                            <option value="admin">Solo Admin</option>
+                        </select>
+                        <label class="prop-label" style="margin-top:8px;">Titolo blocco</label>
+                        <input type="text" class="prop-input" id="propProtectedTitle" placeholder="Contenuto Riservato">
+                        <label class="prop-label" style="margin-top:8px;">Messaggio per non autorizzati</label>
+                        <input type="text" class="prop-input" id="propProtectedMsg" placeholder="Devi fare login per vedere questo">
+                        <label class="prop-label" style="margin-top:8px;">Pagina login (es: login.html)</label>
+                        <input type="text" class="prop-input" id="propProtectedRedirect" placeholder="login.html (opzionale)">
+                    </div>
+                    <div class="prop-group" id="roleGateConfig" style="display:none;">
+                        <label class="prop-label" style="color:var(--accent);"> Configurazione Gate Ruolo</label>
+                        <label class="prop-label" style="margin-top:8px;">Mostra questo contenuto solo a:</label>
+                        <select class="prop-input" id="propRoleGateRole">
+                            <option value="user">Utenti registrati e superiori</option>
+                            <option value="premium">Premium e superiori</option>
+                            <option value="moderator">Moderatori e superiori</option>
+                            <option value="admin">Solo Admin</option>
+                        </select>
+                        <p style="font-size:10px;color:var(--text-secondary);margin-top:4px;line-height:1.5;">Gli utenti con ruolo inferiore non vedranno questo blocco nel sito finale.</p>
+                    </div>
+
+                    <div class="prop-group" id="progressConfig" style="display:none;">
+                        <label class="prop-label" style="color:var(--accent);"> Configurazione Barra Progressi</label>
+                        <label class="prop-label" style="margin-top:8px;">Chiave (nome univoco del progresso)</label>
+                        <input type="text" class="prop-input" id="propProgressKey" placeholder="es: corso-html, livello-gioco">
+                        <p style="font-size:10px;color:var(--text-secondary);margin-top:2px;">Usa la stessa chiave nella Classifica per collegare i due elementi.</p>
+                        <label class="prop-label" style="margin-top:8px;">Etichetta</label>
+                        <input type="text" class="prop-input" id="propProgressLabel" placeholder="Il tuo progresso">
+                        <div style="display:flex;gap:8px;margin-top:8px;">
+                            <div style="flex:1;">
+                                <label class="prop-label">Unità</label>
+                                <input type="text" class="prop-input" id="propProgressUnit" placeholder="% o punti">
+                            </div>
+                            <div style="flex:1;">
+                                <label class="prop-label">Valora max</label>
+                                <input type="number" class="prop-input" id="propProgressMax" value="100">
+                            </div>
+                        </div>
+                        <label class="prop-label" style="margin-top:8px;">Valore bottone +</label>
+                        <input type="number" class="prop-input" id="propProgressIncrement" value="10">
+                        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:12px;color:var(--text-secondary);margin-top:8px;">
+                            <input type="checkbox" id="propProgressShowReset" style="width:14px;height:14px;cursor:pointer;" checked>
+                            Mostra bottone Reset
+                        </label>
+                    </div>
+                    <div class="prop-group" id="blogListConfig" style="display:none;">
+                        <label class="prop-label" style="color:var(--accent);"> Configurazione Lista Blog</label>
+                        <label class="prop-label" style="margin-top:8px;">Numero massimo di post</label>
+                        <input type="number" class="prop-input" id="propBlogLimit" value="10" min="1" max="100">
+                        <label class="prop-label" style="margin-top:8px;">Categoria (lascia vuoto per tutte)</label>
+                        <input type="text" class="prop-input" id="propBlogCategory" placeholder="es: Tutorial">
+                        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:12px;color:var(--text-secondary);margin-top:8px;">
+                            <input type="checkbox" id="propBlogShowAuthor" style="width:14px;height:14px;" checked>
+                            Mostra nome autore
+                        </label>
+                        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:12px;color:var(--text-secondary);margin-top:6px;">
+                            <input type="checkbox" id="propBlogShowDate" style="width:14px;height:14px;" checked>
+                            Mostra data pubblicatione
+                        </label>
+                    </div>
+                    <div class="prop-group" id="userDataConfig" style="display:none;">
+                        <label class="prop-label" style="color:var(--accent);"> Configurazione Dato Utente</label>
+                        <label class="prop-label" style="margin-top:8px;">Chiave dato (nome univoco)</label>
+                        <input type="text" class="prop-input" id="propUserDataKey" placeholder="es: nickname, colore-preferito">
+                        <label class="prop-label" style="margin-top:8px;">Etichetta visualizzata</label>
+                        <input type="text" class="prop-input" id="propUserDataLabel" placeholder="Il tuo nickname">
+                        <label class="prop-label" style="margin-top:8px;">Tipo di input</label>
+                        <select class="prop-input" id="propUserDataType">
+                            <option value="text">Testo libero</option>
+                            <option value="number">Numero</option>
+                            <option value="color">Colore</option>
+                        </select>
+                        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:12px;color:var(--text-secondary);margin-top:8px;">
+                            <input type="checkbox" id="propUserDataEditable" style="width:14px;height:14px;" checked>
+                            L'utente può modificarlo
+                        </label>
+                    </div>
+                    <div class="prop-group" id="productListConfig" style="display:none;">
+                        <label class="prop-label" style="color:var(--accent);"> Configurazioni Catalogo</label>
+                        <label class="prop-label" style="margin-top:8px;">Numero prodotto da mostrare</label>
+                        <input type="number" class="prop-input" id="propProductLimit" value="12" min="1" max="100">
+                        <label class="prop-label" style="margin-top:8px;">Categoria (vuoto = tutte)</label>
+                        <input type="text" class="prop-input" id="propProductCategory" placeholder="es: Abbigliamento">
+                        <label class="prop-label" style="margin-top:8px;">Valuta</label>
+                        <input type="text" class="prop-input" id="propProductCurrency" placeholder="€" style="max-width:80px;">
+                        <label class="prop-label" style="margin-top:8px;">Colonne griglia</label>
+                        <select class="prop-input" id="propProductCols">
+                            <option value="auto">Auto (adattiva)</option>
+                            <option value="2">2 colonne</option>
+                            <option value="3">3 colonne</option>
+                            <option value="4">4 colonne</option>
+                        </select>
+                    </div>
+                    <div class="prop-group" id="bookingFormConfig" style="display:none;">
+                        <label class="prop-label" style="color:var(--accent);"> Configurazione Form Prenotazione</label>
+                        <label class="prop-label" style="margin-top:8px;">Titolo form</label>
+                        <input type="text" class="prop-input" id="propBookingTitle" placeholder="Prenota un appuntamento">
+                        <label class="prop-label" style="margin-top:8px;">Messaggio di conferma</label>
+                        <input type="text" class="prop-input" id="propBookingSuccess" placeholder="Prenotazione confermata!">
+                        <label class="prop-label" style="margin-top:8px;">Orari (separati da virgola)</label>
+                        <input type="text" class="prop-input" id="propBookingTimes" placeholder="09:00, 10:00, 11:00, 15:00">
+                    </div>
+                    <div class="prop-group" id="paymentConfig" style="display:none;">
+                        <label class="prop-label" style="color:var(--accent);"> Configurazione Pagamento</label>
+                        <label class="prop-label" style="margin-top:8px;">Nome prodotto/servizio</label>
+                        <input type="text" class="prop-input" id="propPaymentName" placeholder="Piano Premium">
+                        <label class="prop-label" style="margin-top:8px;">Descrizione breve</label>
+                        <input type="text" class="prop-input" id="propPaymentDesc" placeholder="Accesso illimitato per 1 mese">
+                        <label class="prop-label" style="margin-top:8px;">Prezzo (es: 29.99)</label>
+                        <input type="text" class="prop-input" id="propPaymentAmount" placeholder="29.99">
+                        <label class="prop-label" style="margin-top:8px;">Valuta</label>
+                         <input type="text" class="prop-input" id="propPaymentCurrency" placeholder="€" style="max-width:80px;">
+                        <label class="prop-label" style="margin-top:8px;">Stripe Price ID (per Stripe)</label>
+                        <input type="text" class="prop-input" id="propStripePrice" placeholder="price_xxx">
+                        <label class="prop-label" style="margin-top:8px;">URL successo pagamento</label>
+                        <input type="text" class="prop-input" id="propPaymentSuccess" placeholder="https://... (opzionale)">
+                        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:12px;color:var(--text-secondary);margin-top:8px;">
+                            <input type="checkbox" id="propShowStripe" style="width:14px;height:14px;" checked>
+                            Mostra bottone Stripe
+                        </label>
+                        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:12px;color:var(--text-secondary);margin-top:6px;">
+                            <input type="checkbox" id="propShowPaypal" style="width:14px;height:14px;" checked>
+                            Mostra bottone PayPal
+                        </label>
+                    </div>
+                    <div class="prop-group" id="newsletterConfig" style="display:none;">
+                        <label class="prop-label" style="color:var(--accent);"> Configurazione Newsletter</label>
+                        <label class="prop-label" style="margin-top:8px;">Titolo</label>
+                        <input type="text" class="prop-input" id="propNewsletterTitle" placeholder="Iscriviti alla newsletter">
+                        <label class="prop-label" style="margin-top:8px;">Sottotitolo</label>
+                        <input type="text" class="prop-input" id="propNewsletterSubtitle" placeholder="Ricevi le nostre novità">
+                        <label class="prop-label" style="margin-top:8px;">Testo bottone</label>
+                        <input type="text" class="prop-input" id="propNewsletterBtn" placeholder="Iscriviti">
+                        <label class="prop-label" style="margin-top:8px;">Messaggio di conferma</label>
+                        <input type="text" class="prop-input" id="propNewsletterSuccess" placeholder=" Iscritto! Grazie.">
+                        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:12px;color:var(--text-secondary);margin-top:8px;">
+                            <input type="checkbox" id="propNewsletterShowName" style="width:14px;height:14px;">
+                            Mostra campo nome
+                        </label>
+                    </div>
+
+
+                    <div class="prop-group" id="leaderboardConfig" style="display:none;">
+                        <label class="prop-label" style="color:var(--accent);"> Configurazione Classifica</label>
+                        <label class="prop-label" style="margin-top:8px;">Chiave progresso da mostrare</label>
+                        <input type="text" class="prop-input" id="propLeaderboardKey" placeholder="es: corso-html (uguale al progresso)">
+                        <label class="prop-label" style="margin-top:8px;">Titolo classifica</label>
+                        <input type="text" class="prop-input" id="propLeaderboardTitle" placeholder=" Classifica">
+                        <label class="prop-label" style="margin-top:8px;">Numero posizioni</label>
+                        <input type="number" class="prop-input" id="propLeaderboardLimit" value="10" min="3" max="100">
+                        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:12px;color:var(--text-secondary);margin-top:8px;">
+                            <input type="checkbox" id="propLeaderboardDesc" style="width:14px;height:14px;" checked>
+                            Ordine decrescente (valore più alto vince)
+                        </label>
+                    </div>
+                    </div>
+
+                    <div class="prop-panel" id="tab-style">
+                        <div class="prop-group">
+                            <label class="prop-label">Font</label>
+                            <select class="prop-input" id="propFont">
+                                <option value="Arial, sans-serif">Arial</option>
+                                <option value="'Helvetica Neue', sans-serif">Helvetica</option>
+                                <option value="Georgia, serif">Georgia</option>
+                                <option value="'Times New Roman', serif">Times New Roman</option>
+                                <option value="'Courier New', monospace">Courier New</option>
+                                <option value="Verdana, sans-serif">Verdana</option>
+                                <option value="'Trebuchet MS', sans-serif">Trebuchet MS</option>
+                                <option value="Impact, sans-serif">Impact</option>
+                                <option value="'Inter', sans-serif">Inter</option>
+                                <option value="'Roboto', sans-serif">Roboto</option>
+                                <option value="'Open Sans', sans-serif">Open Sans</option>
+                                <option value="'Poppins', sans-serif">Poppins</option>
+                                <option value="'Montserrat', sans-serif">Montserrat</option>
+                                <option value="'Lato', sans-serif">Lato</option>
+                                <option value="'Playfair Display', serif">Playfair Display</option>
+                            </select>
+                        </div>
+                        <div class="prop-group prop-row">
+                            <div class="prop-half">
+                                <label class="prop-label">Dimensione</label>
+                                <input type="number" class="prop-input" id="propFontSize" placeholder="16" min="8" max="200">
+                            </div>
+                            <div class="prop-half">
+                                <label class="prop-label">Peso</label>
+                                <select class="prop-input" id="propFontWeight">
+                                    <option value="300">Leggero</option>
+                                    <option value="400">Normale</option>
+                                    <option value="500">Medie</option>
+                                    <option value="600">Semi-grassetto</option>
+                                    <option value="700">Grassetto</option>
+                                    <option value="900">Nero</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="prop-group">
+                            <label class="prop-label">Allineamento testo</label>
+                            <div class="prop-button-group">
+                                <button class="prop-btn-icon" data-align="left" title="Sinistra"><i class="fa-solid fa-align-left"></i></button>
+                                <button class="prop-btn-icon" data-align="center" title="Centro"><i class="fa-solid fa-align-center"></i></button>
+                                <button class="prop-btn-icon" data-align="right" title="Destra"><i class="fa-solid fa-align-right"></i></button>
+                                <button class="prop-btn-icon" data-align="justify" title="Giustificato"><i class="fa-solid fa-align-justify"></i></button>
+                            </div>
+                        </div>
+
+                        <div class="prop-group prop-row">
+                            <div class="prop-half">
+                                <label class="prop-label">Colore testo</label>
+                                <div class="color-picker-wrapper">
+                                    <input type="color" class="prop-color" id="propColor" value="#333333">
+                                    <input type="text" class="prop-input prop-color-text" id="propColorText" value = "#333333">
+                                </div>
+                            </div>
+                        <div class="prop-half">
+                            <label class="prop-label">Colore sfondo</label>
+                            <div class="color-picker-wrapper">
+                                <input type="color" class="prop-color" id="propBgColor" value="#ffffff">
+                                <input type="text" class="prop-input prop-color-text" id="propBgColorText" value="#ffffff">
+                        </div>
+                        </div>
+                    </div>
+                    <div class="prop-group prop-row">
+                        <div class="prop-half">
+                            <label class="prop-label">Interlinea</label>
+                            <input type="number" class="prop-input" id="propLineHeight" placeholder="1.5" step="0.1" min="0.5" max="5">
+                        </div>
+                        <div class="prop-half">
+                            <label class="prop-label">Spaziatura lettere</label>
+                            <input type="number" class="prop-input" id="propLetterSpacing" placeholder="0" step="0.5" min="-5" max="20">
+                        </div>
+                    </div>
+                    <hr class="prop-divider">
+                    <div class="prop-group prop-row">
+                        <div class="prop-half">
+                            <label class="prop-label">Larghezza</label>
+                            <input type="text" class="prop-input" id="propWidth" placeholder="auto">
+                        </div>
+                        <div class="prop-half">
+                            <label class="prop-label">Altezza</label>
+                            <input type="text" class="prop-input" id="propHeight" placeholder="auto">
+                        </div>
+                    </div>
+                    <div class="prop-group">
+                        <label class="prop-label">Margine (px)</label>
+                        <div class="spacing-inputs">
+                            <input type="number" class="prop-input prop-spacing" id="propMarginTop" placeholder="Su" min="0">
+                            <input type="number" class="prop-input prop-spacing" id="propMarginRight" placeholder="Dx" min="0">
+                            <input type="number" class="prop-input prop-spacing" id="propMarginBottom" placeholder="Giu" min="0">
+                            <input type="number" class="prop-input prop-spacing" id="propMarginLeft" placeholder="Sx" min="0">
+                        </div>
+                    </div>
+
+                    <div class="prop-group">
+                        <label class="prop-label">Padding (px)</label>
+                        <div class="spacing-inputs">
+                            <input type="number" class="prop-input prop-spacing" id="propPaddingTop">
+                            <input type="number" class="prop-input prop-spacing" id="propPaddingRight">
+                            <input type="number" class="prop-input prop-spacing" id="propPaddingBottom">
+                            <input type="number" class="prop-input prop-spacing" id="propPaddingLeft">
+                        </div>
+                    </div>
+                    <hr class="prop-divider">
+                        <div class="prop-group prop-row">
+                            <div class="prop-half">
+                                <label class="prop-label">Bordo (px)</label>
+                                <input type="number" class="prop-input" id="propBorderWidth" placeholder="0" min="0" max="50">
+                            </div>
+                            <div class="prop-half">
+                                <label class="prop-label">Raggio bordo(px)</label>
+                                <input type="number" class="prop-input" id="propBorderRadius" placeholder="0" min="0" max="500">
+                            </div>
+                        </div>
+                        <div class="prop-group prop-row">
+                            <div class="prop-half">
+                                <label class="prop-label">Stile Bordo</label>
+                                <select class="prop-input" id="propBorderStyle">
+                                    <option value="none">Nessuno</option>
+                                    <option value="solid">Solido</option>
+                                    <option value="dashed">Trateggiato</option>
+                                    <option value="dotted">Punteggiato</option>
+                                    <option value="double">Doppio</option>
+                                </select>
+                            </div>
+                            <div class="prop-half">
+                                <label class="prop-label">Colore bordo</label>
+                                <div class="color-picker-wrapper">
+                                    <input type="color" class="prop-color" id="propBorderColor" value="#cccccc">
+                                    <input type="text" class="prop-input prop-color-text" id="propBorderColorText" value="#cccccc">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="prop-group">
+                            <label class="prop-label">Ombra</label>
+                            <select class="prop-input" id="propShadow">
+                                <option value="none">Nessuna</option>
+                                <option value="0 1px 3px rgba(0,0,0,0.12)">Leggera</option>
+                                <option value="0 4px 6px rgba(0,0,0,0.1)">Media</option>
+                                <option value="0 10px 25px rgba(0,0,0,0.15)">Forte</option>
+                                <option value="0 20px 50px rgba(0,0,0,0.2)">Molto forte</option>
+                            </select>
+                        </div>
+                        <div class="prop-group">
+                            <label class="prop-label">Opacita</label>
+                            <input type="range" class="prop-range" id="propOpacity" min="0" max="100" value="100">
+                            <span class="range-value" id="opacityValue">100%</span>
+                        </div>
+                    </div>
+                    </div>
+                    <div class="prop-panel" id="tab-advanced">
+                        <div class="prop-group">
+                            <label class="prop-label" style="display:flex;align-items:center;gap:8px;cursor:pointer;">
+                                <input type="checkbox" id="propStartHidden" style="width:16px;height:16px;cursor:pointer;">
+                                Invisibile all'avvio (evocabile)
+                            </label>
+                            <p style="font-size:10px;color:var(--text-secondary);margin-top:4px;line-height:1.5;">
+                                L'elemento esiste ma non si vede e non si può cliccare. Evocalo con un'azione "Evoca" su un altro elemento usando il suo ID.
+                            </p>
+                        </div>
+                        <div class="prop-group">
+                            <label class="prop-label">ID elemento</label>
+                            <input type="text" class="prop-input" id="propId" placeholder="mio-elemento">
+                        </div>
+                    <div class="prop-group">
+                        <label class="prop-label">Classi CSS</label>
+                        <input type="text" class="prop-input" id="propClasses" placeholder="classe1 classe2">
+                    </div>
+                    <div class="prop-group">
+                        <label class="prop-label">CSS personalizzato</label>
+                        <textarea class="prop-input prop-textarea prop-code" id="propCustomCSS" rows="5" placeholder="color: red&#10;transform: rotate(5deg);"></textarea>
+                    </div>
+                    <div class="prop-group">
+                        <label class="prop-label">Display</label>
+                        <select class="prop-input" id="propDisplay">
+                            <option value="block">Block</option>
+                            <option value="flex">Flex</option>
+                            <option value="grid">Grid</option>
+                            <option value="inline-block">Inline-block</option>
+                            <option value="inline">Inline</option>
+                            <option value="none">Nascosto</option>
+                        </select>
+                    </div>
+                    <div class="prop-group" id="flexOptions" style="display:none;">
+                        <label class="prop-label">Direzione flex</label>
+                        <select class="prop-input" id="propFlexDirection">
+                            <option value="row">Riga</option>
+                            <option value="column">Colonna</option>
+                        </select>
+                        <label class="prop-label" style="margin-top:8px;">Allinea elementi</label>
+                        <select class="prop-input" id="propAlignItems">
+                            <option value="stretch">Stretch</option>
+                            <option value="flex-start">Inizio</option>
+                            <option value="center">Centro</option>
+                            <option value="flex-end">Fine</option>
+                        </select>
+                        <label class="prop-label" style="margin-top:8px;">Giustifica contenuto</label>
+                        <select class="prop-input" id="propJustifyContent">
+                            <option value="flex-start">Inizio</option>
+                            <option value="center">Centro</option>
+                            <option value="flex-end">Fine</option>
+                            <option value="space-between">Spazio tra</option>
+                            <option value="space-around">Spazio intorno</option>
+                        </select>
+                        <label class="prop-label" style="margin-top:8px;">Gap (px)</label>
+                        <input type="number" class="prop-input" id="propGap" placeholder="0" min="0" max="200">
+                    </div>
+                    <div class="prop-group">
+                        <label class="prop-label">Animazione di entrata</label>
+                        <select class="prop-input" id="propAnimation">
+                            <option value="none">Nessuna</option>
+                            <optgroup label="Dissolvenza">
+                                <option value="fadeIn">Dissolvenza</option>
+                                <option value="fadeInDown">Dissolvenza dall'alto</option>
+                                <option value="fadeInUp">Dissolvenza dal basso</option>
+                                <option value="fadeInLeft">Dissolvenza da sinistra</option>
+                                <option value="fadeInRight">Dissolvenza da destra</option>
+                            </optgroup>
+                            <optgroup label="Zoom">
+                                <option value="zoomIn">Zoom in</option>
+                                <option value="zoomInDown">Zoom dall'alto</option>
+                                <option value="zoomInUp">Zoom dal basso</option>
+                                <option value="zoomInLeft">Zoom da sinistra</option>
+                                <option value="zoomInRight">Zoom da destra</option>
+                            </optgroup>
+                            <optgroup label="Scorrimento">
+                                <option value="slideInDown">Scorri dall'alto</option>
+                                <option value="slideInUp">Scorri dal basso</option>
+                                <option value="slideInLeft">Scorri da sinistra</option>
+                                <option value="slideInRight">Scorri da destra</option>
+                            </optgroup>
+                            <optgroup label="Rimbalzo">
+                                <option value="bounceIn">Rimbalzo</option>
+                                <option value="bounceInDown">Rimbalzo dall'alto</option>
+                                <option value="bounceInUp">Rimbalzo dal basso</option>
+                                <option value="bounceInLeft">Rimbalzo da sinistra</option>
+                                <option value="bounceInRight">Rimbalzo da destra</option>
+                            </optgroup>
+                            <optgroup label="Rotazione">
+                                <option value="rotateIn">Rotazione</option>
+                                <option value="rotateInDownLeft">Rotazione in basso a sinistra</option>
+                                <option value="rotateInDownRight">Rotazione in basso a destra</option>
+                                <option value="rotateInUpLeft">Rotazione in alto a sinistra</option>
+                                <option value="rotateInUpRight">Rotazione in alto a destra</option>
+                            </optgroup>
+                            <optgroup label="Elastico">
+                                <option value="backInDown">Elastico dall'alto</option>
+                                <option value="backInUp">Elastico dal basso</option>
+                                <option value="backInLeft">Elastico da sinistra</option>
+                                <option value="backInRight">Elastico da destra</option>
+                            </optgroup>
+                            <optgroup label="Speciali">
+                                <option value="flip">Capovolgimento</option>
+                                <option value="flipInX">Capovolgimento orizzontale</option>
+                                <option value="flipInY">Capovolgimento verticale</option>
+                                <option value="lightSpeedInRight">Velocita luce da destra</option>
+                                <option value="lightSpeedInLeft">Velocita luce da sinistra</option>
+                                <option value="rollIn">Rotolamento</option>
+                            </optgroup>
+                        </select>
+                        <label class="prop-label" style="margin-top:8px;">Animazione al passaggio del mouse(hover)</label>
+                        <select class="prop-input" id="propHoverAnimation">
+                            <option value="none">Nessuna</option>
+                            <optgroup label="Attenzione">
+                                <option value="pulse">Pulsazione</option>
+                                <option value="bounce">Rimbalzo</option>
+                                <option value="shake">Scuotimento</option>
+                                <option value="shakeX">Scuotimento orizzontale</option>
+                                <option value="shakeY">Scuotimento verticale</option>
+                                <option value="wobble">Oscillazione</option>
+                                <option value="swing">Dondolio</option>
+                                <option value="tada">Tada!</option>
+                                <option value="jello">Gelatina</option>
+                                <option value="heartBeat">Battito cardiaco</option>
+                                <option value="headShake">Scuotimento testa</option>
+                                <option value="rubberBand">Elastico</option>
+                                <option value="flash">Flash</option>
+                            </optgroup>
+                        </select>
+                        <label class="prop-label" style="margin-top:8px;">Velocita animazione</label>
+                        <input type="range" class="prop-range" id="propAnimSpeed" min="0.1" max="5" step="0.1" value = "1">
+                        <span class="range-value" id="animSpeedValue">1s</span>
+                        <div style="display:flex;gap:6px;margin-top:8px;">
+                            <button class="prop-btn-icon" id="btnTestAnimation" title="Testa animazione" style="flex:1;display:flex;align-items:center;justify-content:center;gap:4px;padding:6px;">
+                                <i class="fa-solid fa-play"></i> Testa
+                            </button>
+                        </div>
+                        <p style="font-size:10px;color:var(--text-secondary);margin-top:4px;">L'animazione di entrata si attiva quando l'elemento appare. L'animazione hover si attiva quando ci passi sopra col mouse.</p>
+                        <div style="display:flex;align-items:center;gap:8px;margin-top:8px;">
+                            <input type="checkbox" id="propClickAnim" style="width:16px;height:16px;cursor:pointer;">
+                            <label for="propClickAnim" style="font-size:12px;color:var(--text-secondary);cursor:pointer;">Animazione al click (ingrandimento)</label>
+                        </div>
+                    </div>
+                    <div class="prop-group">
+                        <label class="prop-label">Ordine livello (z-index)</label>
+                        <div style="display:flex;gap:6px;">
+                            <button class="prop-btn-icon" id="btnLayerDown" title="Manda indietro di un livello" style="flex:1;display:flex;align-items:center;justify-content:center;gap:4px;padding:6px;">
+                                <i class="fa-solid fa-arrow-down"></i> Indietro
+                            </button>
+                            <button class="prop-btn-icon" id="btnLayerUp" title="Porta avanti di un livello" style="flex:1;display:flex;align-items:center;justify-content:center;gap:4px;padding:6px;">
+                                <i class="fa-solid fa-arrow-up"></i> Avanti
+                            </button>
+                        </div>
+                        <p style="font-size:10px;color:var(--text-secondary);margin-top:4px;">Sposta l'elemento sopra o sotto gli altri. clicca piu volte per spostarlo di piu livelli.</p>
+                    </div>
+
+                    <div class="prop-group">                
+                        <label class="prop-label">Posizione</label>
+                        <select class="prop-input" id="propPosition">
+                            <option value="static">Statica</option>
+                            <option value="relative">Relative</option>
+                            <option value="absolute">Assoluta</option>
+                            <option value="fixed">Fissa</option>
+                            <option value="sticky">Sticky</option>
+                        </select>
+                    </div>
+                    <div class="prop-group">
+                        <label class="prop-label">Overflow</label>
+                        <select class="prop-input" id="propOverflow">
+                            <option value="visible">Visibile</option>
+                            <option value="hidden">Nascosto</option>
+                            <option value="scroll">Scroll</option>
+                            <option value="auto">Auto</option>
+                        </select>
+                    </div>
+                    <hr class="prop-divider">
+                    <div class="prop-group">
+                        <button class="prop-btn-danger" id="btnDeleteElement">
+                            <i class="fa-solid fa-trash"></i> Elimina elemento
+                        </button>
+                    </div>
+                    <div class="prop-group">
+                        <button class="prop-btn-secondary" id="btnDuplicateElement">
+                            <i class="fa-solid fa-clone"></i> Duplica elemento</button>
+                    </div>
+                </div>
+                </div>
+        </aside>
+    </div>
+
+    <div class="layers-panel" id="layersPanel">
+        <div class="panel-header">
+            <h3>Livelli</h3>
+            <button class="close-btn" id="closeLayers"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div class="layers-tree" id="layersTree"></div>
+    </div>
+    <button class="layers-toggle" id="btnLayers" title="Mostra livelli">
+        <i class="fa-solid fa-layer-group"></i>
+    </button>
+
+    <div class="modal-overlay" id="functionsModal">
+        <div class="modal-content" style="max-width:800px;width:95%;">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-bolt" style="color:var(--accent);margin-right:8px;"></i>Funzioni del sito</h3>
+                <button class="close-btn" id="closeFunctions"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body" style="padding:0;">
+                <div style="display:flex;height:500px;">
+                    <div style="width:200px;min-width:200px;background:var(--bg-dark);border-right:1px solid var(--border-color);padding:12px 8px;">
+                        <div class="fn-menu-item active" data-fn="email">
+                            <i class="fa-solid fa-envelope"></i> Moduli & Email
+                        </div>
+                        <div class="fn-menu-item" data-fn="sheets">
+                            <i class="fa-solid fa-table"></i> Salva dati
+                        </div>
+                        <div class="fn-menu-item" data-fn="auth">
+                            <i class="fa-solid fa-user-lock"></i> Login & Utenti
+                        </div>
+                        <div class="fn-menu-item" data-fn="roles">
+                            <i class="fa-solid fa-shield-halved"></i> Ruoli & Permessi
+                        </div>
+                        <div class="fn-menu-item" data-fn="blog">
+                            <i class="fa-solid fa-newspaper"></i> Blog & Contenuti
+                        </div>
+                        <div class="fn-menu-item" data-fn="dbsetup">
+                            <i class="fa-solid fa-database"></i> Setup Database
+                        </div>
+                        <div class="fn-menu-item" data-fn="products">
+                            <i class="fa-solid fa-store"></i> Prodotti
+                        </div>
+                        <div class="fn-menu-item" data-fn="bookings">
+                            <i class="fa-solid fa-calendar-check"></i> Prenotazioni
+                        </div>
+                        <div class="fn-menu-item" data-fn="payments">
+                            <i class="fa-solid fa-credit-card"></i> Pagamenti
+                        </div>
+                        <div class="fn-menu-item" data-fn="newsletter">
+                            <i class="fa-solid fa-envelope-open-text"></i> Newsletter
+                        </div>
+                        <div class="fn-menu-item" data-fn="coming">
+                            <i class="fa-solid fa-clock"></i> Prossimamente
+                        </div>
+                        </div>
+                        <div style="flex:1;overflow-y:auto;padding:24px;">
+                            <div class="fn-panel active" id="fn-email">
+                                <h2 style="font-size:18px;margin-bottom:6px;"> Moduli & Email</h2>
+                                <p style="color:var(--text-secondary);font-size:13px;margin-bottom:20px;">Quando qualcuno compila un modulo sul tuo sito, ricevi una email con i dati inseriti. Gratis, senza bisogno di server.</p>
+                                <div style="background:rgba(67,97,238,0.1);border:1px solid var(--accent);border-radius:8px;padding:14px;margin-bottom:20px;">
+                                <strong style="color:var(--accent);font-size:13px;">Come funziona?</strong>
+                                <ol style="color:var(--text-secondary);font-size:12px;margin-top:8px;padding-left:18px;line-height:2;">
+                                    <li>Vai su <a href="https://formspree.io" target="_blank" style="color:var(--accent);">formspree.io</a> e crea un account gratis</li>
+                                    <li>Clicca "New Form" e copia il link che ti danno</li>
+                                    <li>Incollalo qui sotto</li>
+                                    <li>Ogni volta che qualcuno compila un modulo, ricevi un email!</li>
+                                </ol>
+                            </div>
+                            <div class="prop-group">
+                                <label class="prop-label">Il tuo link Formspree</label>
+                                <input type="text" class="prop-input" id="formspreeUrl" placeholder="https://formspree.io/f/xxxxxxxx">
+                                <p style="font-size:11px;color:var(--text-secondary);margin-top:4px;">Esempio: https://formspree.io/f/abc12345</p>
+                            </div>
+                            <div class="prop-group">
+                                <label class="prop-label">Messaggio dopo invio modulo</label>
+                                <input type="text" class="prop-input" id="formSuccessMsg" placeholder="Grazie! Ti risponderemo presto." value="Grazie! Ti risponderemo presto.">
+                            </div>
+                                <div class="prop-group">
+                                    <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:12px;color:var(--text-secondary);">
+                                        <input type="checkbox" id="formMultipleSubmit" style="width:16px;height:16px;cursor:pointer;">
+                                        Permetti invii multipli
+                                    </label>
+                                    <p style="font-size:10px;color:var(--text-secondary);margin-top:4px;">Se non spunti, il modulo si può inviare solo una vola. Dopo l'invio apparira il messaggio di conferma e il modulo scomparirà.</p>
+                                </div>
+                            <div class="prop-group">
+                                <div class="prop-group">
+                                    <label class="prop-label">Quale modulo collegare?</label>
+                                    <select class="prop-input" id="formSelect">
+                                        <option value="">-- Selezione un modulo --</option>
+                                    </select>
+                                    <p style="font-size:11px;color:var(--text-secondary);margin-top:4px;">Devi avere un elemento "Modulo" nel canvas.</p>
+                                </div>
+                                <button class="toolbar-btn btn-primary" id="btnSaveFormspree" style="width:100%;justify-content:center;padding:10px;">
+                                    <i class="fa-solid fa-check"></i> Salva impostazioni
+                                </button>
+                                <div id="formspreeStatus" style="display:none;margin-top:12px;padding:10px;border-radius:6px;font-size:13px;text-align:center;"></div>
+                            </div>
+                        </div>
+                        <div class="fn-panel" id="fn-sheets">
+                                <h2 style="font-size:18px;margin-bottom:6px;"> Salva dati in Google sheets</h2>
+                                <p style="color:var(--text-secondary);font-size:13px;margin-bottom:20px;">Ogni volta che qualcuno compila un modulo, i dati vengono salvati automaticamente in un foglio Google. Gratis! </p>
+                                <div style="background:rgba(67,97,238,0.1);border:1px solid var(--accent);border-radius:8px;padding-left:18px;line-height:2px;">
+                                <strong style="color:var(--accent);font-size:13px;">Come funziona?</strong>
+                                <ol style="color:var(--text-secondary);font-size:12px;margin-top:8px;padding-left:18px;line-height:2;">
+                                    <li>Vai su <a href="https://sheet.best" target="_blank" style="color:var(--accent);">sheet.best</a> e crea un account gratis</li>
+                                    <li>Collega il tuo Google Sheet</li>
+                                    <li>Copia il link API che ti danno</li>
+                                    <li>Incollalo qui sotto</li>
+                                </ol>
+                            </div>
+                            <div class="prop-group">
+                                <label class="prop-label">Il tuo link Sheet.best</label>
+                                <input type="text" class="prop-input" id="sheetsUrl" placeholder="https://sheet.best/api/sheets/xxxxxxxx">
+                            </div>
+                            <div class="prop-group">
+                                <label class="prop-label">Quale modulo collegare?</label>
+                                <select class="prop-input" id="formSelectSheets">
+                                    <option value="">-- Seleziona un modulo --</option>
+                                </select>
+                            </div>
+                            <button class="toolbar-btn btn-primary" id="btnSaveSheets" style="width:100%;justify-content:center;padding:10px;">
+                                <i class="fa-solid fa-check"></i> Salva impostazioni
+                            </button>
+                            <div id="sheetsStatus" style="display:none;margin-top:12px;padding:10px;border-radius:6px;font-size:13px;text-align:center;"></div>
+                        </div>
+                        <div class="fn-panel" id="fn-auth">
+                            <h2 style="font-size:18px;margin-bottom:6px;">Login & Utenti</h2>
+                            <p style="color:var(--text-secondary);font-size:13px;margin-bottom:16px;">Aggiungi registrazione e login al tuo sito. Gli utenti potranno creare un account e accedere a pagine protette.</p>
+                            <div style="background:rgba(46,196,182,0.1);border:1px solid var(--success);border-radius:8px;padding:14px;margin-bottom:16px;">
+                                <strong style="color:var(--success);font-size:13px;"> Quanto costa?</strong>
+                                <p style="color:var(--text-secondary);font-size:12px;margin-top:8px;line-height:1.8;">
+                                    <strong style="color:var(--text-primary);">Tu non paghi niente.</strong> Usi il servizio gratuio di <strong>Supabase</strong>.<br>
+                                                                                                                                                Il piano gratuito include fino a <strong>50.000 utenti registrati</strong> sul tuo sito.<br>
+                                                                                                                                                Se il tuo sito cresce oltre quel numero, pagherai direttamente Supabase (non noi).<br>
+                                                                                                                                                <em>Per la maggior parte dei siti, il piano gratuito dura per sempre.</em>
+                                                                                                                                            </p>
+                                                                                                                                        </div>
+                                                                                                                                        <div style="background:rgba(67,97,238,0.1);border:1px solid var(--accent);border-radius:8px;padding:14px;margin-bottom:20px;">
+                                                                                                                                            <strong style="color:var(--accent);font-size:13px;">Come funziona?</strong>
+                                                                                                                                            <ol style="color:var(--text-secondary);font-size:12px;margin-top:8px;padding-left:18px;line-height:2.2;">
+                                                                                                                                                <li>Vai su <a href="https://supabase.com" target="_blank" style="color:var(--accent);">supabase.com</a> e crea un account <strong>gratis</strong></li>
+                                                                                                                                                <li>Clicca <strong>"New Project"</strong> e dagli un nome</li>
+                                                                                                                                                <li>Vai in <strong>Settings -> API</strong></li>
+                                                                                                                                                <li>Copia il <strong> Project URL</strong> e la <strong>anon public key</strong></li>
+                                                                                                                                                <li>Incollali qui sotto e salva</li>
+                                                                                                                                                <li>Il tuo sito avrà login e registrazione!</li>
+                                                                                                                                            </ol>
+                                                                                                                                        </div>
+                                                                                                                                        <div class="prop-group">
+                                                                                                                                            <label class="prop-label">Supabase Project URL</label>
+                                                                                                                                            <input type="text" class="prop-input" id="supabaseUrl" placeholder="https://xxxxxxxx.supabase.co">
+                                                                                                                                            <p style="font-size:11px;color:var(--text-secondary);margin-top:4px;">Lo trovi in Settings -> API -> Project URL</p>
+                                                                                                                                        </div>
+                                                                                                                                        <div class="prop-group">
+                                                                                                                                            <label class="prop-label">Supabase Anon Key (chiave pubblica)</label>
+                                                                                                                                            <input type="text" class="prop-input" id="supabaseKey" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...">
+                                                                                                                                            <p style="font-size:11px;color:var(--text-secondary);margin-top:4px;">Lo trovi in Settings -> API -> anon public</p>
+                                                                                                                                        </div>
+                                                                                                                                        <div class="prop-group">
+                                                                                                                                            <label class="prop-label">Cosa vuoi aggiungere al sito?</label>
+                                                                                                                                            <div style="display:flex;flex-direction:column;gap:8px;margin-top:6px;">
+                                                                                                                                                <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:12px;color:var(--text-secondary);">
+                                                                                                                                                    <input type="checkbox" id="authLogin" checked style="width:16px;height:16px;cursor:pointer;">
+                                                                                                                                                    Pagina di Login
+                                                                                                                                                </label>
+                                                                                                                                                <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:12px;color:var(--text-secondary);">
+                                                                                                                                                    <input type="checkbox" id="authRegister" checked style="width:16px;height:16px;cursor:pointer;">
+                                                                                                                                                    Pagina di Registrazione
+                                                                                                                                                </label>
+                                                                                                                                                <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:12px;color:var(--text-secondary);">
+                                                                                                                                                    <input type="checkbox" id="authLogout" checked style="width:16px;height:16px;cursor:pointer;">
+                                                                                                                                                    Bottone Logout
+                                                                                                                                                </label>
+                                                                                                                                            </div>
+                                                                                                                                        </div>
+                                                                                                                                        <button class="toolbar-btn btn-primary" id="btnSaveAuth" style="width:100%;justify-content:center;padding:10px;">
+                                                                                                                                            <i class="fa-solid fa-check"></i> Salva e attiva Login
+                                                                                                                                        </button>
+                                                                                                                                        <div id="authStatus" style="display:none;margin-top:12px;padding:10px;border-radius:6px;font-size:13px;text-align:center;"></div>
+                                                                                                                                        <div style="margin-top:16px;padding:12px;background:rgba(255,255,255,0.03);border-radius:8px;border:1px solid var(--border-color);">
+                                                                                                                                            <strong style="font-size:12px;color:var(--text-secondary);">Cosa succede dopo aver salvato?</strong>
+                                                                                                                                            <p style="font-size:11px;color:var(--text-secondary);margin-top:6px;line-height:1.8;">
+                                                                                                                                           Quando esporti il sio, il codice del login verrà incluso automaticamente. Gli utenti del tuo sito potranno registrarsi e fare login con la loro email e password.
+                                                                                                                                            </p>
+                                                                                                                                             </div>
+                                                                                                                                    </div>
+                        <div class="fn-panel" id="fn-roles">
+                            <h2 style="font-size:18px;margin-bottom:6px;"> Ruoli & Permessi</h2>
+                            <p style="color:var(--text-secondary);font-size:13px;margin-bottom:20px;">Definisci i ruoli sul sito. Un ruolo più in basso ha meno privilegi.</p>
+                            <div style="background:rgba(67,97,238,0.1);border:1px solid var(--accent);border-radius:8px;padding:14px;margin-bottom:16px;">
+                                <strong style="color:var(--accent);font-size:13px;">Gerarchia ruoli</strong>
+                                <p style="color:var(--text-secondary);font-size:12px;margin-top:6px;line-height:1.8;">Scrivi i ruoli <strong>dal più basso al più alto</strong>. Un admin puù vedere tutto quello che vede un premium, che vede tuto quello che vede uno user, ecc.</p>
+                            </div>
+                            <div class="prop-group">
+                                <label class="prop-label">Ruoli (uno per riga, dal basso verso l'alto)</label>
+                                <textarea class="prop-input prop-textarea" id="rolesConfig" rows="5">user
+premium
+moderator
+admin</textarea>
+                                <button class="prop-btn-small" id="btnUpdateRoleSelects" style="margin-top:6px;">Aggiorna tutte le liste ruoli</button>
+                            </div>
+                            <div class="prop-group">
+                                <label class="prop-label">Ruolo assegnato ai nuovi utenti</label>
+                                <select class="prop-input" id="defaultUserRole">
+                                    <option value="user">user</option>
+                                </select>
+                            </div>
+                            <div class="prop-group">
+                                <label class="prop-label">Chi può pubblicare sul blog?</label>
+                                <select class="prop-input" id="blogPublishRole">
+                                    <option value="user">Tutti gli utenti registrati</option>
+                                    <option value="premium">Solo Premium e superiori</option>
+                                    <option value="moderator">Solo Moderatori e superiori</option>
+                                    <option value="admin">Solo Admin</option>
+                                </select>
+                            </div>
+                            <div class="prop-group">
+                                <label class="prop-label">Chi può eliminare post altrui?</label>
+                                <select class="prop-input" id="blogModerateRole">
+                                    <option value="moderator">Moderatori e superiori</option>
+                                    <option value="admin">Solo Admin</option>
+                                </select>
+                            </div>
+                            <button class="toolbar-btn btn-primary" id="btnSaveRoles" style="width:100%;justify-content:center;padding:10px;margin-top:8px;">
+                                <i class="fa-solid fa-check"></i> Salva configurazione ruoli
+                            </button>
+                            <div id="rolesStatus" style="display:none;margin-top:12px;padding:10px;border-radius:6px;font-size:13px;text-align:center;"></div>
+                        </div>
+                        <div class="fn-panel" id="fn-blog">
+                            <h2 style="font-size:18px;margin-bottom:6px;"> Blog & Contenuti</h2>
+                            <p style="color:var(--text-secondary);font-size:13px;margin-bottom:20px;">Configura il sistema di blog condiviso del tuo sito.</p>
+                            <div class="prop-group">
+                                <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:12px;color:var(--text-secondary);">
+                                    <input type="checkbox" id="blogEnabled" checked style="width:16px;height:16px;cursor:pointer;">
+                                    Abilita sistema blog
+                                </label>
+                            </div>
+                            <div class="prop-group">
+                                <label class="prop-label">Numero post mostrati</label>
+                                <input type="number" class="prop-input" id="blogPostsPerPage" value="10" min="1" max="100">
+                            </div>
+                            <div class="prop-group">
+                                <label class="prop-label">Moderazione post</label>
+                                <select class="prop-input" id="blogModeration">
+                                    <option value="none">Pubblica subito (nessuna Moderazione)</option>
+                                    <option value="manual">Approvazione manuale admin</option>
+                                </select>
+                            </div>
+                            <div class="prop-group">
+                                <label class="prop-label">Categorie blog (una per riga)</label>
+                                <textarea class="prop-input prop-textarea" id="blogCategories" rows="4" placeholder="Generale&#10;Tutorial&#10;Notizie&#10;Domande"></textarea>
+                            </div>
+                            <button class="toolbar-btn btn-primary" id="btnSaveBlog" style="width:100%;justify-content:center;padding:10px;margin-top:8px;">
+                                <i class="fa-solid fa-check"></i> Salva configurazione blog
+                            </button>
+                            <div id="blogStatus" style="display:none;margin-top:12px;padding:10px;border-radius:6px;font-size:13px;text-align:center;"></div>
+                        </div>
+                        <div class="fn-panel" id="fn-dbsetup">
+                            <h2 style="font-size:18px;margin-bottom:6px;"> Setup Database Supabase</h2>
+                            <p style="color:var(--text-secondary);font-size:13px;margin-bottom:16px;">Esegui questo SQL una sola volta nel tuo progetto Supabase per creare tutte le tabelle necessarie.</p>
+                            <div style="background:rgba(46,196,182,0.1);border:1px solid var(--success);border-radius:8px;padding:14px;margin-bottom:16px;">
+                                <strong style="color:var(--success);font-size:13px;"> Istruzioni:</strong>
+                                <ol style="color:var(--text-secondary);font-size:12px;margin-top:8px;padding-left:18px;line-height:2.2;"> 
+                                    <li>Vai su <a href="https://supabase.com" target="_blank" style="color:var(--accent);">supabase.com</a> -> apri il progetto</li>
+                                    <li>Clicca <strong>SQL Editor</strong> -> <strong>New Query</strong></li>
+                                    <li>Incolla tutto il codice qui sotto</li>
+                                    <li>Clicca <strong>Run</strong> ></li>
+                                </ol>
+                            </div>
+                            <pre class="code-output" id="dbSetupSQL" style="max-height:320px;font-size:11px;"></pre>
+                            <div class="export-actions" style="margin-top:12px;">
+                                <button class="toolbar-btn" id="btnCopySQL"><i class="fa-solid fa-copy"></i> Copia SQL</button>
+                            </div>
+                            <div style="margin-top:16px;padding:12px;background:rgba(244,162,97,0.1);border:1px solid var(--warning);border-radius:8px;">
+                                <strong style="color:var(--warning);font-size:12px;"> Esegui UNA SOLA VOLTA per progetto.</strong>
+                                <p style="font-size:11px;color:var(--text-secondary);margin-top:4px;line-height:1.8;">Se lo esegui di nuovo non causa problemi (usa IF NOT EXISTS). Assicurati di aver prima configurato <strong>Login & Utenti</strong> con le credenziali Supabase.</p>
+                            </div>
+                        </div>
+                        <div class="fn-panel" id="fn-products">
+                            <h2 style="font-size:18px;margin-bottom:6px;"> Prodotti & Catalogo</h2>
+                            <p style="color:var(--text-secondary);font-size:13px;margin-bottom:20px;">Configura il catalogo prodotti del tuo sito. I prodotti vengono gestiti nel database Supabase.</p>
+                            <div style="background:rgba(67,97,238,0.1);border:1px solid var(--accent);border-radius:8px;padding:14px;margin-bottom:16px;">
+                                <strong style="color:var(--accent);font-size:13px;">Come aggiungere prodotti</strong>
+                                <ol style="color:var(--text-secondary);font-size:12px;margin-top:8px;padding-left:18px;line-height:2.2;">
+                                    <li>Configura Login & Utenti e Setup Database</li>
+                                    <li>Vai su Supabase -> Table Editor -> <strong>wb_products</strong></li>
+                                    <li>Aggiungi le righe con nome, prezzo, immagine, ecc.</li>
+                                    <li>Imposta <strong>published = true</strong> per renderli visibili</li>
+                                </ol>
+                                </div>
+                                <div class="prop-group">
+                                    <label class="prop-label">Valuta predefinita</label>
+                                    <select class="prop-input" id="productCurrency">
+                                        <option value="€">€ Euro</option>
+                                        <option value="$">$ Dollaro</option>
+                                        <option value="£">£ Sterlina</option>
+                                        <option value="CHF">CHF Franco</option>
+                                    </select>
+                                </div>
+                                <div class="prop-group">
+                                    <label class="prop-label">Testo bottone "Aggiungi al carrello"</label>
+                                    <input type="text" class="prop-input" id="productAddToCartText" value=" Aggiungi al carrello">
+                                </div>
+                                <div class="prop-group">
+                                    <label class="prop-label">Messaggio carrello vuoto</label>
+                                    <input type="text" class="prop-input" id="productCartEmpty" value="Il carrello è vuoto">
+                                </div>
+                                <button class="toolbar-btn btn-primary" id="btnSaveProduct" style="width:100%;justify-content:center;padding:10px;margin-top:8px;">
+                                    <i class="fa-solid fa-check"></i> Salva impostazioni prodotti
+                                </button>
+                                <div id="productsStatus" style="display:none;margin-top:12px;padding:10px;border-radius:6px;font-size:13px;text-align:center;"></div>
+                            </div>
+                            <div class="fn-panel" id="fn-bookings">
+                                <h2 style="font-size:18px;margin-bottom:6px;"> Prenotazioni</h2>
+                                <p style="color:var(--text-secondary);font-size:13px;margin-bottom:20px;">Configura il sistema di prenotazioni. Gli utenti compilano il form e le prenotazioni vengono salvate in Supabase.</p>
+                                <div class="prop-group">
+                                    <label class="prop-label">Servizi disponibili (uno per riga)</label>
+                                    <textarea class="prop-input prop-textarea" id="bookingServices" rows="5" placeholder="Taglio Capelli&#10;Consulenza&#10;Appuntamento generico"></textarea>
+                                </div>
+                                <div class="prop-group">
+                                    <label class="prop-label">Orari disponibili (separati da virgola)</label>
+                                    <input type="text" class="prop-input" id="bookingTimes" placeholder="09:00, 10:00, 14:00, 15:00, 16:00">
+                                </div>
+                                <div class="prop-group">
+                                    <label class="prop-label">Messaggio di conferma prenotazione</label>
+                                    <input type="text" class="prop-input" id="bookingSuccessMsg" value=" Prenotazione confermata! Ti contatteremo presto." placeholder="Messaggio dopo invio">
+                                </div>
+                                <div class="prop-group">
+                                    <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:12px;color:var(--text-secondary);">
+                                        <input type="checkbox" id="bookingRequireLogin" style="width:16px;height:16px;cursor:pointer;">
+                                        Richiedi login per prenotare
+                                    </label>
+                                </div>
+                                <button class="toolbar-btn btn-primary" id="btnSaveBookings" style="width:100%;justify-content:center;padding:10px;margin-top:8px;">
+                                    <i class="fa-solid fa-check"></i> Salva impostazioni prenotazioni
+                                </button>
+                                <div id="bookingsStatus" style="display:none;margin-top:12px;padding:10px;border-radius:6px;font-size:13px;text-align:center;"></div>
+                            </div>
+                            <div class="fn-panel" id="fn-payments">
+                                <h2 style="font-size:18px;margin-bottom:6px;"> Pagamenti</h2>
+                                <p style="color:var(--text-secondary);font-size:13px;margin-bottom:16px;">Integra pagamenti Stripe e/o PayPal nel tuo sito. Entrambi gratuiti da configurare, paghi solo una % sulla transazioni.</p>
+                                <div style="background:rgba(99,91,255,0.1);border:1px solid #635bff;border-radius:8px;padding:14px;margin-bottom:16px;">
+                                    <strong style="color:#635bff;font-size:13px;">Stripe</strong>
+                                    <ol style="color:var(--text-secondary);font-size:12px;margin-top:8px;padding-left:18px;line-height:2.2;">
+                                        <li>Vai su <a href="https://stripe.com" target="_blank" style="color:var(--accent);">stripe.com</a> e crea account</li>
+                                        <li>Dashboard -> API Keys -> copia <strong>Publishable key</strong></li>
+                                        <li>Crea un prodotto in Stripe -> copia il <strong>Price ID</strong> (price_xxx)</li>
+                                        <li>Incolla qui sotto</li>
+                                    </ol>
+                                </div>
+                                <div class="prop-group">
+                                    <label class="prop-label">Stripe Publishable Key</label>
+                                    <input type="text" class="prop-input" id="stripeKey" placeholder="pk_live_... oppure pk_test_...">
+                                </div>
+                                <div class="prop-group">
+                                    <label class="prop-label">PayPal Client ID</label>
+                                    <input type="text" class="prop-input" id="paypalClientId" placeholder="AXxxx... (Client ID sandbox o live)">
+                                </div>
+                                <div class="prop-group">
+                                    <label class="prop-label">Valuta pagamenti</label>
+                                    <select class="prop-input" id="paymentCurrency">
+                                        <option value="EUR">EUR (Euro)</option>
+                                        <option value="USD">USD (Dollaro)</option>
+                                        <option value="GBP">GBP (Sterlina)</option>
+                                        <option value="CHF">CHF (Franco)</option>
+                                    </select>
+                                </div>
+                                <button class="toolbar-btn btn-primary" id="btnSavePayments" style="width:100%;justify-content:center;padding:10px;margin-top:8px;">
+                                    <i class="fa-solid fa-check"></i> Salva impostazioni pagamenti
+                                </button>
+                                <div id="paymentsStatus" style="display:none;margin-top:12px;padding:10px;border-radius:6px;font-size:13px;text-align:center;"></div>
+                            </div>
+                            <div class="fn-panel" id="fn-newsletter">
+                                <h2 style="font-size:18px;margin-bottom:6px;"> Newsletter</h2>
+                                <p style="color:var(--text-secondary);font-size:13px;margin-bottom:20px;">Raccogli email e costruisci la tua mailing list. Le email vengolo salvate in Supabase. Gratuito.</p>
+                                <div class="prop-group">
+                                    <label class="prop-label">Messaggio dopo iscrizione</label>
+                                    <input type="text" class="prop-input" id="newsletterSuccessMsg" value=" Iscritto! Grazie per esserti unito." placeholder="Messaggio di conferma">
+                                </div>
+                                <div class="prop-group">
+                                    <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:12px;color:var(--text-secondary);">
+                                        <input type="checkbox" id="newsletterDoubleOption" style="width:16px;height:16px;cursor:pointer;">
+                                        Abilita double opt-in (conferma via email)
+                                        <small style="display:block;color:var(--text-secondary);font-size:10px;margin-top:2px;">Richiede configurazione Supabase email templates</small>
+                                    </label>
+                                </div>
+                                <div class="prop-group">
+                                    <label class="prop-label">Esporta iscritti</label>
+                                    <p style="font-size:12px;color:var(--text-secondary);margin-bottom:8px;">Vai su Supabase -> Table Editor -> wb_newsletter per vedere e scaricare gli iscritti.</p>
+                                    <a href="#" onclick="window.open('https://supabase.com', '_blank')" class="prop-btn-secondary" style="display:flex;align-items:center;justify-content:center;gap:6px;text-decoration:none;">
+                                        <i class="fa-solid fa-external-link-alt"></i> Apri Supabase
+                                    </a>
+                                </div>
+                                <button class="toolbar-btn btn-primary" id="btnSaveNewsletter" style="width:100%;justify-content:center;padding:10px;margin-top:8px;">
+                                    <i class="fa-solid fa-check"></i> Salva impostazioni newsletter
+                                </button>
+                                <div id="newsletterStatus" style="display:none;margin-top:12px;padding:10px;border-radius:6px;font-size:13px;text-align:center;"></div>
+                            </div>
+                        <div class="fn-panel" id="fn-coming">
+                            <h2 style="font-size:18px;margin-bottom:20px;"> Prossimamente</h2>
+                            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                                <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border-color);border-radius:8px;padding:16px;opacity:0.6;">
+                                    <div style="font-size:24px;margin-bottom:8px;">👤</div>
+                                    <strong style="font-size:13px;">Login & Utenti</strong>
+                                    <p style="font-size:11px;color:var(--text-secondary);margin-top:4px;">Registrazione, login e pagine protette</p>
+                                </div>
+                                <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border-color);border-radius:8px;padding:16px;padding:16px;opacity:0.6;">
+                                    <div style="font-size:24px;margin-bottom:8px;">📝</div>
+                                    <strong style="font-size:13px;">Blog dinamico</strong>
+                                    <p style="font-size:11px;color:var(--text-secondary);margin-top:4px;">Aggiungi articoli senza toccare il codice</p>
+                                </div>
+                                <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border-color);border-radius:8px;padding:16px;opacity:0.6;">
+                                    <div style="font-size:24px;margin-bottom:8px;">🛒</div>
+                                    <strong style="font-size:13px;">Prodotti & Catalogo</strong>
+                                    <p style="font-size:11px;color:var(--text-secondary);margin-top:4px;">Gestisci prodotti e prezzi facilmente</p>
+                                </div>
+                                <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border-color);border-radius:8px;padding:16px;opacity:0.6;">
+                                    <div style="font-size:24px;margin-bottom:8px;">📅</div>
+                                    <strong style="font-size:13px;">Prenotazione</strong>
+                                    <p style="font-size:11px;color:var(--text-secondary);margin-top:4px;">Sistema prenotazioni e appuntamenti</p>
+                                </div>
+                                <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border-color);border-radius:8px;padding:16px;opacity:0.6;">
+                                    <div style="font-size:24px;margin-bottom:8px;">💳</div>
+                                    <strong style="font-size:13px;">Pagamenti</strong>
+                                    <p style="font-size:11px;color:var(--text-secondary);margin-top:4px;">Stripe e PayPal integrati</p>
+                                </div>
+                                <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border-color);border-radius:8px;padding:16px;opacity:0.6;">
+                                    <div style="font-size:24px;margin-bottom:8px;">📧</div>
+                                    <strong style="font-size:13px;">Newsletter</strong>
+                                    <p style="font-size:11px;color:var(--text-secondary);margin-top:4px;">Raccogli email e manda newsletter</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal-overlay" id="previewModal">
+        <div class="modal-content modal-fullscreen">
+            <div class="modal-header">
+                <h3>Anteprima</h3>
+                <button class="close-btn" id="closePreview"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <iframe id="previewFrame" class="preview-frame" title="Anteprima del sito"></iframe>
+        </div>
+    </div>
+    <div class="modal-overlay" id="exportModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Esporta il tuo sito</h3>
+                <button class="close-btn" id="closeExport"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body">
+                <div class="export-tabs">
+                    <button class="export-tab active" data-export="html">HTML</button>
+                    <button class="export-tab" data-export="css">CSS</button>
+                    <button class="export-tab" data-export="full">Completo</button>
+                </div>
+                <pre class="code-output" id="codeOutput"></pre>
+                <div class="export-actions">
+                    <button class="toolbar-btn" id="btnCopyCode"><i class="fa-solid fa-copy"></i>Copia</button>
+                    <button class="toolbar-btn btn-primary" id="btnDownloadZip"><i class="fa-solid fa-download"></i> Scarica ZIP</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="context-menu" id="contextMenu">
+        <button class="context-item" data-action="duplicate"><i class="fa-solid fa-clone"></i> Duplica</button>
+        <button class="context-item" data-action="copy"><i class="fa-solid fa-copy"></i> Copia</button>
+        <button class="context-item" data-action="paste"><i class="fa-solid fa-paste"></i> Incolla</button>
+        <button class="context-item" data-action="moveup"><i class="fa-solid fa-arrow-up"></i> Sposta su</button>
+        <button class="context-item" data-action="movedown"><i class="fa-solid fa-arrow-down"></i> Sposta giu</button>
+        <hr class="context-divider">
+        <button class="context-item context-danger" data-action="delete"><i class="fa-solid fa-trash"></i> Elimina</button>
+    </div>
+
+    <div class="reset-overlay" id="resetOverlay">
+        <div class="reset-dialog">
+            <div class="reset-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
+            <div class="reset-title">Cancellare tutto?</div>
+            <div class="reset-text">Stai per eliminare tutti gli elementi del progetto attuale. Questa azione sarà irreversibile.</div>
+            <div class="reset-buttons">
+                <button class="reset-btn-cancel" id="resetCancel">Annulla</button>
+                <button class="reset-btn-confirm" id="resetConfirm">Sì, cancella tutto</button>
+                </div>
+            </div>
+        </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
