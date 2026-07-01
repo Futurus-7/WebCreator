@@ -2100,7 +2100,7 @@ body.has-platform-warning .main-wrapper {
 .canvas .wb-profile-avatar {
     width: 64px; height: 64px;                 
     border-radius: 50%;
-    background: linear-gradient(135deg, #4361ee, #3e0ca3);
+    background: linear-gradient(135deg, #4361ee, #3a0ca3);
     display: flex; align-items: center; justify-content: center;
     color: white; font-size: 26px; font-weight: 700;
     flex-shrink: 0; overflow: hidden;

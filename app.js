@@ -1656,7 +1656,7 @@ function initPropertyInputs() {
         if (!timeSelect) return;
         const times = $('#propBookingTimes').value.split(',').map(t => t.trim()).filter(t => t);
         timeSelect.innerHTML = '<option value="">Seleziona...</option>' +
-            times.map(t => '<option>${t}</option>').join('');
+            times.map(t => `<option>${t}</option>`).join('');
         saveHistory();
     });
     $('#propPaymentName')?.addEventListener('input', () => {
@@ -1693,7 +1693,7 @@ function initPropertyInputs() {
         if (h3) h3.textContent = $('#propNewsletterTitle').value;
         saveHistory();
     });
-    $('#propNewsletterSubtitle').addEventListener('input',  () => {
+    $('#propNewsletterSubtitle')?.addEventListener('input', () => {
         if (!state.selectedElement) return;
         const p = state.selectedElement.querySelector('p');
         if (p) p.textContent = $('#propNewsletterSubtitle').value;
@@ -2027,7 +2027,7 @@ function updatePropertyPanel() {
             const nlc = document.getElementById('newsletterConfig');
             if (nlc) nlc.style.display = 'block';
             if ($('#propNewsletterTitle')) $('#propNewsletterTitle').value = el.querySelector('h3')?.textContent || '';
-            if ($('#propNewsletterSubtitle')) $('#propNewsletterSubTitle').value = el.querySelector('p')?.textContent || '';
+            if ($('#propNewsletterSubtitle')) $('#propNewsletterSubtitle').value = el.querySelector('p')?.textContent || '';
             if ($('#propNewsletterBtn')) $('#propNewsletterBtn').value = el.querySelector('[data-wb-newsletter-btn]')?.textContent || '';
             if ($('#propNewsletterSuccess')) $('#propNewsletterSuccess').value = el.querySelector('[data-wb-newsletter]')?.dataset.successMsg || '';
             break;
@@ -2303,8 +2303,6 @@ const icons = {
     'block-cart': 'fa-solid fa-cart-shopping',
     'block-booking-form': 'fa-solid fa-calendar-check',
     'block-booking-admin': 'fa-solid fa-calendar-days',
-    'block-payment': 'fa-solid fa-credit-card',
-    'block-stripe-btn': 'fa-brands fa-stripe-s',
     'block-payment': 'fa-solid fa-credit-card',
     'block-stripe-btn': 'fa-brands fa-stripe-s',
     'block-paypal-btn': 'fa-brands fa-paypal',
@@ -2640,7 +2638,7 @@ async function _loadBlog() {
             if (cat) q = q.eq('category', cat);
             var r = await q;
             if (!r.data || r.data.length === 0) {
-                el.innerHTML = '<div style="text-align:center;padding:40px;color:#999;grid-column:1/-1;"><i class="fa-solid fa-store" style="font-size:32px;opacity:0.3;display:block;margin-bottom:12px;"></i>Nessun prodotto disponibile</div>';
+                el.innerHTML = '<div style="text-align:center;padding:40px;color:#999;"><i class="fa-solid fa-newspaper" style="font-size:32px;opacity:0.3;display:block;margin-bottom:12px;"></i>Nessun post ancora. Sii il primo!</div>';
                 return;
             }
             el.innerHTML = r.data.map(function(post) {
@@ -2749,8 +2747,8 @@ async function _loadProducts() {
             var q = window._sb.from('wb_products').select('*').eq('published', true).order('created_at', {ascending:false}).limit(limit);
             if (category) q = q.eq('category', category);
             var r = await q;
-            if (!r.data || r.data.lenght === 0) {
-                el.innerHTML '<div style="text-align:center;padding:40px;color:#999;grid-column:1/-1:"><i class="fa-solid fa-store" style="font-size:32px;opacity:0.3;display:block;margin-bottom:12px;"></i>Nessun prodott disponibile</div>';
+            if (!r.data || r.data.length === 0) {
+                el.innerHTML = '<div style="text-align:center;padding:40px;color:#999;grid-column:1/-1;"><i class="fa-solid fa-store" style="font-size:32px;opacity:0.3;display:block;margin-bottom:12px;"></i>Nessun prodotto disponibile</div>';
                 return;
             }
             el.innerHTML = r.data.map(function(p) {
@@ -2787,7 +2785,7 @@ function _removeFromCart(id) {
 }
 function _changeQty(id, delta) {
     var item = _cart.find(function(i) { return i.id === id; });
-    id (!item) return;
+    if (!item) return;
     item.qty = Math.max(0, item.qty + delta);
     if (item.qty === 0) _cart = _cart.filter(function(i) { return i.id !== id; });
     localStorage.setItem('_wbCart', JSON.stringify(_cart));
@@ -2956,7 +2954,7 @@ function _setupNewsletter() {
                 try {
                     var r = await window._sb.from('wb_newsletter').upsert({ email: email, subscribed_at: new Date().toISOString(), active: true }, { onConflict: 'email' });
                     if (r.error) throw r.error;
-                    widget.innerHTML = '<div style="text-align:center;padding:24px;color:white;font-size:16px;font-weight:600;opacity:0.95;"> + msg + '</div>';
+                    widget.innerHTML = '<div style="text-align:center;padding:24px;color:white;font-size:16px;font-weight:600;opacity:0.95;">' + msg + '</div>';
                 } catch(e) { alert('Errore: ' + e.message); btn.disabled = false; btn.textContent = orig; }    
             } else {
                 widget.innerHTML = '<div style="text-align:center;padding:24px;color:white;font-size:16px;font-weight:600;opacity:0.95;">' + msg + '</div>';
@@ -4367,7 +4365,7 @@ ALTER TABLE wb_newsletter ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "Chiunque può iscriversi" ON wb_newsletter;
 CREATE POLICY "Chiunque può iscriversi" ON wb_newsletter FOR INSERT WITH CHECK (TRUE);
 DROP POLICY IF EXISTS "Utente gestisce propria iscrizione" ON wb_newsletter;
-CREATE POLICY "Utente gestisce propria iscrizione" ON wb_newsletter CREATE POLICY "Utente gestisce propria iscrizione" ON wb_newsletter FOR ALL USING (email = (SELECT email FROM auth.users WHERE id = auth.uid()));
+CREATE POLICY "Utente gestisce propria iscrizione" ON wb_newsletter FOR ALL USING (email = (SELECT email FROM auth.users WHERE id = auth.uid()));
 DROP POLICY IF EXISTS "Admin vede iscritti" ON wb_newsletter;
 CREATE POLICY "Admin vede iscritti" ON wb_newsletter FOR SELECT USING (
     EXISTS (SELECT 1 FROM wb_profiles WHERE id = auth.uid() AND role = 'admin')
