@@ -81,3 +81,110 @@ section { position:relative; z-index:1; padding:110px 6%; }
 .step-num { width:52px; height:52px; border-radius:50%; margin:0 auto 18px; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:18px; background:rgba(34,211,238,0.1); border:1px solid rgba(34,211,138,0.4); color:var(--wb-cyan); }
 .step h3 { font-size:17px; font-weight:700; margin-bottom:8px; }
 .step p { font-size:14px; color:var(-wb-gray); line-height:1.55; }
+
+.cta-banner { max-width:1000px; margin:0 auto; border-radius:24px; padding:70px 6%; text-align:center; background:linear-gradient(135deg,rgba(6,182,212,0.15),rgba(99,102,241,0.15)); border:1px solid rgba(34,211,238,0.25); position:relative; overflow:hidden; }
+.cta-banner h2 { font-size:clamp(26px,4vw,38px); font-weight:800; letter-spacing:-1px; }
+.cta-banner p { color:var(--wb-gray-light); margin-top:14px; font-size:16px; }
+.cta-banner .hero-acions { margin-top:32px; opacity:1; animation:none; }
+footer { position:relative; z-index:1; padding:50px 6% 30px; border-top:1px solid rgba(255,255,255,0.06); display:flex; flex-wrap:wrap; gap:20px; align-items:center; justify-content:space-between; color:var(--wb-gray); font-size:13px; }
+footer .nav-logo { font-size:16px; }
+</style>
+</head>
+<body>
+<div class="bg-blobs">
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
+</div>
+<nav class="nav">
+    <div class="nav-logo"><i class="fa-solid fa-layer-group"></i> WebBuilder</div>
+    <div class="nav-links">
+        <a href="#features">Funzionalità</a>
+        <a href="#how">Come funziona</a>
+        <a href="#cta">Inizia ora</a>
+    </div>
+    <a href="dashboard.html" class="nav-cta">Usa Gratuitamente</a>
+</nav>
+<section class="hero">
+    <div class="hero-badge"><i class="fa-solid fa-bolt"></i> Nessuna carta di credito richiesta</div>
+    <h1>Crea sii web <span class="grad">professionali</span><br>senza scrivere una riga di codice</h1>
+    <p>Trascina, personalizza e pubblica. WebBuilder ti dà login uteni, e-commerce, prenotazioni, pagamenti, e blog già pronti all'uso - tutto gratis per iniziare.</p>
+    <div class="hero-actions">
+        <a href="dashboard.html" class="btn-primary"><i class="fa-solid fa-rocket"></i> Usa Gratuitamente</a>
+        <a href="#features" class="btn-secondary"><i class="fa-solid fa-circle-play"></i> Scopri le funzionalità</a>
+    </div>
+    <div class="hero-mockup">
+        <div class="mockup-bar">
+            <div class="mockup-dot" style="background:#e63946;"></div>
+            <div class="mockup-dot" style="background:#f4a261;"></div>
+            <div class="mockup-dot" style="background:#2ec4b6;"></div>
+        </div>
+        <div class="mockup-body">
+            <div class="mockup-side">
+                <div class="mockup-chip active"></div>
+                <div class="mockup-chip"></div>
+                <div class="mockup-chip"></div>
+                <div class="mockup-chip"></div>
+            </div>
+            <div class="mockup-canvas">
+                <div class="mockup-block h1"></div>
+                <div class="mockup-block p"></div>
+                <div class="mockup-block p2"></div>
+                <div class="mockup-block btn"></div>
+            </div>
+        </div>
+    </div>
+</section>
+<section id="features">
+    <div class="section-head reveal">
+        <div class="eyebrow">Funzionalità</div>
+        <h2>Tutto ciò che serve, già incluso</h2>
+        <p>Non servono plugin esterni o abbonamenti nascosti: ogni blocco è pronto da trascinare.</p>
+    </div>
+    <div class="features-grid">
+        <div class="feature-card reveal"><div class="feature-icon"><i class="fa-solid fa-arrows-up-down-left-right"></i></div><h3>Editor Drag & Drop</h3><p>Trascina sezioni, testi, immagini e blocchi pronti direttamente nel canvas, in modalità struttura o libera.</p></div>
+        <div class="feature-card reveal"><div class="feature-icon"><i class="fa-solid fa-user-lock"></i></div><h3>Login & Ruoli</h3><p>Aggiungi registrazione, login e permessi per utenti, moderatori e admin in pochi click.</p></div>
+        <div class="feature-card reveal"><div class="feature-icon"><i class="fa-solid fa-cart-shopping"></i></div><h3>E-commerce</h3><p>Catalogo prodotti, carrello e pagamenti con Stripe o Paypal integrati.</p></div>
+        <div class="feature-card reveal"><div class="feature-icon"><i class="fa-solid fa-calendar-check"></i></div><h3>Prenotazioni</h3><p>Un sistema di prenotazione appuntamenti completo, con gestione lato admin.</p></div>
+        <div class="feature-card reveal"><div class="feature-icon"><i class="fa-solid fa-newspaper"></i></div><h3>Blog Dinamico</h3><p>I tuoi utenti possono pubblicare articoli, con moderazione e categorie</p></div>
+        <div class="feature-card reveal"><div class="feature-icon"><i class="fa-solid fa-envelope-open-text"></i></div><h3>Newsletter</h3><p>Raccogli iscritti direttamente dal tuo sito, senza servizi esterni a pagamento.</p></div>
+    </div>
+</section>
+<section id="how">
+    <div class="section-head reveal">
+        <div class="eyebrow">Come funziona</div>
+        <h2>Online in tre passaggi</h2>
+    </div>
+    <div class="steps">
+        <div class="step reveal"><div class="step-num">1</div><h3>Crea un account</h3><p>Gratuito, bastano email e password. Nessuna carta richiesta.</p></div>
+        <div class="step reveal"><div class="step-num">2</div><h3>Trascina i tuoi elementi</h3><p>Scegli tra decine di blocchi proni e personalizza colori, testi e stile.</p></div>
+        <div class="step reveal"><div class="step-num">3</div><h3>Pubblica il tuo sito</h3><p>Esporta il codice o scarica lo ZIP pronto per essere caricato online.</p></div>
+    </div>
+</section>
+<section id="cta">
+    <div class="cta-banner reveal">
+        <h2>Pronto a costruire il tuo prossimo progetto?</h2>
+        <p>Crea il tuo account gratuito e inizia subito a trascinare i primi elementi.</p>
+        <div class="hero-actions">
+            <a href="dashboard.html" class="btn-primary"><i class="fa-solid fa-rocket"></i> Usa Gratuitamente</a>
+        </div>
+    </div>
+</section>
+<footer>
+    <div class="nav-logo"><i class="fa-solid fa-layer-group"></i> WebBuilder</div>
+    <div>© 2026 WebBuilder. Creato per creare.</div>
+</footer>
+<script>
+const revealEls = document.querySelectorAll('.reveal');
+const io = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+        if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+            io.unobserve(entry.target);
+        }
+    });
+}, { threshold: 0.15 });
+revealEls.forEach(el => io.observe(el));
+</script>
+</body>
+</html>

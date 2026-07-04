@@ -25,7 +25,7 @@
     </div>
     <header class="toolbar">
         <div class="toolbar-left">
-            <span class="logo">WebBuilder</span>
+            <a href="dashboard.html" class="logo" style="text-decoration:none;display:flex;align-items:center;gap:8px;" title="Torna alla Dashboard"><i class="fa-solid fa-arrow-left" style="font-size:13px;"></i> WebBuilder</a>
             <button class="toolbar-btn" id="btnUndo" title="Annulla" aria-label="Annulla"><i class="fa-solid fa-rotate-left"></i></button>
             <button class="toolbar-btn" id="btnRedo" title="Ripeti"><i class="fa-solid fa-rotate-right"></i></button>
             <button class="toolbar-btn btn-reset" id="btnReset" title="Resetta progetto"><i class="fa-solid fa-triangle-exclamation"></i> Reset</button>
@@ -1428,6 +1428,7 @@ admin</textarea>
             </div>
         </div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="platform-auth.js"></script>
     <script src="app.js"></script>
 </body>
 </html>
