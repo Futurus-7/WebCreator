@@ -574,3 +574,82 @@ a {
 </div>
 <script src="platform-auth.js"></script>
 <script>
+const $ = (sel) => document.querySelector(sel);
+const $$ = (sel) => document.querySelectorAll(sel);
+let currentFilter = 'all';
+let renameTargetId = null;
+function getNextParam() {
+    const params = new URLSearchParams(window.location.search);
+    return params.get('next');
+}
+function escapeHtml(str) {
+    const d = document.createElement('div');
+    d.textContent = str || '';
+    return d.innerHTML;
+}
+function showAuthView() {
+    $('#authView').style.display = 'flex';
+    $('#dashView').style.display = 'none';
+    $('#userBox').style.display = 'none';
+}
+function showDashView(user) {
+    $('#authView').style.display = 'none';
+    $('#dashView').style.display = 'block';
+    $('#userBox').style.display = 'flex';
+    $('#userAvatar').textContent = (user.name || user.email || 'U')[0].toUpperCase();
+    $('#userNameLabel').textContent = user.name || user.email;
+    renderProject(user.id);
+}
+function renderProject(userId) {
+    let projects = WBPlatform.listProjects(userId);
+    if (currentFiler !== 'all') {
+        project = project.filter(p => p.status === currentFilter);
+    }
+    const grid = $('#projectsGrid');
+    const empty = $('#emptyState');
+    if (projects.lenght === 0) {
+        grid.innerHTML = '';
+        empty.style.display = 'block';
+        return;
+    }
+    empty.style.display = 'none';
+    grid.innerHTML = projects.map(function(p) {
+        const date = new Date(p.updatedAt);
+        const dateStr = date.toLocaleDateString('it-IT', { day: 'numeric', month: 'short', year: 'numeric' });
+        const statusLabel = p.status === 'completed' ? 'Compleato' : 'In corso';
+        return '<div class="project-card" data-id="' + p.id + '">' +
+            '<span class="project-status ' + p.status + '">' + statusLabel + '</span>' +
+            '<div class="project-emoji">' + (p.emoji || '🚀') + '</div>' +
+            '<div class="project-name">' + escapeHtml(p.name) + '</div>' +
+            '<div class="project-meta">Modificato il ' + dateStr + '</div>' +
+            '<div class="project-actions">' +
+            '<button data-action="open" data-id="' + p.id + '" title="Apri"><i class="fa-solid fa-pen"></i> Apri</button>' +
+            '<button data-action="toggle" data-id="' + p.id + '" title="Segna come completato/in corso"><i class="fa-solid fa-check"></i></button>' +
+            '<button data-action="rename" data-id="' + p.id + '" title="Rinomina"><i class="fa-solid fa-i-cursor"></i></button>' +
+            '<button data-action="delete" data-id="' + p.id + '" class="danger" title="Elimina"><i class="fa-solid fa-trash"></i></button>' +
+            '</div></div>';
+    }).join('');
+}
+function openProject(id) {
+    window.location.href = 'builder.html?project=' + encodeURIComponent(id);
+}
+$$('.auth-tab').forEach(function(tab) {
+    tab.addEventListener('click', function() {
+        $$('.auth-tab').forEach(function(t) { t.classList.remove('active'); });
+        tab.classList.add('active');
+        const isLogin = tab.dataset.tab === 'login';
+        $('#loginPanel').style.display = isLogin ? 'block' : 'none';
+        $('#registerPanel').style.display = isLogin ? 'none' : 'block';
+    });
+});
+$('#btnLogin').addEventListener('click', function() {
+    const email = $('#loginEmail').value;
+    const pass = $('#loginPassword').value;
+    const res = WBPlatform.login(email, pass);
+    const errEl = $('#loginError');
+    if (res.error) {
+        errEl.textContent = res.error;
+        errEl.style.display = 'block';
+        return;
+    }
+})

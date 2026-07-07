@@ -3480,6 +3480,13 @@ function initKeyboard() {
     });
 }
 
+function _getActiveProjecId() {
+    const params = new URLSearchParams(window.location.search);
+    return params.get('project') || 'default';
+}
+function _getStorageKey() {
+    return 'webbuilder-autosave-' + _getActiveProjectId();
+}
 function autoSave() {
     try {
         saveCurrentPage();
@@ -3491,15 +3498,27 @@ function autoSave() {
             advancedConfig: advancedConfig,
             timestamp: Date.now()
         };
-        localStorage.setItem('webbuilder-autosave', JSON.stringify(data));
+        localStorage.setItem(_getStorageKey(), JSON.stringify(data));
+        if (typeof WBPlatform !== 'undefined') {
+            const projectId = _getActiveProjectId();
+            if (projectId !== 'default') WBPlatform.touchProject(projectId, {});
+        }
     } catch (e) {
         console.warn('Autosave fallito:', e);
     }
 }
-
 function autoLoad() {
     try {
-        const saved = localStorage.getItem('webbuilder-autosave');
+        if (typeof WBPlatform !== 'undefined') {
+            const user = WBPlatform.requireLogin(window.location.href);
+            if (!user) return true;
+            const projectId = _getActiveProjectId();
+            if (projectId !== 'default' && !WBPlatform.getProject(projectId)) {
+                window.location.href = 'dashboard.html';
+                return true;
+            }
+        }
+        const saved = localStorage.getItem(_getStorageKey());
         if (!saved) return false;
         const data = JSON.parse(saved);
         if (!data.pages) return false;
@@ -3508,7 +3527,7 @@ function autoLoad() {
         state.elementCounter = data.counter || 0;
         currentMode = data.currentMode || 'structure';
         $$('.mode-btn').forEach(b => b.classList.remove('active'));
-        const modeBtn = document.querySelector(`.mode-btn[data-mode="${currentMode}"]`);
+        const modeBtn = document.querySelector(`.mode-btn[data-mode="${currentMode}"]`)
         if (modeBtn) modeBtn.classList.add('active');
         if (data.advancedConfig) Object.assign(advancedConfig, data.advancedConfig);
         renderPageTabs();
@@ -3518,6 +3537,10 @@ function autoLoad() {
         return false;
     }
 }
+
+
+
+
 
 function initModes() {
     $$('.mode-btn').forEach(btn => {
