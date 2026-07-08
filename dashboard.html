@@ -652,4 +652,129 @@ $('#btnLogin').addEventListener('click', function() {
         errEl.style.display = 'block';
         return;
     }
-})
+    errEl.style.display = 'none';
+    const next = getNextParam();
+    if (next) { window.location.href = next; return; }
+    showDashView(res.user);
+});
+$('#loginPassword').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') $('#btnLogin').click();
+});
+
+
+$('#btnRegister').addEventListener('click', function() {
+    const name = $('#regName').value;
+    const email = $('#regEmail').value;
+    const pass = $('#regPassword').value;
+    const res = WBPlatform.regiser(name, email, pass);
+    const errEl = $('#regError');
+    if (res.error) {
+        errEl.textContent = res.error;
+        errEl.style.display = 'block';
+        return;
+    }
+    errEl.style.display = 'none';
+    const next = getNextParam();
+    if (next) { window.location.href = next; return; }
+    showDashView(res.user);
+});
+$('#regPassword').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') $('#btnRegister').click();
+});
+$('#btnLogout').addEventListener('click', function() {
+    WBPlatform.logout();
+    showAuthView();
+});
+$$('.filter-tab').forEach(function(tab) {
+    tab.addEventListener('click', function() {
+        $$('.filter-tab').forEach(function(t) { t.classList.remove('active'); });
+        tab.classList.add('active');
+        currentFilter = tab.dataset.filter;
+        const user = WBPlatform.currentUser();
+        if (user) renderProjects(user.id);
+    });
+});
+$('#btnNewProject').addEventListener('click', function() {
+    $('#newProjectName').value = '';
+    $('#newProjectModal').classList.add('visible');
+    $('#newProjectName').focus();
+});
+$('#cancelNewProject').addEventListener('click', function() {
+    $('#newProjectModal').classList.remove('visible');
+});
+$('#confirmNewProject').addEventListener('click', function() {
+    const user = WBPlatform.currentUser();
+    if (!user) return;
+    const name = $('#newProjectName').value;
+    const project = WBPlatform.createProject(user.id, name);
+    $('#newProjectModal').classList.remove('visible');
+    openProject(project.id);
+});
+$('#newProjectName').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') $('#confirmNewProject').click();
+});
+$('#newProjectModal').addEventListener('click', function(e) {
+    if (e.target === $('#newProjectModal')) $('#newProjectModal').classList.remove('visible');
+});
+$('#projectsGrid').addEventListener('click', function(e) {
+    const btn = e.target.closest('button[data-action]');
+    const card = e.target.closest('.project-card');
+    if (!card) return;
+    const id = card.dataset.id;
+    const user = WBPlatform.currentUser();
+    if (!user) return;
+    if (!btn) {
+        openProject(id);
+        return;
+    }
+    e.stopPropagation();
+    const action = btn.dataset.action;
+    if (action === 'open') {
+        openProject(id);
+    } else if (action === 'toggle') {
+        const project = WBPlatform.getProject(id);
+        if (!project) return;
+        const newStatus = project.status === 'completed' ? 'in-progress' : 'completed';
+        WBPlatform.setProjectStatus(id, newStatus);
+        renderProjects(user.id);
+    } else if (action === 'rename') {
+        renameTargetId = id;
+        const project = WBPlatform.getProject(id);
+        $('#renameInput').value = project ? project.name : '';
+        $('#renameModal').classList.add('visible');
+        $('#renameInput').focus();
+    } else if (action === 'delete') {
+        if (confirm('Eliminare definitivamente questo progetto? L\'azione non è reversibile.')) {
+            WBPlatform.deleteProject(id);
+            renderProjects(user.id);
+        }
+    }
+});
+$('#cancelRename').addEventListener('click', function() {
+    $('#renameModal').classList.remove('visible');
+});
+$('#confirmRename').addEventListener('click', function() {
+    if (!renameTargetId) return;
+    const newName = $('#renameInput').value.trim();
+    if (newName) WBPlatform.renameProject(renameTargetId, newName);
+    $('#renameModal').classList.remove('visible');
+    const user = WBPlatform.currentUser();
+    if (user) renderProjects(user.id);
+});
+$('#renameInput').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') $('#confirmRename').click();
+});
+$('#renameModal').addEventListener('click', function(e) {
+    if (e.target === $('#renameModal')) $('#renameModal').classList.remove('visible');
+});
+(function init() {
+    const user = WBPlatform.currentUser();
+    if (user) {
+        showDashView(user);
+    } else {
+        showAuthView();
+    }
+})();
+</script>
+</body>
+</html>

@@ -3480,7 +3480,7 @@ function initKeyboard() {
     });
 }
 
-function _getActiveProjecId() {
+function _getActiveProjectId() {
     const params = new URLSearchParams(window.location.search);
     return params.get('project') || 'default';
 }
