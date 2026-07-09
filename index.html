@@ -8,44 +8,45 @@
 :root {
     --wb-black:#05070d; --wb-dark:#0a0e1a; --wb-navy:#0f1b2e;
     --wb-blue:#1e3a8a; --wb-blue-bright:#3b82f6; --wb-cyan:#22d3ee; --wb-cyan-bright:#06b6d4;
+    --wb-indigo:#6366f1; --wb-white:#ffffff; --wb-gray:#94a3b8; --wb-gray-light:#cbd5e1;
     --grad-main: linear-gradient(135deg, var(--wb-cyan-bright), var(--wb-blue-bright), var(--wb-indigo));
 }
 * { margin:0; padding:0; box-sizing:border-box; }
 html { scroll-behavior:smooth; }
-body { font-family:'Inter',-apple-system,BlinkMaxSystemFont,'Segoe UI',sans-serif; background:var(--wb-black); color:var(--wb-white); overflow-x:hidden; }
+body { font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; background:var(--wb-black); color:var(--wb-white); overflow-x:hidden; }
 a { text-decoration:none; color:inherit; }
 
 .bg-blobs { position:fixed; inset:0; z-index:0; overflow:hidden; pointer-events:none; }
 .blob { position:absolute; border-radius:50%; filter:blur(90px); opacity:0.35; }
 .blob-1 { width:520px; height:520px; background:var(--wb-cyan-bright); top:-120px; left:-100px; animation:float1 18s ease-in-out infinite; }
-.blob-2 { width:460px; height:460px; background:var(--wb-blue-bright); bottom:-140px; right:-80; animation:float2 22s ease-in-out infinite; }
+.blob-2 { width:460px; height:460px; background:var(--wb-blue-bright); bottom:-140px; right:-80px; animation:float2 22s ease-in-out infinite; }
 .blob-3 { width:380px; height:380px; background:var(--wb-indigo); top:40%; left:50%; animation:float3 26s ease-in-out infinite; }
 @keyframes float1 { 0%,100%{ transform:translate(0,0); } 50%{ transform:translate(60px, 80px); } }
 @keyframes float2 { 0%,100%{ transform:translate(0,0); } 50%{ transform:translate(-70px, -50px); } }
-@keyframes float3 { 0%,100%{ transform:translate(-50%,-40%) scale(1); } 50%{ transform:translate(-45%,-55%) scale(1,15); } }
+@keyframes float3 { 0%,100%{ transform:translate(-50%,-40%) scale(1); } 50%{ transform:translate(-45%,-55%) scale(1.15); } }
 
 .nav { position:fixed; top:0; left:0; right:0; z-index:50; display:flex; align-items:center; justify-content:space-between; padding:18px 6%; backdrop-filter:blur(14px); background:rgba(5,7,13,0.55); border-bottom:1px solid rgba(255,255,255,0.06); }
 .nav-logo { display:flex; align-items:center; gap:10px; font-size:20px; font-weight:800; letter-spacing:-0.5px; }
 .nav-logo i { color:var(--wb-cyan-bright); font-size:22px; }
 .nav-links { display:flex; gap:32px; font-size:14px; font-weight:500; color:var(--wb-gray-light); }
 .nav-links a:hover { color:var(--wb-white); }
-.nav-cta { padding:10px 22px; border-radius:10px; font-weight:700; font-size:14px; background:var(--grad-main); color:var(--wb-white); box-shadow:0 8px 24px rgba(6.182,212,0.35); transition:transform .2s ease, box-shadow .2s ease; }
+.nav-cta { padding:10px 22px; border-radius:10px; font-weight:700; font-size:14px; background:var(--grad-main); color:var(--wb-white); box-shadow:0 8px 24px rgba(6,182,212,0.35); transition:transform .2s ease, box-shadow .2s ease; }
 .nav-cta:hover { transform:translateY(-2px); box-shadow:0 12px 30px rgba(6,182,212,0.5); }
 @media (max-width:800px){ .nav-links{ display:none; } }
 
-.hero { position:relaive; z-index:1; min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:140px 6% 100px; }
+.hero { position:relative; z-index:1; min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:140px 6% 100px; }
 .hero-badge { display:inline-flex; align-items:center; gap:8px; padding:8px 16px; border-radius:999px; font-size:13px; font-weight:600; background:rgba(36,211,238,0.1); border:1px solid rgba(34,211,238,0.3); color:var(--wb-cyan); margin-bottom:28px; opacity:0; animation:fadeUp .8s ease forwards; }
 .hero h1 { font-size:clamp(38px,6vw,72px); font-weight:900; line-height:1.08; letter-spacing:-1.5px; max-width:900px; opacity:0; animation:0; animation:fadeUp .8s ease .1s forwards; }
 .hero h1 .grad { background:var(--grad-main); -webkit-background-clip:text; background-clip:text; color:transparent; }
 .hero p { margin-top:24px; font-size:19px; color:var(--wb-gray-light); max-width:600px; line-height:1.6; opacity:0; animation:fadeUp .8s ease .25s forwards; }
-.hero-actions { display:flex; gap:16px; margin-top:40px; flex-wrap:wrap; justify-content:center; opacity:0; animation:fadeUp .8s ease .4 forwards; }
+.hero-actions { display:flex; gap:16px; margin-top:40px; flex-wrap:wrap; justify-content:center; opacity:0; animation:fadeUp .8s ease .4s forwards; }
 .btn-primary { padding:16px 34px; border-radius:12px; font-weight:700; font-size:16px; background:var(--grad-main); color:white; display:inline-flex; align-items:center; gap:10px; box-shadow:0 10px 30px rgba(6,182,212,0.4); transition:transform .2s ease, box-shadow .2s ease; }
 .btn-primary:hover { transform:translateY(-3px); box-shadow:0 16px 40px rgba(6,182,212,0.55); }
-.btn-secondary { padding:16px 34px; border-radius:12px; font-weight:700; font-size:16; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.15); color:white; display:inline-flex; align-items:center; gap:10px; transition:.2s ease; }
+.btn-secondary { padding:16px 34px; border-radius:12px; font-weight:700; font-size:16px; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.15); color:white; display:inline-flex; align-items:center; gap:10px; transition:.2s ease; }
 .btn-secondary:hover { background:rgba(255,255,255,0.12); }
 @keyframes fadeUp { from{ opacity:0; transform:translateY(24px);} to{ opacity:1; transform:translateY(0);} }
 
-.hero-mockup { margin-top:64px; width:min(920px,90vw); border-radius:18px; overflow:hidden; border:1px solid rgba(255,255,255,0.12); background:var(--wb-navy); box-shadow:0 40px 100px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.05); opacity:0; animation:fadeUp 1s ease .55s forwards; transform(24px); }
+.hero-mockup { margin-top:64px; width:min(920px,90vw); border-radius:18px; overflow:hidden; border:1px solid rgba(255,255,255,0.12); background:var(--wb-navy); box-shadow:0 40px 100px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.05); opacity:0; animation:fadeUp 1s ease .55s forwards; transform: translateY(24px); }
 .mockup-bar { display:flex; align-items:center; gap:8px; padding:14px 18px; background:rgba(255,255,255,0.03); border-bottom:1px solid rgba(255,255,255,0.6); }
 .mockup-dot { width:10px; height:10px; border-radius:50%; }
 .mockup-body { display:flex; height:320px; }
@@ -56,17 +57,17 @@ a { text-decoration:none; color:inherit; }
 .mockup-block { width:100%; border-radius:10px; animation:pulseBlock 3s ease-in-out infinite; }
 .mockup-block.h1 { height:44px; width:60%; background:linear-gradient(135deg,var(--wb-cyan-bright),var(--wb-blue-bright)); }
 .mockup-block.p { height:16px; width:80%; background:rgba(255,255,255,0.08); animation-delay:.3s; }
-.mockup-block-p2 { height:16px; width:65%; background:rgba(255,255,255,0.08); animation-delay:.5s; }
+.mockup-block.p2 { height:16px; width:65%; background:rgba(255,255,255,0.08); animation-delay:.5s; }
 .mockup-block.btn { height:40px; width:160px; border-radius:8px; background:var(--grad-main); animation-delay:.7s; }
 @keyframes pulseBlock { 0%,100%{ opacity:.85;} 50%{ opacity:1; transform:scale(1.01);} }
 
 section { position:relative; z-index:1; padding:110px 6%; }
-.secion-head { text-align:center; max-width:640px; margin:0 auto 60px; }
-.eyebrow { color:var(--wb-cyan); font-weight:700; font-size:13px; letter-spacing:1.5; text-transform:uppercase; }
+.section-head { text-align:center; max-width:640px; margin:0 auto 60px; }
+.eyebrow { color:var(--wb-cyan); font-weight:700; font-size:13px; letter-spacing:1.5px; text-transform:uppercase; }
 .section-head h2 { font-size:clamp(28px,4vw,42px); font-weight:800; letter-spacing:-1px; margin-top:12px; }
 .section-head p { color:var(--wb-gray); margin-top:14px; font-size:16px; line-height:1.6; }
 
-.reveal { opacity:0; transform:translateY(30px); transition:opacity .7s ease, transition .7s ease; }
+.reveal { opacity:0; transform:translateY(30px); transition:opacity .7s ease, transform .7s ease; }
 .reveal.visible { opacity:1; transform:translateY(0); }
 
 .features-grid {display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:22px; max-width:1200px; margin:0 auto; }
@@ -80,12 +81,12 @@ section { position:relative; z-index:1; padding:110px 6%; }
 .step { text-align:center; padding:0 10px; }
 .step-num { width:52px; height:52px; border-radius:50%; margin:0 auto 18px; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:18px; background:rgba(34,211,238,0.1); border:1px solid rgba(34,211,138,0.4); color:var(--wb-cyan); }
 .step h3 { font-size:17px; font-weight:700; margin-bottom:8px; }
-.step p { font-size:14px; color:var(-wb-gray); line-height:1.55; }
+.step p { font-size:14px; color:var(--wb-gray); line-height:1.55; }
 
 .cta-banner { max-width:1000px; margin:0 auto; border-radius:24px; padding:70px 6%; text-align:center; background:linear-gradient(135deg,rgba(6,182,212,0.15),rgba(99,102,241,0.15)); border:1px solid rgba(34,211,238,0.25); position:relative; overflow:hidden; }
 .cta-banner h2 { font-size:clamp(26px,4vw,38px); font-weight:800; letter-spacing:-1px; }
 .cta-banner p { color:var(--wb-gray-light); margin-top:14px; font-size:16px; }
-.cta-banner .hero-acions { margin-top:32px; opacity:1; animation:none; }
+.cta-banner .hero-actions { margin-top:32px; opacity:1; animation:none; }
 footer { position:relative; z-index:1; padding:50px 6% 30px; border-top:1px solid rgba(255,255,255,0.06); display:flex; flex-wrap:wrap; gap:20px; align-items:center; justify-content:space-between; color:var(--wb-gray); font-size:13px; }
 footer .nav-logo { font-size:16px; }
 </style>
@@ -107,8 +108,8 @@ footer .nav-logo { font-size:16px; }
 </nav>
 <section class="hero">
     <div class="hero-badge"><i class="fa-solid fa-bolt"></i> Nessuna carta di credito richiesta</div>
-    <h1>Crea sii web <span class="grad">professionali</span><br>senza scrivere una riga di codice</h1>
-    <p>Trascina, personalizza e pubblica. WebBuilder ti dà login uteni, e-commerce, prenotazioni, pagamenti, e blog già pronti all'uso - tutto gratis per iniziare.</p>
+    <h1>Crea siti web <span class="grad">professionali</span><br>senza scrivere una riga di codice</h1>
+    <p>Trascina, personalizza e pubblica. WebBuilder ti dà login utenti, e-commerce, prenotazioni, pagamenti, e blog già pronti all'uso - tutto gratis per iniziare.</p>
     <div class="hero-actions">
         <a href="dashboard.html" class="btn-primary"><i class="fa-solid fa-rocket"></i> Usa Gratuitamente</a>
         <a href="#features" class="btn-secondary"><i class="fa-solid fa-circle-play"></i> Scopri le funzionalità</a>
@@ -157,7 +158,7 @@ footer .nav-logo { font-size:16px; }
     </div>
     <div class="steps">
         <div class="step reveal"><div class="step-num">1</div><h3>Crea un account</h3><p>Gratuito, bastano email e password. Nessuna carta richiesta.</p></div>
-        <div class="step reveal"><div class="step-num">2</div><h3>Trascina i tuoi elementi</h3><p>Scegli tra decine di blocchi proni e personalizza colori, testi e stile.</p></div>
+        <div class="step reveal"><div class="step-num">2</div><h3>Trascina i tuoi elementi</h3><p>Scegli tra decine di blocchi pronti e personalizza colori, testi e stile.</p></div>
         <div class="step reveal"><div class="step-num">3</div><h3>Pubblica il tuo sito</h3><p>Esporta il codice o scarica lo ZIP pronto per essere caricato online.</p></div>
     </div>
 </section>

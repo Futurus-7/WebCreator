@@ -149,7 +149,7 @@ a {
     width: 100%;
     max-width: 400px;
     background: linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.015));
-    border: 1px solid rgba(255, 255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 20px;
     padding: 36px 32px;
     box-shadow: 0 30px 80px rgba(0, 0, 0, 0.5);
@@ -177,7 +177,7 @@ a {
     font-weight: 700;
     cursor: pointer;
     color: var(--wb-gray);
-    transition 0.2s ease;
+    transition: 0.2s ease;
     user-select: none;
 }
 .auth-tab.active {
@@ -283,7 +283,7 @@ a {
     cursor: pointer;
     border: none;
     box-shadow: 0 10px 26px rgba(6, 182, 212, 0.35);
-    transition: transform: 0.2s ease;
+    transition: transform 0.2s ease;
 }
 
 .btn-new:hover {
@@ -308,12 +308,12 @@ a {
     transition: 0.2s ease;
     user-select: none;
 }
-.filter-tab-active {
+.filter-tab.active {
     background: rgba(34, 211, 238, 0.15);
     border-color: rgba(34,211, 238, 0.4);
     color: var(--wb-cyan);
 }
-.project-grid {
+.projects-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
     gap: 20px;
@@ -359,7 +359,7 @@ a {
     letter-spacing: 0.4px;
     white-space: nowrap;
 }
-.project-saus.in-progress {
+.project-status.in-progress {
     background: rgba(244, 162, 97, 0.15);
     color: var(--warning);
     border: 1px solid rgba(244, 162, 97, 0.4);
@@ -516,7 +516,7 @@ a {
             <div class="sub">Gratuito, bastano 30 secondi</div>
             <div class="field">
                 <label>Nome</label>
-                <input type="text" if="regName" placeholder="Il tuo nome">
+                <input type="text" id="regName" placeholder="Il tuo nome">
             </div>
             <div class="field">
                 <label>Email</label>
@@ -598,16 +598,16 @@ function showDashView(user) {
     $('#userBox').style.display = 'flex';
     $('#userAvatar').textContent = (user.name || user.email || 'U')[0].toUpperCase();
     $('#userNameLabel').textContent = user.name || user.email;
-    renderProject(user.id);
+    renderProjects(user.id);
 }
-function renderProject(userId) {
+function renderProjects(userId) {
     let projects = WBPlatform.listProjects(userId);
-    if (currentFiler !== 'all') {
-        project = project.filter(p => p.status === currentFilter);
+    if (currentFilter !== 'all') {
+        projects = projects.filter(p => p.status === currentFilter);
     }
     const grid = $('#projectsGrid');
     const empty = $('#emptyState');
-    if (projects.lenght === 0) {
+    if (projects.length === 0) {
         grid.innerHTML = '';
         empty.style.display = 'block';
         return;
@@ -616,7 +616,7 @@ function renderProject(userId) {
     grid.innerHTML = projects.map(function(p) {
         const date = new Date(p.updatedAt);
         const dateStr = date.toLocaleDateString('it-IT', { day: 'numeric', month: 'short', year: 'numeric' });
-        const statusLabel = p.status === 'completed' ? 'Compleato' : 'In corso';
+        const statusLabel = p.status === 'completed' ? 'Completato' : 'In corso';
         return '<div class="project-card" data-id="' + p.id + '">' +
             '<span class="project-status ' + p.status + '">' + statusLabel + '</span>' +
             '<div class="project-emoji">' + (p.emoji || '🚀') + '</div>' +
@@ -666,7 +666,7 @@ $('#btnRegister').addEventListener('click', function() {
     const name = $('#regName').value;
     const email = $('#regEmail').value;
     const pass = $('#regPassword').value;
-    const res = WBPlatform.regiser(name, email, pass);
+    const res = WBPlatform.register(name, email, pass);
     const errEl = $('#regError');
     if (res.error) {
         errEl.textContent = res.error;

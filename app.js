@@ -628,7 +628,7 @@ function getElementHTML(type) {
                                 </div>
                                 <div class="wb-progress-actions">
                                     <button class="wb-button" data-wb-progress-add="10" style="font-size:12px;padding:6px 14px;">+10</button>
-                                    <button class="wb-button" data-wb-progress-reset style="font-size:12px;padding:6px; 14px;background:#e63946;">Reset</button>
+                                    <button class="wb-button" data-wb-progress-reset style="font-size:12px;padding:6px 14px;background:#e63946;">Reset</button>
                                 </div>
                             </div>`,
                         'block-blog-list': `
@@ -2429,6 +2429,19 @@ function updateExportCode(type) {
 function generateCleanHTML() {
     const clone = canvas.cloneNode(true);
     clone.querySelectorAll('.element-actions, .drop-indicator, .canvas-empty, .resize-handle').forEach(el => el.remove());
+    clone.querySelectorAll('form.wb-form').forEach(form => {
+        const parentEl = form.closest('.builder-element');
+        if (parentEl && parentEl.dataset.formspreeUrl) {
+            form.removeAttribute('onsubmit');
+            form.dataset.formspreeUrl = parentEl.dataset.formspreeUrl;
+            form.dataset.formSuccessMsg = parentEl.dataset.formSuccessMsg || 'Grazie';
+            form.dataset.formMultiple = parentEl.dataset.formMultiple || 'false'; 
+        }
+        if (parentEl && parentEl.dataset.sheetsUrl) {
+            form.removeAttribute('onsubmit');
+            form.dataset.sheetsUrl = parentEl.dataset.sheetsUrl;
+        }
+    });
     clone.querySelectorAll('.builder-element').forEach((el, i) => {
         el.classList.remove('builder-element', 'selected', 'drag-over');
         el.classList.add(`element-${i + 1}`);
@@ -2450,22 +2463,8 @@ function generateCleanHTML() {
             }
         el.removeAttribute('data-start-hidden');
     });
-
     clone.querySelectorAll('[contenteditable]').forEach(el => {
         el.removeAttribute('contenteditable');
-    });
-    clone.querySelectorAll('form.wb-form').forEach(form => {
-        const parentEl = form.closest('.builder-element');
-        if (parentEl && parentEl.dataset.formspreeUrl) {
-            form.removeAttribute('onsubmit');
-            form.dataset.formspreeUrl = parentEl.dataset.formspreeUrl;
-            form.dataset.formSuccessMsg = parentEl.dataset.formSuccessMsg || 'Grazie';
-            form.dataset.formMultiple = parentEl.dataset.formMultiple || 'false';
-        }
-        if (parentEl && parentEl.dataset.sheetsUrl) {
-            form.removeAttribute('onsubmit');
-            form.dataset.sheetsUrl = parentEl.dataset.sheetsUrl;
-        }
     });
     return formatHTML(clone.innerHTML);
 }
@@ -2875,7 +2874,7 @@ function _setupBookings() {
                 try {
                     var r = await window._sb.from('wb_bookings').insert(data);
                     if (r.error) throw r.error;
-                    form.innerHTML = '<div style="text-align:center;padding:30px;color:#2ec4b6;font-size:16px;font-weight:600;">' + msg '</div>';   
+                    form.innerHTML = '<div style="text-align:center;padding:30px;color:#2ec4b6;font-size:16px;font-weight:600;">' + msg + '</div>';
                 } catch(e) { alert('Errore: ' + e.message); if(btn) { btn.disabled = false; btn.textContent = 'Prenota ora'; } }
             } else {
                 form.innerHTML = '<div style="text-align:center;padding:30px;color:#2ec4b6;font-size:16px;font-weight:600;">' + msg + '</div>';
@@ -3258,6 +3257,7 @@ async function _initWB() {
     _setupBookings();
     _setupPayments();
     _setupNewsletter();
+    _setupListeners();
     if (!_sbUrl || !_sbKey) return;
     var script = document.createElement('script');
     script.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
@@ -3267,7 +3267,6 @@ async function _initWB() {
         _u = res.data?.user || null;
         if (_u) await _loadProfile();
         _applyGates();
-        _setupListeners();
         await Promise.all([_loadProgress(), _loadUserData(), _loadBlog(), _loadLeaderboards(), _loadAdmin(), _loadProducts(), _loadBookingAdmin()]);
         _updateCarts();
         _setupBookings();
@@ -3487,6 +3486,46 @@ function _getActiveProjectId() {
 function _getStorageKey() {
     return 'webbuilder-autosave-' + _getActiveProjectId();
 }
+/*
+function autoSave() {
+    try {
+        saveCurrentPage();
+        const data = {
+            pages: pages,
+            currentPageIndex: currentPageIndex,
+            currentMode: currentMode,
+            counter: state.elementCounter,
+            advancedConfig: advancedConfig,
+            timestampt: Date.now()
+        };
+        localStorage.setItem('webbuilder-autosave', JSON.stringify(data));
+    } catch (e) {
+        console.warn('Autosave fallito:', e);
+    }
+}
+function autoLoad() {
+    try {
+        const saved = localStorage.getItem('webbuilder-autosave');
+        if (!saved) return false;
+        const data = JSON.parse(saved);
+        if (!date.pages) return false;
+        pages = data.pages;
+        currentPageIndex = data.currentPageIndex || 0;
+        state.elementCounter = data.counter || 0;
+        currentMode = data.currentMode || 'structure';
+        $$('.mode-btn').forEach( b => b.classList.remove('active'));
+        const modeBtn = document.querySelector(`.mode-btn[data-mode="${currentMode}"]`);
+        if(modeBtn) modeBtn.classList.add('active');
+        if (data.advancedConfig) Object.assign(advancedConfig, data.advancedConfig);
+        renderPageTabs();
+        loadPage(currentPageIndex);
+        return true;
+    } catch (e) {
+        return false;
+    }
+}
+*/
+
 function autoSave() {
     try {
         saveCurrentPage();
@@ -3537,10 +3576,6 @@ function autoLoad() {
         return false;
     }
 }
-
-
-
-
 
 function initModes() {
     $$('.mode-btn').forEach(btn => {

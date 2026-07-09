@@ -19,7 +19,7 @@ const WBPlatform = (function() {
     function register(name, email, password) {
         email = (email || '').trim().toLowerCase();
         if (!name || !email || !password) return {error: 'Compila tutti i campi.' };
-        if (password.lenght < 6) return { error: 'La password deve avere almeno 6 caratteri.' };
+        if (password.length < 6) return { error: 'La password deve avere almeno 6 caratteri.' };
         const users = _getUsers();
         if (users.find(u => u.email === email)) return { error: 'Esiste già un account con questa email.' };
         const user = {
@@ -79,7 +79,7 @@ const WBPlatform = (function() {
     function listProjects(userId) {
         return _getProjects().filter(p => p.ownerId === userId).sort((a,b) => b.updatedAt - a.updatedAt);
     }
-    function getProject(userId, projectId) {
+    function getProject(Id) {
         return _getProjects().find(p => p.id === id) || null;
     } 
     function createProject(userId, name) {
@@ -108,7 +108,7 @@ const WBPlatform = (function() {
     function deleteProject(id) {
         const projects = _getProjects().filter(p => p.id !== id);
         _saveProjects(projects);
-        localStorage.removeItem('webbuilder-project-' + id);
+        localStorage.removeItem('webbuilder-autosave-' + id);
     }
     function setProjectStatus(id, status) {
         return touchProject(id, { status: status });

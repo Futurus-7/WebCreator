@@ -2222,6 +2222,17 @@ body.has-platform-warning .main-wrapper {
     padding: 2px 8px; background: #f0f4ff; color: #4361ee;
     border-radius: 20px; text-transform: uppercase; margin-bottom: 6px;
 }
+.canvas .wb-add-to-cart-btn {
+    width: 100%;
+    padding: 10px;
+    background: #4361ee;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+}
 .canvas .wb-cart-widget {
     background: white; border: 1px solid #eee;
     border-radius: 8px; padding: 20px;
