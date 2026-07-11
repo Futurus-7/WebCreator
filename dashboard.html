@@ -572,15 +572,25 @@ a {
         </div>
     </div>
 </div>
+<div class="modal-ov" id="shareModal">
+    <div class="modal-box">
+        <h3>Condividi progetto</h3>
+        <input type="email" id="shareEmailInput" placeholder="email@collaboratore.com">
+        <div class="modal-actions">
+            <button class="cancel" id="cancelShare">Chiudi</button>
+            <button class="confirm" id="confirmShare">Aggiungi</button>
+        </div>
+    </div>
+</div>
 <script src="platform-auth.js"></script>
 <script>
 const $ = (sel) => document.querySelector(sel);
 const $$ = (sel) => document.querySelectorAll(sel);
 let currentFilter = 'all';
 let renameTargetId = null;
+let shareTargetId = null;
 function getNextParam() {
-    const params = new URLSearchParams(window.location.search);
-    return params.get('next');
+    return new URLSearchParams(window.location.search).get('next');
 }
 function escapeHtml(str) {
     const d = document.createElement('div');
@@ -592,26 +602,20 @@ function showAuthView() {
     $('#dashView').style.display = 'none';
     $('#userBox').style.display = 'none';
 }
-function showDashView(user) {
+async function showDashView(user) {
     $('#authView').style.display = 'none';
     $('#dashView').style.display = 'block';
     $('#userBox').style.display = 'flex';
     $('#userAvatar').textContent = (user.name || user.email || 'U')[0].toUpperCase();
     $('#userNameLabel').textContent = user.name || user.email;
-    renderProjects(user.id);
+    await renderProjects();
 }
-function renderProjects(userId) {
-    let projects = WBPlatform.listProjects(userId);
-    if (currentFilter !== 'all') {
-        projects = projects.filter(p => p.status === currentFilter);
-    }
+async function renderProject() {
+    let projects = await WBPlatform.listProjects();
+    if (currentFilter !== 'all') projects = projects.filter(p => p.status === currentFilter);
     const grid = $('#projectsGrid');
     const empty = $('#emptyState');
-    if (projects.length === 0) {
-        grid.innerHTML = '';
-        empty.style.display = 'block';
-        return;
-    }
+    if (projects.length === 0) { grid.innerHTML = ''; empty.style.display = 'block'; return; }
     empty.style.display = 'none';
     grid.innerHTML = projects.map(function(p) {
         const date = new Date(p.updatedAt);
@@ -623,26 +627,63 @@ function renderProjects(userId) {
             '<div class="project-name">' + escapeHtml(p.name) + '</div>' +
             '<div class="project-meta">Modificato il ' + dateStr + '</div>' +
             '<div class="project-actions">' +
-            '<button data-action="open" data-id="' + p.id + '" title="Apri"><i class="fa-solid fa-pen"></i> Apri</button>' +
-            '<button data-action="toggle" data-id="' + p.id + '" title="Segna come completato/in corso"><i class="fa-solid fa-check"></i></button>' +
+            '<button data-action="open" data-id="' + p.id + '" title="Apri"><i class="fa-solid fa-pen"></i></button>' +
+            '<button data-action="toggle" data-id="' + p.id + '" title="Completato/In corso"><i class="fa-solid fa-check"></i></button>' +
             '<button data-action="rename" data-id="' + p.id + '" title="Rinomina"><i class="fa-solid fa-i-cursor"></i></button>' +
+            '<button data-action="share" data-id="' + p.id + '" title="Condividi"><i class="fa-solid fa-user-plus"></i></button>' +
             '<button data-action="delete" data-id="' + p.id + '" class="danger" title="Elimina"><i class="fa-solid fa-trash"></i></button>' +
             '</div></div>';
     }).join('');
 }
-function openProject(id) {
-    window.location.href = 'builder.html?project=' + encodeURIComponent(id);
-}
+function openProject(id) { window.location.href = 'builder.html?project=' + encodeURIComponent(id); }
 $$('.auth-tab').forEach(function(tab) {
     tab.addEventListener('click', function() {
-        $$('.auth-tab').forEach(function(t) { t.classList.remove('active'); });
+        $$('.auth-tab').forEach(t => t.classList.remove('active'));
         tab.classList.add('active');
         const isLogin = tab.dataset.tab === 'login';
         $('#loginPanel').style.display = isLogin ? 'block' : 'none';
         $('#registerPanel').style.display = isLogin ? 'none' : 'block';
     });
 });
-$('#btnLogin').addEventListener('click', function() {
+$('#btnLogin').addEventListener('click', async function() {
+    const errEl = $('#loginError'); errEl.style.display = 'none';
+    const res = await WBPlatform.login($('#loginEmail').value, $('#loginPassword').value);
+    if (res.error) { errEl.textContent = res.error; errEl.style.display = 'block'; return; }
+    const next = getNextParam();
+    if (next) { window.location.href = next; return; }
+    showDashView(res.user);
+});
+$('#loginPassword').addEventListener('keydown', e => { if (e.key === 'Enter') $('#btnLogin').click(); });
+$('#btnRegister').addEventListener('click', async function() {
+    const errEl = $('#regError'); errEl.style.display = 'none'; errEl.style.color = '#ff8a93';
+    const res = await WBPlatform.register($('#regName').value, $('#regEmail').value, $('#regPassword').value);
+    if (res.error) { errEl.textCOntent = res.error; errEl.style.display = 'block'; return; }
+    if (res.needsConfirmation) {
+        errEl.style.color = '#2ec4b6';
+        errEl.textContent = "Controlla la tua email per confermare l'account, poi accedi.";
+        errEl.style.display = 'block';
+        return;
+    }
+    const next = getNextParam();
+    if (next) { window.location.href = next; return; }
+    showDashView(res.user);
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*
+$('#btnLogin').addEventListener('click', async function() {
     const email = $('#loginEmail').value;
     const pass = $('#loginPassword').value;
     const res = WBPlatform.login(email, pass);
@@ -775,6 +816,7 @@ $('#renameModal').addEventListener('click', function(e) {
         showAuthView();
     }
 })();
+*/
 </script>
 </body>
 </html>

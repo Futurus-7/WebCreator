@@ -75,7 +75,7 @@ function optionActionsToText(jsonText) {
         return '';
     }
 }
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
     initDragAndDrop();
     initToolbar();
     initViewport();
@@ -94,7 +94,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initTouchDragAndDrop();
     initFunctions();
     setInterval(autoSave, 5000);
-    const loaded = autoLoad();
+    const loaded = await autoLoad();
     if (!loaded) {
         saveHistory();
     }
@@ -2310,8 +2310,9 @@ const icons = {
     };
     return icons[type] || 'fa-solid fa-cube';
 }
-
+let _lastLocalEditAt = 0;
 function saveHistory() {
+    _lastLocalEditAt = Date.now();
     if (state.historyIndex < state.history.length -1) {
         state.history = state.history.slice(0, state.historyIndex +1);
     }
@@ -3525,56 +3526,82 @@ function autoLoad() {
     }
 }
 */
-
+let _unsubscribeRealtime = null;
 function autoSave() {
-    try {
-        saveCurrentPage();
-        const data = {
-            pages: pages,
-            currentPageIndex: currentPageIndex,
-            currentMode: currentMode,
-            counter: state.elementCounter,
-            advancedConfig: advancedConfig,
-            timestamp: Date.now()
-        };
-        localStorage.setItem(_getStorageKey(), JSON.stringify(data));
-        if (typeof WBPlatform !== 'undefined') {
-            const projectId = _getActiveProjectId();
-            if (projectId !== 'default') WBPlatform.touchProject(projectId, {});
-        }
-    } catch (e) {
-        console.warn('Autosave fallito:', e);
-    }
+    saveCurrentPage();
+    if (typeof WBPlatform === 'undefined') return;
+    const projectId =_getActiveProjectId();
+    if (projectId === 'default') return;
+    const payload = {
+        pages: pages,
+        currentPageIndex: currentPageIndex,
+        currentMode: currentMode,
+        counter: state.elementCounter,
+        advancedConfig: advancedConfig
+    };
+    WBPlatform.touchProject(projectId, { data: payload }).catch(e => console.warn('Autosave fallito:', e));
 }
-function autoLoad() {
-    try {
-        if (typeof WBPlatform !== 'undefined') {
-            const user = WBPlatform.requireLogin(window.location.href);
-            if (!user) return true;
-            const projectId = _getActiveProjectId();
-            if (projectId !== 'default' && !WBPlatform.getProject(projectId)) {
-                window.location.href = 'dashboard.html';
-                return true;
-            }
-        }
-        const saved = localStorage.getItem(_getStorageKey());
-        if (!saved) return false;
-        const data = JSON.parse(saved);
-        if (!data.pages) return false;
-        pages = data.pages;
-        currentPageIndex = data.currentPageIndex || 0;
-        state.elementCounter = data.counter || 0;
-        currentMode = data.currentMode || 'structure';
+async function autoLoad() {
+    if (typeof WBPlatform === 'undefined') return false;
+    await WBPlatform.ready;
+    const user = await WBPlatform.requireLogin(window.location.href);
+    if (!user) return true;
+    const projectId = _getActiveProjectId();
+    if (projectId === 'default') {
+        window.location.href = 'dashboard.html';
+        return true;
+    }
+    const project = await WBPlatform.getProject(projectId);
+    if (!project) {
+        window.location.href = 'dashboard.html';
+        return true;
+    }
+    const saved = project.data;
+    if (saved && saved.pages) {
+        pages = saved.pages;
+        currentPageIndex = saved.currentPageIndex || 0;
+        state.elementCounter = saved.counter || 0;
+        currentMode = saved.currentMode || 'structure';
         $$('.mode-btn').forEach(b => b.classList.remove('active'));
-        const modeBtn = document.querySelector(`.mode-btn[data-mode="${currentMode}"]`)
+        const modeBtn = document.querySelector(`.mode-btn[data-mode="${currentMode}"]`);
         if (modeBtn) modeBtn.classList.add('active');
-        if (data.advancedConfig) Object.assign(advancedConfig, data.advancedConfig);
+        if (saved.advancedConfig) Object.assign(advancedConfig, saved.advancedConfig);
         renderPageTabs();
         loadPage(currentPageIndex);
-        return true;
-    } catch (e) {
-        return false;
     }
+    _initRealtimeSync(projectId);
+    return true;
+}
+function _initRealtimeSync(projectId) {
+    if (_unsubscribeRealtime) _unsubscribeRealtime();
+    _unsubscribeRealtime = WBPlatform.subscribeToProject(projectId, function(remoteProject) {
+        const secondsSinceEdit = (Data.now() - _lastLocalEditAt) / 1000;
+        const saved = remoteProject.data;
+        if (!saved || !saved.pages) return;
+        if (secondsSinceEdit > 4) {
+            pages = saved.pages;
+            currentPageIndex = saved.currentPageIndex || 0;
+            if (saved.advancedConfig) Object.assign(advancedConfig, saved.advancedConfig);
+            renderPageTabs();
+            loadPage(currentPageIndex);
+            _showSyncToast('🔄 Sincronizzato con le modifiche di un altro utente');
+        } else {
+            _showSyncToast('⚠️ Un altro utente ha modificato il progetto. Ricarica per vedere le sue modifiche.');
+        }
+    });
+}
+function _showSyncToast(msg) {
+    let toast = document.getElementById('_wbSyncToast');
+    if (!toast) {
+        toast = document.createElement('div');
+        toast.id = '_wbSyncToast';
+        toast.style.cssText = 'position:fixed;bottom:20px;right:20px;background:#16213;border:1px solid #4361ee;color:#e0e0e0;padding:12px 18px;border-radius:8px;font-size:12px;max-width:280px;z-index:9999;box-shadow:0 10px 30px rgba(0,0,0,0.4);';
+        document.body.appendChild(toast);
+    }
+    toast.textContent = msg;
+    toast.style.display = 'block';
+    clearTimeout(toast._t);
+    toast._t = setTimeout(() => { toast.style.display = 'none'; }, 5000);
 }
 
 function initModes() {
