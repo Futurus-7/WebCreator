@@ -57,7 +57,7 @@ a {
     background: var(--wb-cyan-bright);
     top: -140px;
     left: -100px;
-    animation: floatA 20s ease-in-ou infinite;
+    animation: floatA 20s ease-in-out infinite;
 }
 
 .blob-2 {
@@ -610,7 +610,7 @@ async function showDashView(user) {
     $('#userNameLabel').textContent = user.name || user.email;
     await renderProjects();
 }
-async function renderProject() {
+async function renderProjects() {
     let projects = await WBPlatform.listProjects();
     if (currentFilter !== 'all') projects = projects.filter(p => p.status === currentFilter);
     const grid = $('#projectsGrid');
@@ -648,7 +648,7 @@ $$('.auth-tab').forEach(function(tab) {
 $('#btnLogin').addEventListener('click', async function() {
     const errEl = $('#loginError'); errEl.style.display = 'none';
     const res = await WBPlatform.login($('#loginEmail').value, $('#loginPassword').value);
-    if (res.error) { errEl.textContent = res.error; errEl.style.display = 'block'; return; }
+        if (res.error) { errEl.textContent = res.error; errEl.style.display = 'block'; return; }
     const next = getNextParam();
     if (next) { window.location.href = next; return; }
     showDashView(res.user);
@@ -657,7 +657,7 @@ $('#loginPassword').addEventListener('keydown', e => { if (e.key === 'Enter') $(
 $('#btnRegister').addEventListener('click', async function() {
     const errEl = $('#regError'); errEl.style.display = 'none'; errEl.style.color = '#ff8a93';
     const res = await WBPlatform.register($('#regName').value, $('#regEmail').value, $('#regPassword').value);
-    if (res.error) { errEl.textCOntent = res.error; errEl.style.display = 'block'; return; }
+        if (res.error) { errEl.textContent = res.error; errEl.style.display = 'block'; return; }
     if (res.needsConfirmation) {
         errEl.style.color = '#2ec4b6';
         errEl.textContent = "Controlla la tua email per confermare l'account, poi accedi.";
@@ -668,71 +668,14 @@ $('#btnRegister').addEventListener('click', async function() {
     if (next) { window.location.href = next; return; }
     showDashView(res.user);
 });
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/*
-$('#btnLogin').addEventListener('click', async function() {
-    const email = $('#loginEmail').value;
-    const pass = $('#loginPassword').value;
-    const res = WBPlatform.login(email, pass);
-    const errEl = $('#loginError');
-    if (res.error) {
-        errEl.textContent = res.error;
-        errEl.style.display = 'block';
-        return;
-    }
-    errEl.style.display = 'none';
-    const next = getNextParam();
-    if (next) { window.location.href = next; return; }
-    showDashView(res.user);
-});
-$('#loginPassword').addEventListener('keydown', function(e) {
-    if (e.key === 'Enter') $('#btnLogin').click();
-});
-
-
-$('#btnRegister').addEventListener('click', function() {
-    const name = $('#regName').value;
-    const email = $('#regEmail').value;
-    const pass = $('#regPassword').value;
-    const res = WBPlatform.register(name, email, pass);
-    const errEl = $('#regError');
-    if (res.error) {
-        errEl.textContent = res.error;
-        errEl.style.display = 'block';
-        return;
-    }
-    errEl.style.display = 'none';
-    const next = getNextParam();
-    if (next) { window.location.href = next; return; }
-    showDashView(res.user);
-});
-$('#regPassword').addEventListener('keydown', function(e) {
-    if (e.key === 'Enter') $('#btnRegister').click();
-});
-$('#btnLogout').addEventListener('click', function() {
-    WBPlatform.logout();
-    showAuthView();
-});
+$('#regPassword').addEventListener('keydown', e => { if (e.key === 'Enter') $('#btnRegister').click(); });
+$('#btnLogout').addEventListener('click', async function() { await WBPlatform.logout(); showAuthView(); });
 $$('.filter-tab').forEach(function(tab) {
-    tab.addEventListener('click', function() {
-        $$('.filter-tab').forEach(function(t) { t.classList.remove('active'); });
+    tab.addEventListener('click', async function() {
+        $$('.filter-tab').forEach(t => t.classList.remove('active'));
         tab.classList.add('active');
         currentFilter = tab.dataset.filter;
-        const user = WBPlatform.currentUser();
-        if (user) renderProjects(user.id);
+        if (WBPlatform.currentUser()) await renderProjects();
     });
 });
 $('#btnNewProject').addEventListener('click', function() {
@@ -740,83 +683,74 @@ $('#btnNewProject').addEventListener('click', function() {
     $('#newProjectModal').classList.add('visible');
     $('#newProjectName').focus();
 });
-$('#cancelNewProject').addEventListener('click', function() {
+$('#cancelNewProject').addEventListener('click', () => $('#newProjectModal').classList.remove('visible'));
+$('#confirmNewProject').addEventListener('click', async function() {
+    if (!WBPlatform.currentUser()) return;
+    const project = await WBPlatform.createProject($('#newProjectName').value);
     $('#newProjectModal').classList.remove('visible');
+    if (project) openProject(project.id);
 });
-$('#confirmNewProject').addEventListener('click', function() {
-    const user = WBPlatform.currentUser();
-    if (!user) return;
-    const name = $('#newProjectName').value;
-    const project = WBPlatform.createProject(user.id, name);
-    $('#newProjectModal').classList.remove('visible');
-    openProject(project.id);
-});
-$('#newProjectName').addEventListener('keydown', function(e) {
-    if (e.key === 'Enter') $('#confirmNewProject').click();
-});
-$('#newProjectModal').addEventListener('click', function(e) {
-    if (e.target === $('#newProjectModal')) $('#newProjectModal').classList.remove('visible');
-});
-$('#projectsGrid').addEventListener('click', function(e) {
+$('#newProjectName').addEventListener('keydown', e => { if (e.key === 'Enter') $('#confirmNewProject').click(); });
+$('#newProjectModal').addEventListener('click', e => { if (e.target === $('#newProjectModal')) $('#newProjectModal').classList.remove('visible'); });
+
+$('#projectsGrid').addEventListener('click', async function(e) {
     const btn = e.target.closest('button[data-action]');
     const card = e.target.closest('.project-card');
-    if (!card) return;
+    if (!card || !WBPlatform.currentUser()) return;
     const id = card.dataset.id;
-    const user = WBPlatform.currentUser();
-    if (!user) return;
-    if (!btn) {
-        openProject(id);
-        return;
-    }
+    if (!btn) { openProject(id); return; }
     e.stopPropagation();
     const action = btn.dataset.action;
-    if (action === 'open') {
-        openProject(id);
-    } else if (action === 'toggle') {
-        const project = WBPlatform.getProject(id);
+    if (action === 'open') openProject(id);
+    else if (action === 'toggle') {
+        const project = await WBPlatform.getProject(id);
         if (!project) return;
-        const newStatus = project.status === 'completed' ? 'in-progress' : 'completed';
-        WBPlatform.setProjectStatus(id, newStatus);
-        renderProjects(user.id);
+        await WBPlatform.setProjectStatus(id, project.status === 'completed' ? 'in-progress' : 'completed');
+        await renderProjects();
     } else if (action === 'rename') {
         renameTargetId = id;
-        const project = WBPlatform.getProject(id);
+        const project = await WBPlatform.getProject(id);
         $('#renameInput').value = project ? project.name : '';
         $('#renameModal').classList.add('visible');
         $('#renameInput').focus();
+    } else if (action === 'share') {
+        shareTargetId = id;
+        $('#shareEmailInput').value = '';
+        $('#shareModal').classList.add('visible');
+        $('#shareEmailInput').focus();
     } else if (action === 'delete') {
-        if (confirm('Eliminare definitivamente questo progetto? L\'azione non è reversibile.')) {
-            WBPlatform.deleteProject(id);
-            renderProjects(user.id);
+        if (confirm("Eliminare definitivamente questo progetto? L'azione non è reversibile.")) {
+            await WBPlatform.deleteProject(id);
+            await renderProjects();
         }
     }
 });
-$('#cancelRename').addEventListener('click', function() {
-    $('#renameModal').classList.remove('visible');
-});
-$('#confirmRename').addEventListener('click', function() {
+$('#cancelRename').addEventListener('click', () => $('#renameModal').classList.remove('visible'));
+$('#confirmRename').addEventListener('click', async function() {
     if (!renameTargetId) return;
     const newName = $('#renameInput').value.trim();
-    if (newName) WBPlatform.renameProject(renameTargetId, newName);
+    if (newName) await WBPlatform.renameProject(renameTargetId, newName);
     $('#renameModal').classList.remove('visible');
+    await renderProjects();
+});
+$('#renameInput').addEventListener('keydown', e => { if (e.key === 'Enter') $('#confirmRename').click(); });
+$('#renameModal').addEventListener('click', e => { if (e.target === $('#renameModal')) $('#renameModal').classList.remove('visible'); });
+$('#cancelShare').addEventListener('click', () => $('#shareModal').classList.remove('visible'));
+$('#confirmShare').addEventListener('click', async function() {
+    if (!shareTargetId) return;
+    const email = $('#shareEmailInput').value.trim();
+    if (email) await WBPlatform.addCollaborator(shareTargetId, email);
+    $('#shareModal').classList.remove('visible');
+});
+$('#shareModal').addEventListener('click', e => { if  (e.target === $('#shareModal')) $('#shareModal').classList.remove('visible'); });
+
+(async function init() {
+    await WBPlatform.ready;
     const user = WBPlatform.currentUser();
-    if (user) renderProjects(user.id);
-});
-$('#renameInput').addEventListener('keydown', function(e) {
-    if (e.key === 'Enter') $('#confirmRename').click();
-});
-$('#renameModal').addEventListener('click', function(e) {
-    if (e.target === $('#renameModal')) $('#renameModal').classList.remove('visible');
-});
-(function init() {
-    const user = WBPlatform.currentUser();
-    if (user) {
-        showDashView(user);
-    } else {
-        showAuthView();
-    }
+    if (user) await showDashView(user);
+    else showAuthView();
 })();
-*/
+
 </script>
 </body>
 </html>

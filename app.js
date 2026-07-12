@@ -3575,7 +3575,7 @@ async function autoLoad() {
 function _initRealtimeSync(projectId) {
     if (_unsubscribeRealtime) _unsubscribeRealtime();
     _unsubscribeRealtime = WBPlatform.subscribeToProject(projectId, function(remoteProject) {
-        const secondsSinceEdit = (Data.now() - _lastLocalEditAt) / 1000;
+        const secondsSinceEdit = (Date.now() - _lastLocalEditAt) / 1000;
         const saved = remoteProject.data;
         if (!saved || !saved.pages) return;
         if (secondsSinceEdit > 4) {
@@ -3595,7 +3595,7 @@ function _showSyncToast(msg) {
     if (!toast) {
         toast = document.createElement('div');
         toast.id = '_wbSyncToast';
-        toast.style.cssText = 'position:fixed;bottom:20px;right:20px;background:#16213;border:1px solid #4361ee;color:#e0e0e0;padding:12px 18px;border-radius:8px;font-size:12px;max-width:280px;z-index:9999;box-shadow:0 10px 30px rgba(0,0,0,0.4);';
+        toast.style.cssText = 'position:fixed;bottom:20px;right:20px;background:#16213e;border:1px solid #4361ee;color:#e0e0e0;padding:12px 18px;border-radius:8px;font-size:12px;max-width:280px;z-index:9999;box-shadow:0 10px 30px rgba(0,0,0,0.4);';
         document.body.appendChild(toast);
     }
     toast.textContent = msg;

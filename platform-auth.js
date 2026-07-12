@@ -125,14 +125,14 @@ const WBPlatform = (function() {
 })();
 */
 // Questa parte è per supabase, quindi funziona online e non in localstorage
-const SUPABASE_URL = 'https://ztqsdoohxbjsiqkxihks.supabase.co/rest/v1/';
+const SUPABASE_URL = 'https://ztqsdoohxbjsiqkxihks.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp0cXNkb29oeGJqc2lxa3hpaGtzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM3MDAxMTEsImV4cCI6MjA5OTI3NjExMX0.Tr2TrUioOHB34axDZI5TnT9tjcS0UIZWnv-_HfPqpnA'
 const WBPlatform = (function() {
     let _client = null;
     let _currentUser = null;
     let _readyResolve;
-    const ready = new Promise(res => { _readResolve = res; });
-    const _clientId = 'c_' + Math.random().toString(36).slice(2) + Data.now().toString(36);
+    const ready = new Promise(res => { _readyResolve = res; });
+    const _clientId = 'c_' + Math.random().toString(36).slice(2) + Date.now().toString(36);
 
     function _loadSDK() {
         return new Promise((resolve, reject) => {
@@ -154,7 +154,7 @@ const WBPlatform = (function() {
         });
         _readyResolve();
     }
-    _inist();
+    _init();
     function _publicUser(u) {
         return { id: u.id, email: u.email, name: (u.user_metadata && u.user_metadata.name) || u.email };
     }
@@ -163,7 +163,7 @@ const WBPlatform = (function() {
             id: p.id, ownerId: p.owner_id, name: p.name, status: p.status,
             emoji: p.emoji, data: p.data, collaborators: p.collaborators || [],
             createdAt: new Date(p.created_at).getTime(),
-            updatedAt: new Date(p.updated_at).geTime()
+            updatedAt: new Date(p.updated_at).getTime()
         };
     }
     async function register(name, email, password) {
@@ -201,10 +201,10 @@ const WBPlatform = (function() {
         }
         return _currentUser;
     }
-    async function listProject() {
+    async function listProjects() {
         await ready;
         if (!_currentUser) return [];
-        const { data, error } = await _client.from('wb_platform-projects').select('*').order('updated_at', { ascending: false });
+        const { data, error } = await _client.from('wb_platform_projects').select('*').order('updated_at', { ascending: false });
         if (error) { console.error(error); return []; }
         return data.map(_mapProject);
     }
