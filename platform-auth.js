@@ -248,6 +248,56 @@ const WBPlatform = (function() {
         const collabs = Array.from(new Set([...(project.collaborators||[]), email.trim().toLowerCase()]));
         return touchProject(id, { collaborators: collabs });
     }
+    async function removeCollaborator(id, email) {
+        await ready;
+        const project = await getProject(id);
+        if (!project) return null;
+        const collabs = (project.collaborators || []).filter(c => c !== email.trim().toLowerCase());
+        return touchProject(id, { collaborators: collabs });
+    }
+    async function loginWithGoogle() {
+        await ready;
+        const redirectTo = window.location.origin + window.location.pathname;
+        const { error } = await _client.auth.signInWithOAuth({ provider: 'google', options: { redirectTo } });
+        if (error) return { error: error.message };
+        return {};
+    }
+    async function updateProfile(patch) {
+        await ready;
+        const { data, error } = await _client.auth.updateUser({ data: patch });
+        if (error) return { error: error.message };
+        _currentUser = _publicUser(data.user);
+        return { user: _currentUser };
+    }
+    async function changeEmail(newEmail) {
+        await ready;
+        const { error } = await _client.auth.updateUser({ email: newEmail });
+        if (error) return { error: error.message };
+        return { success: true };
+    }
+    async function changePasswordSecure(currentPassword, newPassword) {
+        awair ready;
+        if (!_currentUser) return { error: 'Non sei loggato.' };
+        if (!newPassword || newPassword.length < 6) return { error: 'La nuova password deve avere almeno 6 caratteri.' };
+        const check = await _client.auth.signInWithPassword({ email: _currentUser.wmail, password: currentPassword });
+        if (check.error) return { error: 'Password attuale non corretta (o questo account usa solo Google).' };
+        const { error } = await _client.auth.updateUser({ password: newPassword });
+        if (error) return { error: error.message };
+        return { success: true };
+    }
+    async function uploadFile(file, folder) {
+        await ready;
+        if (!_currentUser) return { error: 'Devi essere loggato.' };
+        const ext = (file.name.split('.').pop() || 'bin').toLowerCase();
+        const path = (folder || 'uploads') + '/' + _currentUser.id + '/' + Date.now() + '_' + Math.random().toString(36).slice(2) + '.' + ext;
+        const { error } = await _client.storage.from('project-media').upload(path, file, { cacheControl: '3600', upsert: false });
+        if (error) return { error: error.message };
+        const { data } = _client.storage.from('project-media').getPublixUrl(path);
+        return { url: data.publicUrl };
+    }
+
+
+
     function subscribeToProject(id, onRemoteChange) {
         if (!_client) return () => {};
         const channel = _client.channel('project-' + id)

@@ -486,13 +486,17 @@ a {
 <div class="topbar">
     <a href="index.html" class="brand"><i class="fa-solid fa-layer-group"></i> WebBuilder</a>
     <div class="user-box" id="userBox">
-        <div class="user-avatar" id="userAvatar">U</div>
-        <span class="user-name" id="userNameLabel">Utente</span>
+        <div class="user-avatar" id="userAvatar" style="cursor:pointer;overflow:hidden;" title="Impostazioni profilo">U</div>
+        <span class="user-name" id="userNameLabel" style="cursor:pointer;" title="Impostazioni profilo">Utente</span>
         <button class="btn-ghost" id="btnLogout"><i class="fa-solid fa-right-from-bracket"></i> Esci</button>
-    </div>
 </div>
 <div id="authView">
     <div class="auth-card">
+        <button class="auth-submit" id="btnGoogleLogin" style="background:white;color:#333;display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:18px;">
+            <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.3 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.1 8 3l6-6C34.1 5.5 29.4 3.5 24 3.5 12.7 3.5 3.5 12.7 3.5 24S12.7 44.5 24 44.5 44.5 35.3 44.5 24c0-1.2-.1-2.3-.9-3.5z"/><path fill="#FF3D00" d="m6.3 14.7 6.6 4.8C14.7 16 19 13.5 24 13.5c3.1 0 5.8 1.1 8 3l6-6C34.1 5.5 29.4 3.5 24 3.5c-7.7 0-14.3 4.4-17.7 11.2z"/><path fill="#4CAF50" d="M24 44.5c5.3 0 10-1.9 13.6-5.1l-6.3-5.3C29.3 35.5 26.8 36 24 36c-5.3 0-9.7-3.3-11.3-8l-6.5 5C9.6 40 16.2 44.5 24 44.5z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.3-2.3 4.2-4.3 5.6l6.3 5.3C40.9 36 44.5 30.5 44.5 24c0-1.2-.1-2.3-.9-3.5z"/></svg>
+            Continua con Google
+        </button>
+        <div style="text-align:center;color:var(--wb-gray);font-size:11px;margin-bottom:18px;">oppure con email</div>
         <div class="auth-tabs">
             <div class="auth-tab active" data-tab="login">Accedi</div>
             <div class="auth-tab" data-tab="register">Registrati</div>
@@ -528,6 +532,11 @@ a {
             </div>
             <button class="auth-submit" id="btnRegister">Crea account</button>
             <div class="auth-error" id="regError"></div>
+        </div>
+        <div id="verifyingPanel" style="display:none;text-align:center;padding:10px 0;">
+            <div style="font-size:36px;margin-bottom:14px;" id="verifyingIcon">⏳</div>
+            <p style="color:var(--wb-gray-light);font-size:14px;" id="verifyingText">Verifica email in corso...</p>
+            <a href="#" id="backToLoginLink" style="display:none;margin-top:14px;font-size:12px;color:var(--wb-cyan);">Torna al login</a>
         </div>
     </div>
 </div>
@@ -575,10 +584,40 @@ a {
 <div class="modal-ov" id="shareModal">
     <div class="modal-box">
         <h3>Condividi progetto</h3>
+        <div id="collaboratorsList" style="margin-bottom:14px;display:flex;flex-direction:column;gap:6px;"></div>
         <input type="email" id="shareEmailInput" placeholder="email@collaboratore.com">
         <div class="modal-actions">
             <button class="cancel" id="cancelShare">Chiudi</button>
             <button class="confirm" id="confirmShare">Aggiungi</button>
+        </div>
+    </div>
+</div>
+<div class="modal-ov" id="profileModal">
+    <div class="modal-box" style="max-width:440px;">
+        <h3>Impostazioni account</h3>
+        <div style="display:flex;align-items:center;gap:14px;margin-bottom:20px;">
+            <div id="profileAvatarPreview" style="width:56;height:56;border-radius:50px;background:var(--grad-main);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:20px;overflow:hidden;flex-shrink:0;">U</div>
+            <button class="cancel" id="btnChangeAvatar" style="padding:8px 14px;font-size:12px;">Cambia foto</button>
+        </div>
+        <label style="display:bloxk;font-size:12px;color:var(--wb-gray-light);margin-bottom:6px;">Nome</label>
+        <input type="text" id="profileNameInput" style="margin-bottom:10px;">
+        <button class="confirm" id="btnSaveProfileName" style="width:100%;margin-bottom:20px;">Salva nome</button>
+        <hr style="border:none;border-top:1px solid rgba(255,255,255,0.1);margin:16px 0;">
+        <label style="display:block;font-size:12px;color:var(--wb-gray-light);margin-bottom:6px;">Nuova email</label>
+        <input type="email" id="profileEmailInput" placeholder="nuova@email.com" style="margin-bottom:10px;">
+        <buttom class="cancel" id="btnChangeEmail" style="width:100%;margin-bottom:6px;">Cambia email</buttom>
+        <div style="font-size:11px;color:var(--wb-gray);margin-bottom:20px;">Riceverai un'email di conferma prima che il cambio sia effettivo.</div>
+        <hr style="border:none;border-top:1px solid rgba(255,255,255,0.1);margin:16px 0;">
+        <label style="display:block;font-size:12px;color:var(--wb-gray-light);margin-bottom:6px;">Password attuale</label>
+        <input type="password" id="profileCurrentPassword" style="margin-bottom:10px;">
+        <label style="display:block;font-size:12px;color:var(--wb-gray-light);margin-bottom:6px;">Nuova password</label>
+        <input type="password" id="profileNewPassword" style="margin-bottom:10px;">        
+        <button class="cancel" id="btnChangePassword" style="width:100%;margin-bottom:20px;">Cambia password</button>
+        <div id="profileStatus" style="display:none;font-size:12px;padding:8px;border-radius:6px;margin-bottom:16px;text-align:center;"></div>
+        <hr style="border:none;border-top:1px solid rgba(230,57,70,0.3);margin:16px 0;">
+        <button class="cancel" id="btnDeleteAccount" style="width:100%;color:#ff8a93;border-color:rgba(230,57,70,0.4);">Elimina account definitivamente</button>
+        <div class="modal-actions" style="margin-top:18px;">
+            <button class="cancel" id="cancelProfile">Chiudi</button>
         </div>
     </div>
 </div>
@@ -606,9 +645,14 @@ async function showDashView(user) {
     $('#authView').style.display = 'none';
     $('#dashView').style.display = 'block';
     $('#userBox').style.display = 'flex';
-    $('#userAvatar').textContent = (user.name || user.email || 'U')[0].toUpperCase();
-    $('#userNameLabel').textContent = user.name || user.email;
+    renderUserBadge(user);
     await renderProjects();
+}
+function renderUserBadge(user) {
+    const avatarEl = $('#userAvatar');
+    if (user.avatarUrl) avatarEl.innerHTML = '<img src="' + user.avatarUrl + '" style="width:100%;height:100%;object-fit:cover;">';
+    else avatarEl.textContent = (user.name || user.email || 'U')[0].toUpperCase();
+    $('#userNameLabel').textContent = user.name || user.email;
 }
 async function renderProjects() {
     let projects = await WBPlatform.listProjects();
@@ -716,6 +760,8 @@ $('#projectsGrid').addEventListener('click', async function(e) {
     } else if (action === 'share') {
         shareTargetId = id;
         $('#shareEmailInput').value = '';
+        const project = await WBPlatform.getProject(id);
+        renderCollaboratorsList(project ? project.collaborators : []);
         $('#shareModal').classList.add('visible');
         $('#shareEmailInput').focus();
     } else if (action === 'delete') {
@@ -740,15 +786,143 @@ $('#confirmShare').addEventListener('click', async function() {
     if (!shareTargetId) return;
     const email = $('#shareEmailInput').value.trim();
     if (email) await WBPlatform.addCollaborator(shareTargetId, email);
-    $('#shareModal').classList.remove('visible');
+    $('#shareEmailInput').value = '';
+    const project = await WBPlatform.getProject(shareTargetId);
+    renderCollaboratorsList(project ? project.collaborators : []);
 });
-$('#shareModal').addEventListener('click', e => { if  (e.target === $('#shareModal')) $('#shareModal').classList.remove('visible'); });
-
+$('#shareModal').addEventListener('click', e => { if (e.target === $('#shareModal')) $('#shareModal').classList.remove('visible'); });
+function renderCollaboratorsList(collaborators) {
+    const box = $('#collaboratorsList');
+    if (!box) return;
+    if (!collaborators || collaborators.lenght === 0) {
+        box.innerHTML = '<div style="font-size:12px;color:var(--wb-gray);">Nessun collaboratore ancora.</div>';
+        return;
+    }
+    box.innerHTML = collaborators.map(function(email) {
+        return '<div style="display:flex;align-items:center;justify-content:spcace-between;background:rgba(255,255,255,0.04);padding:6px 10px;border-radius:8px;font-size:12px;">' +
+            '<span>' + escapeHtml(email) + '</span>' +
+            '<button class="remove-collab-btn" data-email="' + escapeHtml(email) + '" style="background:none;border:none;color:#ff8a93;cursor:pointer;font-size:14px;">✕</button>' +
+            '</div>';
+    }).join('');
+    box.querySelectorAll('.remove-collab-btn').forEach(function(btn) {
+        btn.addEventListener('click', async function() {
+            if (!shareTargetId) return;
+            await WBPlatform.removeCollaborator(shareTargetId, btn.dataset.email);
+            const project = await WBPlatform.getProject(shareTargetId);
+            renderCollaboratorsList(project ? project.collaborators : []);
+        });
+    });
+}
+$('#userAvatar').addEventListener('click', openProfileModal);
+$('#userNameLabel').addEventListener('click', openProfileModal);
+function openProfileModal() {
+    const user = WBPlatform.currentUser();
+    if (!user) return;
+    $('#profileNameInput').value = user.name || '';
+    $('#profileEmailInput').value = '';
+    $('#profileCurrentPassword').value = '';
+    $('#profileNewPassword').value = '';
+    $('#profileStatus').style.display = 'none';
+    const preview = $('#profileAvatarPreview');
+    if (user.avatarUrl) preview.innerHTML = '<img src="' + user.avatarUrl + '" style="width:100%;height:100%;object-fit:cover;">';
+    else preview.textContent = (user.name || user.email || 'U')[0].toUpperCase();
+    $('#profileModal').classList.add('visible');
+}
+$('#cancelProfile').addEventListener('click', () => $('#profileModal').classList.remove('visible'));
+$('#profileModal').addEventListener('click', (e) => { if (e.target === $('#profileModal')) $('#profileModal').classList.remove('visible'); });
+function showProfileStatus(msg, ok) {
+    const el = $('#profileStatus');
+    el.textContent = msg;
+    el.style.background = ok ? 'rgba(46,196,182,0.15)' : 'rgba(230,57,70,0.15)';
+    el.style.color = ok ? '#2ec4b6' : '#ff8a93';
+    el.style.display = 'block';
+}
+$('#btnChangeAvatar').addEventListener('click', () => {
+    const fileInput = document.createElement('input');
+    fileInput.type = 'file';
+    fileInput.accept = 'image/*';
+    fileInput.addEventListener('change', async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const res = await WBPlatform.uploadFile(file, 'avatars');
+        if (res.error) { showProfileStatus('Errore: ' + res.error, false); return; }
+        const upd = await WBPlatform.updateProfile({ avatar_url: res.url });
+        if (upd.error) { showProfileStatus('Errore: ' + upd.error, false); return; }
+        renderUserBadge(upd.user);
+        $('#profileAvatarPreview').innerHTML = '<img src="' + res.url + '" style="width:100%;height:100%;object-fit:cover;">';
+        showProfileStatus('Foto aggiornata!', true);
+    });
+    fileInput.click();
+});
+$('#btnSaveProfileName').addEventListener('click', async () => {
+    const name = $('#profileNameInput').value.trim();
+    if (!name) return;
+    const res = await WBPlatform.updateProfile({ name });
+    if (res.error) { showProfileStatus('Errore: ' + res.error, false); return; }
+    renderUserBadge(res.user);
+    showProfileStatus('Nome aggiornato!', true);
+});
+$('#btnChangePassword').addEventListener('click', async () => {
+    const current = $('#profileCurrentPassword').value;
+    const next = $('#profileNewPassword').value;
+    const res = await WBPlatform.changePasswordSecure(current, next);
+    if (res.error) { showProfileStatus('Errore: ' + res.error, false); return; }
+    $('#profileCurrentPassword').value = '';
+    $('#profileNewPassword').value = '';
+    showProfileStatus('Password aggiornata!', true);
+});
+$('#btnDeleteAccount').addEventListener('click', async () => {
+    if (!confirm('Eliminare DEFINITIVAMENTE il tuo account e tutti i tuoi progetti? Non si può annullare.')) return;
+    if (!confirm('Sei sicuro al 100% Non potrai recuperare nulla dopo questo.')) return;
+    const res = await WBPlatform.deleteAccount();
+    if (res.error) { showProfileStatus('Errore: ' + res.error, false); return; }
+    alert('Account eliminato.');
+    window.location.href = window.location.pathname;
+});
+$('#btnGoogleLogin').addEventListener('click', async () => {
+    await WBPlatform.ready;
+    const res = await WBPlatform.loginWithGoogle();
+    if (res.error) alert('Errore Google: ' + res.error);
+});
+function parseHashParams() {
+    const hash = window.location.hash.startsWith('#') ? window.location.hash.slice(1) : window.location.hash;
+    return new URLSearchParams(hash);
+}
+$('#backToLoginLink').addEventListener('click', (e) => {
+    e.preventDefault();
+    history.replaceState(null, '', window.location.pathname + window.location.search);
+    $('#verifyingPanel').style.display = 'none';
+    $('.auth-tabs').style.display = 'flex';
+    $('#loginPanel').style.display = 'block';
+});
 (async function init() {
+    const hashParams = parseHashParams();
+    const isEmailConfirm = hashParams.get('type') === 'signup';
+    const hashError = hashParams.get('error_description');
+    if (isEmailConfirm || hashError) {
+        $('.auth-tabs').style.display = 'none';
+        $('#loginPanel').style.display = 'none';
+        $('#registerPanel').style.display = 'none';
+        $('#verifyingPanel').style.display = 'block';
+        if (hashError) {
+            $('#verifyingIcon').textContent = '⚠️';
+            $('#verifyingText').textContent = 'Il link non è più valido: ' + decodeURIComponent(hashError.replace(/\+/g, ' '));
+            $('#backToLoginLink').style.display = 'inline-block';
+        }
+    }
     await WBPlatform.ready;
     const user = WBPlatform.currentUser();
-    if (user) await showDashView(user);
-    else showAuthView();
+    if (user) {
+        if (isEmailConfirm) {
+            $('#verifyingIcon').textContent = '✅';
+            $('#verifyingText').textContent = 'Email verificata! Bentornato.';
+            await new Promise(r => setTimeout(r, 900));
+        }
+        history.replaceState(null, '', window.location.pathname + window.location.search);
+        await showDashView(user);
+    } else if (!hashError) {
+        showAuthView();
+    }
 })();
 
 </script>
