@@ -1171,16 +1171,13 @@ function initPropertyInputs() {
         fileInput.addEventListener('change', (e) => {
             const file = e.target.files[0];
             if (!file) return;
-            const reader = new FileReader();
-            reader.onload = (ev) => {
-                propImageSrc.value = ev.target.result;
-                propImageSrc.dispatchEvent(new Event('change'));
-            };
-            reader.readAsDataURL(file);
+            const res = await WBPlatform.upload(file, 'images');
+            if (res.error) { alert('Caricamento immagine fallito: ' + res.error); return; }
+            propImageSrc.value = res.url;
+            propImageSrc.dispatchEvent(new Event('change'));
         });
         fileInput.click();
     });
-
     $('#propAlt').addEventListener('change', () => {
         if (!state.selectedElement) return;
         const img = state.selectedElement.querySelector('img');
@@ -1219,12 +1216,10 @@ function initPropertyInputs() {
             fileInput.addEventListener('change', (e) => {
                 const file = e.target.files[0];
                 if (!file) return;
-                const reader = new FileReader();
-                reader.onload = (ev) => {
-                    propBgImage.value = ev.target.result;
-                    applyBgImage();
-                };
-                reader.readAsDataURL(file);
+                const res = await WBPlatform.uploadFile(file, 'images');
+                if (res.error) { alert('Caricamento immagine fallito: ' + res.error); return; }
+                propBgImage.value = res.url;
+                applyBgImage();
             });
             fileInput.click();
         });
@@ -3569,9 +3564,30 @@ async function autoLoad() {
         renderPageTabs();
         loadPage(currentPageIndex);
     }
+    const templateParam = new URLSearchParams(window.location.search).get('template');
+    if (templateParam && (!saved || !saved.pages)) {
+        applyStarterTemplate(templateParam);
+    }
     _initRealtimeSync(projectId);
     return true;
 }
+function applyStarterTemplate(templateName) {
+    const templates = {
+        ristorante: ['block-navbar', 'block-hero', 'block-card', 'block-card', 'block-footer'],
+        portfolio: ['block-navbar', 'block-hero', 'block-card', 'block-card', 'block-card', 'block-footer'],
+        landing: ['block-navbar', 'block-hero', 'block-pricing', 'block-testimonial', 'block-footer']
+    };
+    const blocks = templates[templateName];
+    if (!blocks) return;
+    blocks.forEach(type => {
+        const el = createElement(type);
+        canvas.appendChild(el);
+    });
+    hideCanvasEmpty();
+    saveHistory();
+    updateLayers();
+}
+
 function _initRealtimeSync(projectId) {
     if (_unsubscribeRealtime) _unsubscribeRealtime();
     _unsubscribeRealtime = WBPlatform.subscribeToProject(projectId, function(remoteProject) {

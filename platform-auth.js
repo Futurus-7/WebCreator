@@ -156,7 +156,13 @@ const WBPlatform = (function() {
     }
     _init();
     function _publicUser(u) {
-        return { id: u.id, email: u.email, name: (u.user_metadata && u.user_metadata.name) || u.email };
+        const meta = u.user_metadate || {};
+        return {
+            id: u.id,
+            email: u.email,
+            name: meta.name || meta.full_name || u.email,
+            avatarUrl: meta.avatar_url || meta.picture || null
+        };
     }
     function _mapProject(p) {
         return {
@@ -185,6 +191,7 @@ const WBPlatform = (function() {
         const { data, error } = await _client.auth.signInWithPassword({ email, password });
         if (error) return { error: 'Email o password non corretti.' };
         _currentUser = _publicUser(data.user);
+        notifyLogin();
         return { user: _currentUser };
     }
     async function logout() {
@@ -276,7 +283,7 @@ const WBPlatform = (function() {
         return { success: true };
     }
     async function changePasswordSecure(currentPassword, newPassword) {
-        awair ready;
+        await ready;
         if (!_currentUser) return { error: 'Non sei loggato.' };
         if (!newPassword || newPassword.length < 6) return { error: 'La nuova password deve avere almeno 6 caratteri.' };
         const check = await _client.auth.signInWithPassword({ email: _currentUser.wmail, password: currentPassword });
@@ -295,9 +302,32 @@ const WBPlatform = (function() {
         const { data } = _client.storage.from('project-media').getPublixUrl(path);
         return { url: data.publicUrl };
     }
-
-
-
+    async function deleteAccount() {
+        await ready;
+        if (!_currentUser) return { error: 'Non sei loggato.' };
+        const { data: sessionData } = await _client.auth.getSession();
+        const token = sessionData?.session?.access_token;
+        if (!token) return { error: 'Sessione non valida, ricarica la pagina.' };
+        const res = await fetch(SUPABASE_URL + '/functions/v1/delete-account', {
+            method: 'POST',
+            headers: { 'Authorization': 'Bearer ' + token }
+        });
+        const json = await res.json().catch(() => ({}));
+        if (!res.ok) return { error: json.error || 'Errore durante eliminazione.' };
+        await logout();
+        return { success: true };
+    }
+    async function notifyLogin() {
+        try {
+            const { data: sessionData } = await _client.auth.getSession();
+            const token = sessionData?.session?.access_token;
+            if (!token) return;
+            await fetch(SUPABASE_URL + '/functions/v1/notify-login', {
+                method: 'POST',
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+        } catch (e) { /* non bloccante */ }
+    }
     function subscribeToProject(id, onRemoteChange) {
         if (!_client) return () => {};
         const channel = _client.channel('project-' + id)
@@ -310,6 +340,7 @@ const WBPlatform = (function() {
     return {
         ready, register, login, logout, currentUser, requireLogin,
         listProjects, getProject, createProject, touchProject, deleteProject,
-        setProjectStatus, renameProject, addCollaborator, subscribeToProject
+        setProjectStatus, renameProject, addCollaborator, removeCollaborator, subscribeToProject,
+        loginWithGoogle, updateProfile, changeEmail, changePasswordSecure, uploadFile, deleteAccount
     };
 })();

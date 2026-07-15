@@ -489,6 +489,7 @@ a {
         <div class="user-avatar" id="userAvatar" style="cursor:pointer;overflow:hidden;" title="Impostazioni profilo">U</div>
         <span class="user-name" id="userNameLabel" style="cursor:pointer;" title="Impostazioni profilo">Utente</span>
         <button class="btn-ghost" id="btnLogout"><i class="fa-solid fa-right-from-bracket"></i> Esci</button>
+    </div>
 </div>
 <div id="authView">
     <div class="auth-card">
@@ -565,6 +566,13 @@ a {
     <div class="modal-box">
         <h3>Nuovo progetto</h3>
         <input type="text" id="newProjectName" placeholder="Nome del progetto (es: Sito Ristorante)">
+        <label style="display:block;font-size:12px;color:var(--wb-gray-light);margin:-8px 0 10px;">Parti da un modello</label>
+        <select id="newProjectTemplate" style="width:100%;padding:12px 14px;border-radius:10px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.15);color:white;font-size:14px;margin-bottom:18px;">
+            <option value="">Vuoto</option>
+            <option value="ristorante">Sito Ristorante</option>
+            <option value="portfolio">Portfolio</option>
+            <option value="landing">Landing Page Prodotto</option>
+        </select>
         <div class="modal-actions">
             <button class="cancel" id="cancelNewProject">Annulla</button>
             <button class="confirm" id="confirmNewProject">Crea</button>
@@ -596,16 +604,16 @@ a {
     <div class="modal-box" style="max-width:440px;">
         <h3>Impostazioni account</h3>
         <div style="display:flex;align-items:center;gap:14px;margin-bottom:20px;">
-            <div id="profileAvatarPreview" style="width:56;height:56;border-radius:50px;background:var(--grad-main);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:20px;overflow:hidden;flex-shrink:0;">U</div>
+            <div id="profileAvatarPreview" style="width:56px;height:56px;border-radius:50%;background:var(--grad-main);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:20px;overflow:hidden;flex-shrink:0;">U</div>
             <button class="cancel" id="btnChangeAvatar" style="padding:8px 14px;font-size:12px;">Cambia foto</button>
         </div>
-        <label style="display:bloxk;font-size:12px;color:var(--wb-gray-light);margin-bottom:6px;">Nome</label>
+        <label style="display:block;font-size:12px;color:var(--wb-gray-light);margin-bottom:6px;">Nome</label>
         <input type="text" id="profileNameInput" style="margin-bottom:10px;">
         <button class="confirm" id="btnSaveProfileName" style="width:100%;margin-bottom:20px;">Salva nome</button>
         <hr style="border:none;border-top:1px solid rgba(255,255,255,0.1);margin:16px 0;">
         <label style="display:block;font-size:12px;color:var(--wb-gray-light);margin-bottom:6px;">Nuova email</label>
         <input type="email" id="profileEmailInput" placeholder="nuova@email.com" style="margin-bottom:10px;">
-        <buttom class="cancel" id="btnChangeEmail" style="width:100%;margin-bottom:6px;">Cambia email</buttom>
+        <button class="cancel" id="btnChangeEmail" style="width:100%;margin-bottom:6px;">Cambia email</button>
         <div style="font-size:11px;color:var(--wb-gray);margin-bottom:20px;">Riceverai un'email di conferma prima che il cambio sia effettivo.</div>
         <hr style="border:none;border-top:1px solid rgba(255,255,255,0.1);margin:16px 0;">
         <label style="display:block;font-size:12px;color:var(--wb-gray-light);margin-bottom:6px;">Password attuale</label>
@@ -679,7 +687,11 @@ async function renderProjects() {
             '</div></div>';
     }).join('');
 }
-function openProject(id) { window.location.href = 'builder.html?project=' + encodeURIComponent(id); }
+function openProject(id, template) {
+    let url = 'builder.html?project=' + encodeURIComponent(id);
+    if (template) url += '&template=' + encodeURIComponent(template);
+    window.location.href = url;
+}
 $$('.auth-tab').forEach(function(tab) {
     tab.addEventListener('click', function() {
         $$('.auth-tab').forEach(t => t.classList.remove('active'));
@@ -732,7 +744,8 @@ $('#confirmNewProject').addEventListener('click', async function() {
     if (!WBPlatform.currentUser()) return;
     const project = await WBPlatform.createProject($('#newProjectName').value);
     $('#newProjectModal').classList.remove('visible');
-    if (project) openProject(project.id);
+    const template = $('#newProjectTemplate').value;
+    if (project) openProject(project.id, template);
 });
 $('#newProjectName').addEventListener('keydown', e => { if (e.key === 'Enter') $('#confirmNewProject').click(); });
 $('#newProjectModal').addEventListener('click', e => { if (e.target === $('#newProjectModal')) $('#newProjectModal').classList.remove('visible'); });
@@ -794,12 +807,12 @@ $('#shareModal').addEventListener('click', e => { if (e.target === $('#shareModa
 function renderCollaboratorsList(collaborators) {
     const box = $('#collaboratorsList');
     if (!box) return;
-    if (!collaborators || collaborators.lenght === 0) {
+    if (!collaborators || collaborators.length === 0) {
         box.innerHTML = '<div style="font-size:12px;color:var(--wb-gray);">Nessun collaboratore ancora.</div>';
         return;
     }
     box.innerHTML = collaborators.map(function(email) {
-        return '<div style="display:flex;align-items:center;justify-content:spcace-between;background:rgba(255,255,255,0.04);padding:6px 10px;border-radius:8px;font-size:12px;">' +
+        return '<div style="display:flex;align-items:center;justify-content:space-between;background:rgba(255,255,255,0.04);padding:6px 10px;border-radius:8px;font-size:12px;">' +
             '<span>' + escapeHtml(email) + '</span>' +
             '<button class="remove-collab-btn" data-email="' + escapeHtml(email) + '" style="background:none;border:none;color:#ff8a93;cursor:pointer;font-size:14px;">✕</button>' +
             '</div>';
@@ -861,6 +874,13 @@ $('#btnSaveProfileName').addEventListener('click', async () => {
     if (res.error) { showProfileStatus('Errore: ' + res.error, false); return; }
     renderUserBadge(res.user);
     showProfileStatus('Nome aggiornato!', true);
+});
+$('#btnChangeEmail').addEventListener('click', async () => {
+    const newEmail = $('#profileEmailInput').value.trim();
+    if (!newEmail) return;
+    const res = await WBPlatform.changeEmail(newEmail);
+    if (res.error) { showProfileStatus('Errore: ' + res.error, false); return; }
+    showProfileStatus("Controlla la tua nuova email per confermare il cambio.", true); 
 });
 $('#btnChangePassword').addEventListener('click', async () => {
     const current = $('#profileCurrentPassword').value;
