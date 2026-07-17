@@ -328,6 +328,42 @@ const WBPlatform = (function() {
             });
         } catch (e) { /* non bloccante */ }
     }
+    async function requestPasswordReset(email) {
+        await ready;
+        email = (email || '').trim().toLowerCase();
+        if (!email) return { error: 'Inserisci la tua email.' };
+        const { error } = await _client.auth.resetPasswordForEmail(email, {
+            redirectTo: window.location.origin + window.location.pathname
+        });
+        if (error) return { error: error.message };
+        return { success: true };
+    }
+    async function listTrash() {
+        await ready;
+        if (!_currentUser) return [];
+        const { data, error } = await _client.from('wb_platform_projects').select('*').not('deleted_at', 'is', null).eq('owner_id', _currentUser.id).order('deleted_at', { ascending: false });
+        if (error) { console.error(error); return []; }
+        return data.map(_mapProject);
+    }
+    async function restoreProject(id) {
+        return touchProject(id, { deleted_at: null });
+    }
+    async function permanentDeleteProject(id) {
+        await ready;
+        await _client.from('wb_platform_projects').delete().eq('id', id);
+    }
+    async function _notifyShare(targetEmail, projectName) {
+        try {
+            const { data: sessionData } = await _client.auth.getSession();
+            const token = sessionData?.session?.access_token;
+            if (!token) return;
+            await fetch(SUPABASE_URL + '/functions/v1/notify-share', {
+                method: 'POST',
+                headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+                body: JSON.stringify({ targetEmail, projectName })
+            });
+        } catch (e) { /* non bloccante */ }
+    }
     function subscribeToProject(id, onRemoteChange) {
         if (!_client) return () => {};
         const channel = _client.channel('project-' + id)
@@ -341,6 +377,7 @@ const WBPlatform = (function() {
         ready, register, login, logout, currentUser, requireLogin,
         listProjects, getProject, createProject, touchProject, deleteProject,
         setProjectStatus, renameProject, addCollaborator, removeCollaborator, subscribeToProject,
-        loginWithGoogle, updateProfile, changeEmail, changePasswordSecure, uploadFile, deleteAccount
+        loginWithGoogle, updateProfile, changeEmail, changePasswordSecure, uploadFile, deleteAccount,
+        requestPasswordReset, confirmNewPassword, listTrash, restoreProject, permanentDeleteProject
     };
 })();

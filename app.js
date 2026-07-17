@@ -3522,6 +3522,8 @@ function autoLoad() {
 }
 */
 let _unsubscribeRealtime = null;
+let _lastThumbnailUrl = null;
+let _thumbnailTickCounter = 0;
 function autoSave() {
     saveCurrentPage();
     if (typeof WBPlatform === 'undefined') return;
@@ -3532,9 +3534,32 @@ function autoSave() {
         currentPageIndex: currentPageIndex,
         currentMode: currentMode,
         counter: state.elementCounter,
-        advancedConfig: advancedConfig
+        advancedConfig: advancedConfig,
+        thumbnailUrl: _lastThumbnailUrl
     };
-    WBPlatform.touchProject(projectId, { data: payload }).catch(e => console.warn('Autosave fallito:', e));
+    function doSave(p) {
+        WBPlatform.touchProject(projectId, { data: p }).then(result => {
+            if (!result) _showSyncToast('⚠️ Salvataggio non riuscito.  Controlla la connessione.', 'error');
+        }).catch(e => {
+            console.warn('Autosave fallito:', e);
+            _showSyncToast('⚠️ Salvataggio non riuscito. Controlla la connessione.', 'error');
+        });
+    }
+    _thumbnailTickCounter++;
+    if (_thumbnailTickCounter % 12 === 0 && typeof html2canvas !== 'undefined') {
+        html2canvas(canvas, { scale: 0.3, logging: false }).then((canvasImg) => {
+            canvasImg.toBlob(async (blob) => {
+                if (!blob) { doSave(payload); return; }
+                const file = new File([blob], 'thumb.png', { type: 'image/png' });
+                const res = await WBPlatform.uploadFile(file, 'thumbnails');
+                if (!res.error) _lastThumbnailUrl = res.url;
+                payload.thumbnailUrl = _lastThumbnailUrl;
+                doSave(payload);
+            });
+        }).catch(() => doSave(payload));
+    } else {
+        doSave(payload);
+    }
 }
 async function autoLoad() {
     if (typeof WBPlatform === 'undefined') return false;
@@ -3561,6 +3586,7 @@ async function autoLoad() {
         const modeBtn = document.querySelector(`.mode-btn[data-mode="${currentMode}"]`);
         if (modeBtn) modeBtn.classList.add('active');
         if (saved.advancedConfig) Object.assign(advancedConfig, saved.advancedConfig);
+        _lastThumbnailUrl = saved.thumbnailUrl || null;
         renderPageTabs();
         loadPage(currentPageIndex);
     }
@@ -3611,9 +3637,10 @@ function _showSyncToast(msg) {
     if (!toast) {
         toast = document.createElement('div');
         toast.id = '_wbSyncToast';
-        toast.style.cssText = 'position:fixed;bottom:20px;right:20px;background:#16213e;border:1px solid #4361ee;color:#e0e0e0;padding:12px 18px;border-radius:8px;font-size:12px;max-width:280px;z-index:9999;box-shadow:0 10px 30px rgba(0,0,0,0.4);';
         document.body.appendChild(toast);
     }
+    const borderColor = type === 'error' ? '#e63946' : '#4361ee';
+    toast.style.cssText = 'position:fixed;bottom:20px;right:20px;background:#16213e;border:1px solid ' + borderColor + ';color:#e0e0e0;padding:12px 18px;border-radius:8px;font-size:12px;max-width:280px;z-index:9999;box-shadow:0 10px 30px rgba(0,0,0,0.4);';
     toast.textContent = msg;
     toast.style.display = 'block';
     clearTimeout(toast._t);

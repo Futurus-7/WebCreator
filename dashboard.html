@@ -515,6 +515,7 @@ a {
             </div>
             <button class="auth-submit" id="btnLogin">Accedi</button>
             <div class="auth-error" id="loginError"></div>
+            <a href="#" id="forgotLink" style="display:block;text-align:center;margin-top:14px;font-size:12px;color:var(--wb-cyan);">Password dimenticata?</a>
         </div>
         <div id="registerPanel" style="display:none;">
             <h2>Crea un account</h2>
@@ -538,6 +539,15 @@ a {
             <div style="font-size:36px;margin-bottom:14px;" id="verifyingIcon">⏳</div>
             <p style="color:var(--wb-gray-light);font-size:14px;" id="verifyingText">Verifica email in corso...</p>
             <a href="#" id="backToLoginLink" style="display:none;margin-top:14px;font-size:12px;color:var(--wb-cyan);">Torna al login</a>
+        </div>
+        <div id="resetPanel" style="display:none;">
+            <h2>Imposta una nuova password</h2>
+            <div class="field">
+                <label>Nuova password</label>
+                <input type="password" id="newPasswordInput" placeholder="Almeno 6 caratteri">
+            </div>
+            <button class="auth-submit" id="btnUpdatePassword">Salva nuova password</button>
+            <div class="auth-error" id="resetError"></div>
         </div>
     </div>
 </div>
@@ -626,6 +636,16 @@ a {
         <button class="cancel" id="btnDeleteAccount" style="width:100%;color:#ff8a93;border-color:rgba(230,57,70,0.4);">Elimina account definitivamente</button>
         <div class="modal-actions" style="margin-top:18px;">
             <button class="cancel" id="cancelProfile">Chiudi</button>
+        </div>
+    </div>
+</div>
+<div class="modal-ov" id="forgotModal">
+    <div class="modal-box">
+        <h3>Recupera password</h3>
+        <input type="email" id="forgotEmailInput" placeholder="tua@email.com">
+        <div class="modal-actions">
+            <button class="cancel" id="cancelForgot">Chiudi</button>
+            <button class="confirm" id="confirmForgot">Invia link</button>
         </div>
     </div>
 </div>
@@ -915,9 +935,35 @@ $('#backToLoginLink').addEventListener('click', (e) => {
     $('.auth-tabs').style.display = 'flex';
     $('#loginPanel').style.display = 'block';
 });
+$('#forgotLink').addEventListener('click', (e) => {
+    e.preventDefault();
+    $('#forgotEmailInput').value = $('#loginEmail').value || '';
+    $('#forgotModal').classList.add('visible');
+});
+$('#cancelForgot').addEventListener('click', () => $('#forgotModal').classList.remove('visible'));
+$('#forgotModal').addEventListener('click', e => { if (e.target === $('#forgotModal')) $('#forgotModal').classList.remove('visible'); });
+$('#confirmForgot').addEventListener('click', async function() {
+    const email = $('#forgotEmailInput').value.trim();
+    if (!email) return;
+    const btn = $('#confirmForgot');
+    btn.disabled = true; btn.textContent = 'Invio...';
+    const res = await WBPlatform.requestPasswordReset(email);
+    btn.disabled = false; btn.textContent = 'Invia link';
+    if (res.error) { alert('Errore: ' + res.error); return; }
+    $('#forgotModal').classList.remove('visible');
+    alerT("Ti abbiamo inviato un'email con il link per reimpostare la password.");
+});
+$('#btnUpdatePassword').addEventListener('click', async function() {
+    const errEl = $('#resetError'); errEl.style.display = 'none';
+    const res = await WBPlatform.confirmNewPassword($('#newPasswordInput').value);
+    if (res.error) { errEl.textContent = res.error; errEl.style.display = 'block'; return; }
+    alert('Password aggiornata! Ora puoi accedere normalmente.');
+    window.location.href = window.location.pathname;
+});
 (async function init() {
     const hashParams = parseHashParams();
     const isEmailConfirm = hashParams.get('type') === 'signup';
+    const isRecovery = hashParams.get('type') === 'recovery';
     const hashError = hashParams.get('error_description');
     if (isEmailConfirm || hashError) {
         $('.auth-tabs').style.display = 'none';
@@ -930,7 +976,15 @@ $('#backToLoginLink').addEventListener('click', (e) => {
             $('#backToLoginLink').style.display = 'inline-block';
         }
     }
+    if (isRecovery) {
+        $('.auth-tabs').style.display = 'none';
+        $('#loginPanel').style.display = 'none';
+        $('#registerPanel').style.display = 'none';
+        $('#verifyingPanel').style.display = 'none';
+        $('#resetPanel').style.display = 'block';
+    }
     await WBPlatform.ready;
+    if (isRecovery) return;
     const user = WBPlatform.currentUser();
     if (user) {
         if (isEmailConfirm) {
