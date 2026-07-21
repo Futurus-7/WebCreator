@@ -1168,10 +1168,10 @@ function initPropertyInputs() {
         const fileInput = document.createElement('input');
         fileInput.type = 'file';
         fileInput.accept = 'image/*';
-        fileInput.addEventListener('change', (e) => {
+        fileInput.addEventListener('change', async (e) => {
             const file = e.target.files[0];
             if (!file) return;
-            const res = await WBPlatform.upload(file, 'images');
+            const res = await WBPlatform.uploadFile(file, 'images');
             if (res.error) { alert('Caricamento immagine fallito: ' + res.error); return; }
             propImageSrc.value = res.url;
             propImageSrc.dispatchEvent(new Event('change'));
@@ -1213,7 +1213,7 @@ function initPropertyInputs() {
             const fileInput = document.createElement('input');
             fileInput.type = 'file';
             fileInput.accept = 'image/*';
-            fileInput.addEventListener('change', (e) => {
+            fileInput.addEventListener('change', async (e) => {
                 const file = e.target.files[0];
                 if (!file) return;
                 const res = await WBPlatform.uploadFile(file, 'images');
@@ -2109,6 +2109,7 @@ function initToolbar() {
     $('#btnRedo').addEventListener('click', redo);
     $('#btnPreview').addEventListener('click', showPreview);
     $('#btnExport').addEventListener('click', showExport);
+    $('#btnBackupJSON')?.addEventListener('click', downloadBackupJSON);
     $('#btnReset').addEventListener('click', () => {
         $('#resetOverlay').classList.add('visible');
     });
@@ -2124,6 +2125,19 @@ function initToolbar() {
             $('#resetOverlay').classList.remove('visible');
         }
     });
+}
+function downloadBackupJSON() {
+    saveCurrentPage();
+    const backup = { exportedAt: new Date().toISOString(), pages: pages, advancedConfig: advancedConfig };
+    const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'backup-progetto-' + Date.now() + '.json';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
 }
 function resetCurrentProject() {
     structureHTML = '';
@@ -3524,6 +3538,7 @@ function autoLoad() {
 let _unsubscribeRealtime = null;
 let _lastThumbnailUrl = null;
 let _thumbnailTickCounter = 0;
+let _historyTickCounter = 0;
 function autoSave() {
     saveCurrentPage();
     if (typeof WBPlatform === 'undefined') return;
@@ -3544,6 +3559,10 @@ function autoSave() {
             console.warn('Autosave fallito:', e);
             _showSyncToast('⚠️ Salvataggio non riuscito. Controlla la connessione.', 'error');
         });
+    }
+    _historyTickCounter++;
+    if (_historyTickCounter % 24 === 0) {
+        WBPlatform.saveHistorySnapshot(projectId, payload).catch(() => {});
     }
     _thumbnailTickCounter++;
     if (_thumbnailTickCounter % 12 === 0 && typeof html2canvas !== 'undefined') {
@@ -3632,7 +3651,7 @@ function _initRealtimeSync(projectId) {
         }
     });
 }
-function _showSyncToast(msg) {
+function _showSyncToast(msg, type) {
     let toast = document.getElementById('_wbSyncToast');
     if (!toast) {
         toast = document.createElement('div');
@@ -3647,6 +3666,40 @@ function _showSyncToast(msg) {
     toast._t = setTimeout(() => { toast.style.display = 'none'; }, 5000);
 }
 
+document.getElementById('btnHistory')?.addEventListener('click', openHistoryModal);
+document.getElementById('closeHistory')?.addEventListener('click', () => document.getElementById('historyModal').classList.remove('visible'));
+async function openHistoryModal() {
+    const projectId = _getActiveProjectId();
+    if (projectId === 'default') return;
+    const list = await WBPlatform.listHistorySnapshots(projectId);
+    const box = document.getElementById('historyList');
+    if (!list.length) {
+        box.innerHTML = '<p style="color:var(--text-secondary);padding:10px;">Nessuna versione salvata ancora. Ne salvo una ogni paio di minuti mentre lavori - torna più tardi.</p>';
+    } else {
+        box.innerHTML = list.map((h, i) => {
+            const d = new Date(h.createdAt);
+            return '<div style="display:flex;justify-content:space-between;align-items:center;padding:10px;border-bottom:1px solid var(--border-color);">' +
+                '<span>' + d.toLocaleDateString('it-IT') + ' ' + d.toLocaleTimeString('it-IT', {hour:'2-digit',minute:'2-digit'}) + '</span>' +
+                '<button class="toolbar-btn" data-history-index="' + 1 + '">Ripristina</button></div>';
+        }).join('');
+        box.querySelectorAll('[data-history-index]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const snap = list[parseInt(btn.dataset.historyIndex)];
+                if (!confirm('Ripristinare questa versione? Le modifiche non salvate andranno perse.')) return;
+                if (snap.data.pages) {
+                    pages = snap.data.pages;
+                    currentPageIndex = snap.data.currentPageIndex || 0;
+                    renderPageTabs();
+                    loadPage(currentPageIndex);
+                    saveHistory();
+                    autoSave();
+                    document.getElementById('historyModal').classList.remove('visible');
+                }
+            });
+        });
+    }
+    document.getElementById('historyModal').classList.add('visible');
+}
 function initModes() {
     $$('.mode-btn').forEach(btn => {
         btn.addEventListener('click', () => {

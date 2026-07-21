@@ -563,6 +563,7 @@ a {
         <div class="filter-tab active" data-filter="all">Tutti</div>
         <div class="filter-tab" data-filter="in-progress">In corso</div>
         <div class="filter-tab" data-filter="completed">Completati</div>
+        <div class="filter-tab" data-filter="trash">Cestino</div>
     </div>
     <div class="projects-grid" id="projectsGrid"></div>
     <div class="empty-state" id="emptyState" style="display:none;">
@@ -683,28 +684,38 @@ function renderUserBadge(user) {
     $('#userNameLabel').textContent = user.name || user.email;
 }
 async function renderProjects() {
-    let projects = await WBPlatform.listProjects();
-    if (currentFilter !== 'all') projects = projects.filter(p => p.status === currentFilter);
+    let projects = currentFilter === 'trash' ? await WBPlatform.listTrash() : await WBPlatform.listProjects();
+    if (currentFilter !== 'all' && currentFilter !== 'trash') projects = projects.filter(p => p.status === currentFilter);
     const grid = $('#projectsGrid');
     const empty = $('#emptyState');
     if (projects.length === 0) { grid.innerHTML = ''; empty.style.display = 'block'; return; }
     empty.style.display = 'none';
+    const myId = WBPlatform.currentUser().id;
     grid.innerHTML = projects.map(function(p) {
         const date = new Date(p.updatedAt);
         const dateStr = date.toLocaleDateString('it-IT', { day: 'numeric', month: 'short', year: 'numeric' });
         const statusLabel = p.status === 'completed' ? 'Completato' : 'In corso';
+        const isOwner = p.ownerId === myId;
+        const thumb = (p.data && p.data.thumbnailUrl)
+            ? '<div class="project-emoji" style="background-image:url(' + p.data.thumbnailUrl + ');background-size:cover;background-position:center;width:100%;height:80px;border-radius:8px;margin-bottom:14px;"></div>'
+            : '<div class="project-emoji">' + (p.emoji || '🚀') + '</div>';
+        let actions;
+        if (currentFilter === 'trash') {
+            actions = '<button data-action="restore" data-id="' + p.id + '" title="Ripristina"><i class="fa-solid fa-trash-arrow-up"></i></button>' +
+                '<button data-action="deleteforever" data-id="' + p.id + '" class="danger" title="Elimina per sempre"><i class="fa-solid fa-trash"></i></button>';
+        } else {
+            actions = '<button data-action="open" data-id="' + p.id + '" title="Apri"><i class="fa-solid fa-pen"></i></button>' +
+                '<button data-action="toggle" data-id="' + p.id + '" title="Completato/In corso"><i class="fa-solid fa-check"></i></button>' +
+                '<button data-action="rename" data-id="' + p.id + '" title="Rinomina"><i class="fa-solid fa-i-cursor"></i></button>' +
+                (isOwner ? '<button data-action="share" data-id="' + p.id + '" title="Condividi"><i class="fa-solid fa-user-plus"></i></button>' : '') +
+                (isOwner ? '<button data-action="delete" data-id="' + p.id + '" class="danger" title="Sposta nel cestino"><i class="fa-solid fa-trash"></i></button>' : '');
+        }
         return '<div class="project-card" data-id="' + p.id + '">' +
             '<span class="project-status ' + p.status + '">' + statusLabel + '</span>' +
-            '<div class="project-emoji">' + (p.emoji || '🚀') + '</div>' +
+            thumb +
             '<div class="project-name">' + escapeHtml(p.name) + '</div>' +
             '<div class="project-meta">Modificato il ' + dateStr + '</div>' +
-            '<div class="project-actions">' +
-            '<button data-action="open" data-id="' + p.id + '" title="Apri"><i class="fa-solid fa-pen"></i></button>' +
-            '<button data-action="toggle" data-id="' + p.id + '" title="Completato/In corso"><i class="fa-solid fa-check"></i></button>' +
-            '<button data-action="rename" data-id="' + p.id + '" title="Rinomina"><i class="fa-solid fa-i-cursor"></i></button>' +
-            '<button data-action="share" data-id="' + p.id + '" title="Condividi"><i class="fa-solid fa-user-plus"></i></button>' +
-            '<button data-action="delete" data-id="' + p.id + '" class="danger" title="Elimina"><i class="fa-solid fa-trash"></i></button>' +
-            '</div></div>';
+            '<div class="project-actions">' + actions + '</div></div>';
     }).join('');
 }
 function openProject(id, template) {
@@ -775,7 +786,7 @@ $('#projectsGrid').addEventListener('click', async function(e) {
     const card = e.target.closest('.project-card');
     if (!card || !WBPlatform.currentUser()) return;
     const id = card.dataset.id;
-    if (!btn) { openProject(id); return; }
+    if (!btn) { if (currentFilter !== 'trash') openProject(id); return; }
     e.stopPropagation();
     const action = btn.dataset.action;
     if (action === 'open') openProject(id);
@@ -798,8 +809,16 @@ $('#projectsGrid').addEventListener('click', async function(e) {
         $('#shareModal').classList.add('visible');
         $('#shareEmailInput').focus();
     } else if (action === 'delete') {
-        if (confirm("Eliminare definitivamente questo progetto? L'azione non è reversibile.")) {
+        if (confirm('Spostare questo progetto nel cestino? Potrai ripristinarlo entro 30 giorni.')) {
             await WBPlatform.deleteProject(id);
+            await renderProjects();
+        }
+    } else if (action === 'restore') {
+        await WBPlatform.restoreProject(id);
+        await renderProjects();
+    } else if (action === 'deleteforever') {
+        if (confirm('Eliminare DEFINITIVAMENTE questo progetto? Non potrai più recuperarlo.')) {
+            await WBPlatform.permanentDeleteProject(id);
             await renderProjects();
         }
     }
@@ -951,7 +970,7 @@ $('#confirmForgot').addEventListener('click', async function() {
     btn.disabled = false; btn.textContent = 'Invia link';
     if (res.error) { alert('Errore: ' + res.error); return; }
     $('#forgotModal').classList.remove('visible');
-    alerT("Ti abbiamo inviato un'email con il link per reimpostare la password.");
+    alert("Ti abbiamo inviato un'email con il link per reimpostare la password.");
 });
 $('#btnUpdatePassword').addEventListener('click', async function() {
     const errEl = $('#resetError'); errEl.style.display = 'none';

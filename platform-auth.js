@@ -124,7 +124,7 @@ const WBPlatform = (function() {
     };
 })();
 */
-// Questa parte è per supabase, quindi funziona online e non in localstorage
+// Questa parte è per supabase, quindi funziona online e non in localstorage, MA DEVI SETTARE IL TUO SUPABASE, QUESTO USA IL MIO PERSONALE
 const SUPABASE_URL = 'https://ztqsdoohxbjsiqkxihks.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp0cXNkb29oeGJqc2lxa3hpaGtzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM3MDAxMTEsImV4cCI6MjA5OTI3NjExMX0.Tr2TrUioOHB34axDZI5TnT9tjcS0UIZWnv-_HfPqpnA'
 const WBPlatform = (function() {
@@ -168,6 +168,7 @@ const WBPlatform = (function() {
         return {
             id: p.id, ownerId: p.owner_id, name: p.name, status: p.status,
             emoji: p.emoji, data: p.data, collaborators: p.collaborators || [],
+            deletedAt: p.deleted_at || null,
             createdAt: new Date(p.created_at).getTime(),
             updatedAt: new Date(p.updated_at).getTime()
         };
@@ -211,7 +212,7 @@ const WBPlatform = (function() {
     async function listProjects() {
         await ready;
         if (!_currentUser) return [];
-        const { data, error } = await _client.from('wb_platform_projects').select('*').order('updated_at', { ascending: false });
+        const { data, error } = await _client.from('wb_platform_projects').select('*').is('deleted_at', null).order('updated_at', { ascending: false });
         if (error) { console.error(error); return []; }
         return data.map(_mapProject);
     }
@@ -243,8 +244,7 @@ const WBPlatform = (function() {
         return data ? _mapProject(data) : null;
     }
     async function deleteProject(id) {
-        await ready;
-        await _client.from('wb_platform_projects').delete().eq('id', id);
+        return touchProject(id, { deleted_at: new Date().toISOString() });
     }
     async function setProjectStatus(id, status) { return touchProject(id, { status }); }
     async function renameProject(id, name) { return touchProject(id, { name }); }
@@ -252,8 +252,11 @@ const WBPlatform = (function() {
         await ready;
         const project = await getProject(id);
         if (!project) return null;
-        const collabs = Array.from(new Set([...(project.collaborators||[]), email.trim().toLowerCase()]));
-        return touchProject(id, { collaborators: collabs });
+        email = email.trim().toLowerCase();
+        const collabs = Array.from(new Set([...(project.collaborators||[]), email]));
+        const result = await touchProject(id, { collaborators: collabs });
+        if (result) _notifyShare(email, project.name);
+        return result;
     }
     async function removeCollaborator(id, email) {
         await ready;
@@ -286,7 +289,7 @@ const WBPlatform = (function() {
         await ready;
         if (!_currentUser) return { error: 'Non sei loggato.' };
         if (!newPassword || newPassword.length < 6) return { error: 'La nuova password deve avere almeno 6 caratteri.' };
-        const check = await _client.auth.signInWithPassword({ email: _currentUser.wmail, password: currentPassword });
+        const check = await _client.auth.signInWithPassword({ email: _currentUser.email, password: currentPassword });
         if (check.error) return { error: 'Password attuale non corretta (o questo account usa solo Google).' };
         const { error } = await _client.auth.updateUser({ password: newPassword });
         if (error) return { error: error.message };
@@ -299,7 +302,7 @@ const WBPlatform = (function() {
         const path = (folder || 'uploads') + '/' + _currentUser.id + '/' + Date.now() + '_' + Math.random().toString(36).slice(2) + '.' + ext;
         const { error } = await _client.storage.from('project-media').upload(path, file, { cacheControl: '3600', upsert: false });
         if (error) return { error: error.message };
-        const { data } = _client.storage.from('project-media').getPublixUrl(path);
+        const { data } = _client.storage.from('project-media').getPublicUrl(path);
         return { url: data.publicUrl };
     }
     async function deleteAccount() {
@@ -338,6 +341,13 @@ const WBPlatform = (function() {
         if (error) return { error: error.message };
         return { success: true };
     }
+    async function confirmNewPassword(newPassword) {
+        await ready;
+        if (!newPassword || newPassword.length < 6) return { error: 'La password deve avere almeno 6 caratteri.' };
+        const { error } = await _client.auth.updateUser({ password: newPassword });
+        if (error) return { error: error.message };
+        return { success: true };
+    }
     async function listTrash() {
         await ready;
         if (!_currentUser) return [];
@@ -364,6 +374,16 @@ const WBPlatform = (function() {
             });
         } catch (e) { /* non bloccante */ }
     }
+    async function saveHistorySnapshot(projectId, data) {
+        await ready;
+        await _client.from('wb_platform_project_history').insert({ project_id: projectId, data });
+    }
+    async function listHistorySnapshots(projectId) {
+        await ready;
+        const { data, error } = await _client.from('wb_platform_project_history').select('*').eq('project_id', projectId).order('created_at', { ascending: false }).limit(20);
+        if (error) return [];
+        return data.map(h => ({ id: h.id, data: h.data, createdAt: new Date(h.created_at).getTime() }));
+    }
     function subscribeToProject(id, onRemoteChange) {
         if (!_client) return () => {};
         const channel = _client.channel('project-' + id)
@@ -378,6 +398,7 @@ const WBPlatform = (function() {
         listProjects, getProject, createProject, touchProject, deleteProject,
         setProjectStatus, renameProject, addCollaborator, removeCollaborator, subscribeToProject,
         loginWithGoogle, updateProfile, changeEmail, changePasswordSecure, uploadFile, deleteAccount,
-        requestPasswordReset, confirmNewPassword, listTrash, restoreProject, permanentDeleteProject
+        requestPasswordReset, confirmNewPassword, listTrash, restoreProject, permanentDeleteProject,
+        saveHistorySnapshot, listHistorySnapshots, trackPresence
     };
 })();

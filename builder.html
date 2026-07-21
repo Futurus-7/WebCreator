@@ -48,6 +48,8 @@
         <div class="toolbar-right">
             <button class="toolbar-btn" id="btnFunctions" title="Funzioni del sito"><i class="fa-solid fa-bolt"></i>Funzioni</button>
             <button class="toolbar-btn" id="btnPreview" title="Anteprima"><i class="fa-solid fa-eye"></i>Anteprima</button>
+            <button class="toolbar-btn" id="btnHistory" title="Cronologia versioni"><i class="fa-solid fa-clock-rotate-left"></i></button>
+            <button class="toolbar-btn" id="btnBackupJSON" title="Scarica backup JSON"><i class="fa-solid fa-file-arrow-down"></i></button>
             <button class="toolbar-btn btn-primary" id="btnExport" title="Esporta"><i class="fa-solid fa-download"></i> Esporta</button>
         </div>
     </header>
@@ -989,6 +991,9 @@
                         <div class="fn-menu-item" data-fn="newsletter">
                             <i class="fa-solid fa-envelope-open-text"></i> Newsletter
                         </div>
+                        <div class="fn-menu-item" data-fn="domain">
+                            <i class="fa-solid fa-globe"></i> Dominio personalizzato
+                        </div>
                         <div class="fn-menu-item" data-fn="coming">
                             <i class="fa-solid fa-clock"></i> Prossimamente
                         </div>
@@ -1336,6 +1341,21 @@ admin</textarea>
                                 </button>
                                 <div id="newsletterStatus" style="display:none;margin-top:12px;padding:10px;border-radius:6px;font-size:13px;text-align:center;"></div>
                             </div>
+                        <div class="fn-panel" id="fn-domain">
+                            <h2 style="font-size:18px;margin-bottom:6px;"> Dominio personalizzato</h2>
+                            <p style="color:var(--text-secondary);font-size:13px;margin-bottom:20px;">Vuoi che il tuo sito sia raggiungibile da un indirizzo tipo www.iltuosito.com invece del link lungo? Ecco come.</p>
+                            <div style="background:rgba(67,97,238,0.1);border:1px solid var(--accent);border-radius:8px;padding:14px;margin-bottom:16px;">
+                                <strong style="color:var(--accent);font-size:13px;">Passaggi</strong>
+                                <ol style="color:var(--text-secondary);font-size:12px;margin-top:8px;padding-left:18px;line-height:2.2;">
+                                    <li>Compra un dominio da un sito qualsiasi (es. Namecheap, GoDaddy, Google Domains) - di solito costa pochi euro all'anno</li>
+                                    <li>Dove hai caricato il tuo sito esportato (es. GitHub Pages), vai nelle impostazioni del repository -> Pages -> campo "Custom domain" -> scrivi il tuo dominio</li>
+                                    <li>Sul sito dove hai comprato il dominio, vai nelle impostazioni DNS e aggiungi i record che il tuo host ti chiede (per GitHub Pages: alcuni record "A" se usi il dominio nudo, oppure un record "CNAME" se usi un sottodominio tipo www)</li>
+                                    <li>Aspetta da qualche minuto a qualche ora perchè i DNS si aggiornino nel mondo</li>
+                                    <li>Attiva "Enforce HTTPS" quando l'opzione diventa disponibile, per avere il lucchetto verde</li>
+                                </ol>
+                            </div>
+                            <p style="font-size:12px;color:var(--text-secondary);">Ogni host (GitHub Pages, Netlify, ecc.) ha una pagina di aiuto dedicata proprio a "custom domain" - cerca quella del servizio che stai usando per i dettagli esatti dei record DNS.</p>
+                        </div>
                         <div class="fn-panel" id="fn-coming">
                             <h2 style="font-size:18px;margin-bottom:20px;"> Prossimamente</h2>
                             <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
@@ -1415,7 +1435,15 @@ admin</textarea>
         <hr class="context-divider">
         <button class="context-item context-danger" data-action="delete"><i class="fa-solid fa-trash"></i> Elimina</button>
     </div>
-
+    <div class="modal-overlay" id="historyModal">
+        <div class="modal-content" style="max-width:480px;">
+            <div class="modal-header">
+                <h3>Cronologia versione</h3>
+                <button class="close-btn" id="closeHistory"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body" id="historyList"></div>
+        </div>
+    </div>
     <div class="reset-overlay" id="resetOverlay">
         <div class="reset-dialog">
             <div class="reset-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
