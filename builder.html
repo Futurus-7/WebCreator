@@ -988,6 +988,9 @@
                         <div class="fn-menu-item" data-fn="payments">
                             <i class="fa-solid fa-credit-card"></i> Pagamenti
                         </div>
+                        <div class="fn-menu-item" data-fn="seo">
+                            <i class="fa-solid fa-magnifying-glass"></i> SEO pagina
+                        </div>
                         <div class="fn-menu-item" data-fn="newsletter">
                             <i class="fa-solid fa-envelope-open-text"></i> Newsletter
                         </div>
@@ -1341,6 +1344,26 @@ admin</textarea>
                                 </button>
                                 <div id="newsletterStatus" style="display:none;margin-top:12px;padding:10px;border-radius:6px;font-size:13px;text-align:center;"></div>
                             </div>
+                        <div class="fn-panel" id="fn-seo">
+                            <h2 style="font-size:18px;margin-bottom:6px;">SEO per questa pagina</h2>
+                            <p style="color:var(--text-secondary);font-size:13px;margin-bottom:20px;">Questi campi valgono solo per la pagina che stai modificando ora (<span id="seoPageName"></span>).</p>
+                            <div class="prop-group">
+                                <label class="prop-label">Titolo pagina (tab del browser)</label>
+                                <input type="text" class="prop-input" id="seoTitle" placeholder="Il mio sito - Home">
+                            </div>
+                            <div class="prop-group">
+                                <label class="prop-label">Descrizione (sotto il titolo su Google)</label>
+                                <textarea class="prop-input prop-textarea" id="seoDescription" rows="3" placeholder="Breve descrizione della pagina..."></textarea>
+                            </div>
+                            <div class="prop-group">
+                                <label class="prop-label">Immagine anteprima (mostrata su WhatsApp/social)</label>
+                                <input type="text" class="prop-input" id="seoImage" placeholder="https://...">
+                            </div>
+                            <button class="toolbar-btn btn-primary" id="btnSaveSeo" style="width:100%;justify-content:center;padding:10px;">
+                                <i class="fa-solid fa-check"></i> Salva SEO
+                            </button>
+                            <div id="seoStatus" style="display:none;margin-top:12px;padding:10px;border-radius:6px;font-size:13px;text-align:center;"></div>
+                        </div>
                         <div class="fn-panel" id="fn-domain">
                             <h2 style="font-size:18px;margin-bottom:6px;"> Dominio personalizzato</h2>
                             <p style="color:var(--text-secondary);font-size:13px;margin-bottom:20px;">Vuoi che il tuo sito sia raggiungibile da un indirizzo tipo www.iltuosito.com invece del link lungo? Ecco come.</p>

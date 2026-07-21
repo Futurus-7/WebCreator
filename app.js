@@ -4289,8 +4289,27 @@ function initFunctions() {
     $('#btnSaveFormspree').addEventListener('click', saveFormspree);
     $('#btnSaveSheets').addEventListener('click', saveSheets);
     $('#btnSaveAuth').addEventListener('click', saveAuth);
+    $('#btnSaveSeo')?.addEventListener('click', saveSeoFields);
     loadFunctionSettings();
     initAdvancedFunctions();
+}
+function loadSeoFields() {
+    const p = pages[currentPageIndex];
+    if (!p) return;
+    const nameEl = document.getElementById('seoPageName');
+    if (nameEl) nameEl.textContent = p.name;
+    if ($('#seoTitle')) $('#seoTitle').value = p.seoTitle || '';
+    if ($('#seoDescription')) $('#seoDescription').value = p.seoDescription || '';
+    if ($('#seoImage')) $('#seoImage').value = p.seoImage || '';
+}
+function saveFields() {
+    const p = pages[currentPageIndex];
+    if (!p) return;
+    p.seoTitle = $('#seoTitle').value.trim();
+    p.seoDescription = $('#seoDescription').value.trim();
+    p.seoImage = $('#seoImage').value.trim();
+    autoSave();
+    showFnStatus($('#seoStatus'), ' Impostazioni SEO salvate!', 'success');
 }
 function populateFormSelects() {
     const forms = canvas.querySelectorAll('.builder-element[data-type="form"], .builder-element[data-type="form-contact"]');
