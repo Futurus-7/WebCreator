@@ -39,7 +39,8 @@ let advancedConfig = {
     blogPublishRole: 'user',
     blogModerateRole: 'moderator',
     blogModeration: 'none',
-    blogCategories: []
+    blogCategories: [],
+    customFonts: []
 };
 
 function parseOptionActionsText(text) {
@@ -1241,6 +1242,10 @@ function initPropertyInputs() {
     });
 
     $('#propFontWeight').addEventListener('change', () => applyStyle('fontWeight', $('#propFontWeight').value));
+    $('#propFontSizeTablet')?.addEventListener('input', () => { if (state.selectedElement) { state.selectedElement.dataset.fontTablet = $('#propFontSizeTablet').value; saveHistory(); } });
+    $('#propFontSizeMobile')?.addEventListener('input', () => { if (state.selectedElement) { state.selectedElement.dataset.fontMobile = $('#propFontSizeMobile').value; saveHistory(); } });
+    $('#propHideTablet')?.addEventListener('change', () => { if (state.selectedElement) { state.selectedElement.dataset.hideTablet = $('#propHideTablet').checked ? 'true' : 'false'; saveHistory(); } });
+    $('#propHideMobile')?.addEventListener('change', () => { if (state.selectedElement) { state.selectedElement.dataset.hideMobile = $('#propHideMobile').checked ? 'true' : 'false'; saveHistory(); } });
     $$('.prop-btn-icon[data-align]').forEach(btn => {
         btn.addEventListener('click', () => {
             $$('.prop-btn-icon[data-align]').forEach(b => b.classList.remove('active'));
@@ -1706,6 +1711,53 @@ function initPropertyInputs() {
         if (nl) nl.dataset.successMsg = $('#propNewsletterSuccess').value;
         saveHistory();
     });
+}
+function injectCustomFontFace(font) {
+    let styleEl = document.getElementById('customFontsStyle');
+    if (!styleEl) {
+        styleEl = document.createElement('style');
+        styleEl.id = 'customFontsStyle';
+        document.head.appendChild(styleEl);
+    }
+    styleEl.textContent += `@font-face { font-family: '${font.name}'; src: url('${font.url}'); }\n`;
+}
+function addCustomFontOption(font) {
+    const already = Array.from($('#propFont').options).some(o => o.value === `'${font.name}', sans-serif`);
+    if (already) return;
+    const opt = document.createElement('option');
+    opt.value = `'${font.name}', sans-serif`;
+    opt.textContent = font.name + ' (personalizzato)';
+    $('#propFont').appendChild(opt);
+}
+function loadCustomFonts() {
+    (advancedConfig.customFonts || []).forEach(font => {
+        injectCustomFontFace(font);
+        addCustomFontOption(font);
+    });
+}
+document.getElementById('btnUploadFont')?.addEventListener('click', () => {
+    const fileInput = document.createElement('input');
+    fileInput.type = 'file';
+    fileInput.accept = '.woff,.woff2,.ttf,.otf';
+    fileInput.addEventListener('change', async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const res = await WBPlatform.uploadFile(file, 'fonts');
+        if (res.error) { alert('Caricamento font fallito: ' + res.error); return; }
+        const fontName = file.name.replace(/\.[^/.]+$/, '').replace(/[^a-zA-Z0-9]/g, '');
+        const font = { name: fontName, url: res.url };
+        advancedConfig.customFonts = advancedConfig.customFonts || [];
+        advancedConfig.customFonts.push(font);
+        injectCustomFontFace(font);
+        addCustomFontOption(font);
+        saveAdvancedConfig();
+        autoSave();
+        alert('Font "' + fontName + '" caricato! Ora lo trovi nella lista Font.');
+    });
+    fileInput.click();
+});
+function generateFontFacesCSS() {
+    return (advancedConfig.customFonts || []).map(f => `@font-face { font-family: '${f.name}'; src: url('${f.url}'); }`).join('\n');
 }
 function buildActionRow(action, index) {
     const row = document.createElement('div');
@@ -2507,15 +2559,24 @@ function generateFullHTML() {
     const sbUrl = $('#supabaseUrl').value || '';
     const sbKey = $('#supabaseKey').value || '';
     const cfg = JSON.stringify(advancedConfig);
+    const seoTitle = (pages[currentPageIndex] && pages[currentPageIndex].soTitle) || 'Il mio sito';
+    const seoDesc = (pages[currentPageIndex] && pages[currenPageIndex].seoDescription) || '';
+    const seoImage = (pages[currentPageIndex] && pages[currentPageIndex].seoImage) || '';
     return `<!DOCTYPE html>
 <html lang="it">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Il mio sito</title>
+    <title>${seoTitle}</title>
+    ${seoDesc ? '<meta name="description" content="' + seoDesc.replace(/"/g,'&quot;') + '">' : ''}
+    <meta property="og:title" content="${seoTitle}">
+    ${seoDesc ? '<meta property="og:description" content="' + seoDesc.replace(/"/g,'&quot;') + '">' : ''}
+    ${seoImage ? '<meta property="og:image" content="' + seoImage + '">' : ''}
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
     <style>
+        ${generateFontFacesCSS()}
+        ${generateResponsiveCSS(canvas.querySelectorAll('.builder-element'))}
         * {margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif; }
         img { max-width: 100%; height: auto; }
@@ -3374,14 +3435,21 @@ function downloadZip() {
     }
     const zip = new JSZip();
     const cssContent = generateInlineStyles();
-    const fullCSS= '* { margin: 0; padding: 0; box-sizing: border-box; }\nbody { font-family: "Inter", -apple-system, sans-serif; }\nimg { max-width: 100%; height: auto; }\n' + cssContent;
+    const fullCSS = generateFontFacesCSS() + '\n' + generateResponsiveCSS(canvas.querySelectorAll('.builder-element')) + '\n* { margin: 0; padding: 0; box-sizing: border-box; }\nbody { font-family: "Inter", -apple-system, sans-serif; }\nimg { max-width: 100%; height: auto; }\n' + cssContent;
     const htmlContent = generateCleanHTML();
+    const seoTitle = (pages[currentPageIndex] && pages[currentPageIndex].seoTitle) || 'Il mio sito';
+    const seoDesc = (pages[currentPageIndex] && pages[currentPageIndex].seoDescription) || '';
+    const seoImage = (pages[currentPageIndex] && pages[currentPageIndex].seoImage) || '';
     const htmlFile = `<!DOCTYPE html>
 <html lang="it">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Il mio sito</title>
+    <title>${seoTitle}</title>
+    ${seoDesc ? '<meta name="description" content="' + seoDesc.replace(/"/g,'&quot;') + '">' : ''}
+    <meta property="og:title" content="${seoTitle}">
+    ${seoDesc ? '<meta property="og:description" content="' + seoDesc.replace(/"/g,'&quot;') + '">' : ''}
+    ${seoImage ? '<meta property="og:image" content="' + seoImage + '">' : ''}
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="style.css">
 </head>
@@ -3606,6 +3674,7 @@ async function autoLoad() {
         if (modeBtn) modeBtn.classList.add('active');
         if (saved.advancedConfig) Object.assign(advancedConfig, saved.advancedConfig);
         _lastThumbnailUrl = saved.thumbnailUrl || null;
+        loadCustomFonts();
         renderPageTabs();
         loadPage(currentPageIndex);
     }
@@ -4270,6 +4339,7 @@ function initFunctions() {
     btnFunctions.addEventListener('click', () => {
         functionsModal.classList.add('visible');
         populateFormSelects();
+        loadSeoFields();
     });
     closeFunctions.addEventListener('click', () => {
         functionsModal.classList.remove('visible');

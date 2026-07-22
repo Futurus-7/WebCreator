@@ -601,6 +601,7 @@
                     <div class="prop-panel" id="tab-style">
                         <div class="prop-group">
                             <label class="prop-label">Font</label>
+                            <button class="prop-btn-small" id="btnUploadFont" type="button" style="width:100%;margin-bottom:8px;">Carica font personalizzato</button>
                             <select class="prop-input" id="propFont">
                                 <option value="Arial, sans-serif">Arial</option>
                                 <option value="'Helvetica Neue', sans-serif">Helvetica</option>
@@ -637,6 +638,18 @@
                             </div>
                         </div>
 
+                        <div class="prop-group">
+                            <label class="prop-label">Dimensione testo per dispositivo (vuoto = usa quella sopra)</label>
+                            <div class="prop-row">
+                                <div class="prop-half"><input type="number" class="prop-input" id="propFontSizeTablet" placeholder="Tablet"></div>
+                                <div class="prop-half"><input type="number" class="prop-input" id="propFontSizeMobile" placeholder="Mobile"></div>
+                            </div>
+                            <label class="prop-label" style="margin-top:8px;">Nascondi elemento su</label>
+                            <div style="display:flex;gap:14px;font-size:12px;color:var(--text-secondary);">
+                                <label style="display:flex;align-items:center;gap:5px;cursor:pointer;"><input type="checkbox" id="propHideTablet" style="width:14px;height:14px;">Tablet</label>
+                                <label style="display:flex;align-items:center;gap:5px;cursor:pointer;"><input type="checkbox" id="propHideMobile" style="width:14px;height:14px;">Mobile</label>
+                            </div>
+                        </div>
                         <div class="prop-group">
                             <label class="prop-label">Allineamento testo</label>
                             <div class="prop-button-group">
