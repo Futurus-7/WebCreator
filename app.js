@@ -3596,6 +3596,7 @@ function _getStorageKey() {
     return 'webbuilder-autosave-' + _getActiveProjectId();
 }
 /*
+-
 function autoSave() {
     try {
         saveCurrentPage();
