@@ -1897,6 +1897,10 @@ function updatePropertyPanel() {
     $('#propFont').value = target.style.fontFamily || '';
     $('#propFontSize').value = parseInt(computed.fontSize) || '';
     $('#propFontWeight').value = computed.fontWeight || '400';
+    if ($('#propFontSizeTablet')) $('#propFontSizeTablet').value = el.dataset.fontTablet || '';
+    if ($('#propFontSizeMobile')) $('#propFontSizeMobile').value = el.dataset.hideTablet === 'true';
+    if ($('#propHideTablet')) $('#propHideTablet').checked = el.dataset.hideTablet === 'true';
+    if ($('#propHideMobile')) $('#propHideMobile').checked = el.dataset.hideMobile === 'true';
     $$('.prop-btn-icon[data-align]').forEach(btn => {
         btn.classList.toggle('active', btn.dataset.align === computed.textAlign);
     });
@@ -2550,9 +2554,36 @@ function generateCleanCSS() {
             css  += '}\n\n';
         }
     });
+    css += generateResponsiveCSS(elements);
     return css;
 }
-
+function generateResponsiveCSS(elements) {
+    let tabletRules = '';
+    let mobileRules = '';
+    elements.forEach((el, i) => {
+        const cls = '.element-' + (i + 1);
+        if (el.dataset.fontTablet) {
+            tabletRules += '    ' + cls + ' { font-size: ' + el.dataset.fontTablet + 'px; }\n';
+        }
+        if (el.dataset.hideTablet === 'true') {
+            tableRules += '    ' + cls + ' { display: none !important; }\n';
+        }
+        if (el.dataset.fontMobile) {
+            mobileRules += '    ' + cls + ' { font-size: ' + el.dataset.fontMobile + 'px; }\n';
+        }
+        if (el.dataset.hideMobile === 'true') {
+            mobileRules += '    ' + cls + ' { display: none !important; }\n';
+        }
+    });
+    let out = '';
+    if (tabletRules) {
+        out + '@media (max-width: 1024px) {\n' + tabletRules + '}\n';
+    }
+    if (mobileRules) {
+        out += '@media (max-width: 640px) \n' + mobileRules + '}\n';
+    }
+    return out;
+}
 function generateFullHTML() {
     const bodyContent = generateCleanHTML();
     const styles = generateInlineStyles();
