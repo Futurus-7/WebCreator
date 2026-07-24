@@ -46,6 +46,7 @@
             </div>        
             </div>
         <div class="toolbar-right">
+            <button class="toolbar-btn" id="btnTutorial" title="Guida rapida"><i class="fa-solid fa-circle-question"></i></button>
             <button class="toolbar-btn" id="btnFunctions" title="Funzioni del sito"><i class="fa-solid fa-bolt"></i>Funzioni</button>
             <button class="toolbar-btn" id="btnPreview" title="Anteprima"><i class="fa-solid fa-eye"></i>Anteprima</button>
             <button class="toolbar-btn" id="btnHistory" title="Cronologia versioni"><i class="fa-solid fa-clock-rotate-left"></i></button>
@@ -1491,6 +1492,20 @@ admin</textarea>
                 </div>
             </div>
         </div>
+    <div class="tutorial-overlay" id="tutorialOverlay">
+        <div class="tutorial-card">
+            <button class="tutorial-skip" id="tutorialSkip">Salta tutorial <i class="fa-solid fa-xmark"></i></button>
+            <div class="tutorial-icon" id="tutorialIcon"><i class="fa-solid fa-hand-pointer"></i></div>
+            <div class="tutorial-step-label" id="tutorialStepLabel">Passo 1 di 8</div>
+            <h3 class="tutorial-title" id="tutorialTitle"></h3>
+            <p class="tutorial-text" id="tutorialText"></p>
+            <div class="tutorial-dots" id="tutorialDots"></div>
+            <div class="tutorial-nav">
+                <button class="tutorial-btn-back" id="tutorialBack">Indietro</button>
+                <button class="tutorial-btn-next" id="tutorialNext">Avanti</button>
+            </div>
+        </div>
+    </div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="platform-auth.js"></script>

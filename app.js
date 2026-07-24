@@ -94,6 +94,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     initCanvasResize();
     initTouchDragAndDrop();
     initFunctions();
+    initTutorial();
     setInterval(autoSave, 5000);
     const loaded = await autoLoad();
     if (!loaded) {
@@ -1898,7 +1899,7 @@ function updatePropertyPanel() {
     $('#propFontSize').value = parseInt(computed.fontSize) || '';
     $('#propFontWeight').value = computed.fontWeight || '400';
     if ($('#propFontSizeTablet')) $('#propFontSizeTablet').value = el.dataset.fontTablet || '';
-    if ($('#propFontSizeMobile')) $('#propFontSizeMobile').value = el.dataset.hideTablet === 'true';
+    if ($('#propFontSizeMobile')) $('#propFontSizeMobile').value = el.dataset.fontMobile || '';
     if ($('#propHideTablet')) $('#propHideTablet').checked = el.dataset.hideTablet === 'true';
     if ($('#propHideMobile')) $('#propHideMobile').checked = el.dataset.hideMobile === 'true';
     $$('.prop-btn-icon[data-align]').forEach(btn => {
@@ -2566,7 +2567,7 @@ function generateResponsiveCSS(elements) {
             tabletRules += '    ' + cls + ' { font-size: ' + el.dataset.fontTablet + 'px; }\n';
         }
         if (el.dataset.hideTablet === 'true') {
-            tableRules += '    ' + cls + ' { display: none !important; }\n';
+            tabletRules += '    ' + cls + ' { display: none !important; }\n';
         }
         if (el.dataset.fontMobile) {
             mobileRules += '    ' + cls + ' { font-size: ' + el.dataset.fontMobile + 'px; }\n';
@@ -2577,10 +2578,10 @@ function generateResponsiveCSS(elements) {
     });
     let out = '';
     if (tabletRules) {
-        out + '@media (max-width: 1024px) {\n' + tabletRules + '}\n';
+        out += '@media (max-width: 1024px) {\n' + tabletRules + '}\n';
     }
     if (mobileRules) {
-        out += '@media (max-width: 640px) \n' + mobileRules + '}\n';
+        out += '@media (max-width: 640px) {\n' + mobileRules + '}\n';
     }
     return out;
 }
@@ -2590,8 +2591,8 @@ function generateFullHTML() {
     const sbUrl = $('#supabaseUrl').value || '';
     const sbKey = $('#supabaseKey').value || '';
     const cfg = JSON.stringify(advancedConfig);
-    const seoTitle = (pages[currentPageIndex] && pages[currentPageIndex].soTitle) || 'Il mio sito';
-    const seoDesc = (pages[currentPageIndex] && pages[currenPageIndex].seoDescription) || '';
+    const seoTitle = (pages[currentPageIndex] && pages[currentPageIndex].seoTitle) || 'Il mio sito';
+    const seoDesc = (pages[currentPageIndex] && pages[currentPageIndex].seoDescription) || '';
     const seoImage = (pages[currentPageIndex] && pages[currentPageIndex].seoImage) || '';
     return `<!DOCTYPE html>
 <html lang="it">
@@ -3781,7 +3782,7 @@ async function openHistoryModal() {
             const d = new Date(h.createdAt);
             return '<div style="display:flex;justify-content:space-between;align-items:center;padding:10px;border-bottom:1px solid var(--border-color);">' +
                 '<span>' + d.toLocaleDateString('it-IT') + ' ' + d.toLocaleTimeString('it-IT', {hour:'2-digit',minute:'2-digit'}) + '</span>' +
-                '<button class="toolbar-btn" data-history-index="' + 1 + '">Ripristina</button></div>';
+                '<button class="toolbar-btn" data-history-index="' + i + '">Ripristina</button></div>';
         }).join('');
         box.querySelectorAll('[data-history-index]').forEach(btn => {
             btn.addEventListener('click', () => {
@@ -4391,7 +4392,7 @@ function initFunctions() {
     $('#btnSaveFormspree').addEventListener('click', saveFormspree);
     $('#btnSaveSheets').addEventListener('click', saveSheets);
     $('#btnSaveAuth').addEventListener('click', saveAuth);
-    $('#btnSaveSeo')?.addEventListener('click', saveSeoFields);
+    $('#btnSaveSeo')?.addEventListener('click', saveFields);
     loadFunctionSettings();
     initAdvancedFunctions();
 }
@@ -4789,4 +4790,16 @@ function loadAdvancedConfig() {
         if ($('#blogModerateRole')) $('#blogModerateRole').value = advancedConfig.blogModerateRole;
         if ($('#defaultUserRole')) $('#defaultUserRole').value = advancedConfig.defaultRole;
     } catch(e) {}
+}
+function initTutorial() {
+    const steps = [
+        { icon: 'fa-solid fa-hand-pointer', title: 'Benvenuto in WebBuilder!', text: 'In pochi passi ti mostriamo come funziona l\'editor. Puoi saltare quando vuoi e riaprire questa guida dal punto interrogativo in alo.' },
+        { icon: 'fa-solid fa-layer-group', title:'Elementi a sinistra', text: 'Nel pannello a sinistra trovi tutti gli elementi: layout, testi, media, moduli e blocchi già pronti (hero, navbar, pricing...). Trascinali nel canvas per costruire la pagina.' },
+        { icon: 'fa-solid fa-arrows-up-down-left-right', title: 'Il canvas', text: 'Il canvas al centro è la tua pagina. Trascina un elemento sopra un altro per posizionarlo prima, dopo o dentro. Clicca un elemento per selezionarlo.' },
+        { icon: 'fa-solid fa-sliders', title: 'Proprietà a destra', text: 'Selezionando un elemento, a destra puoi modificarne il contenuto, lo stile (colori, font, spaziature) e le opzioni avanzate (animazioni, azioni al click, visibilità).' },
+        { icon: 'fa-solid fa-arrows-up-down-left-right', title: 'Struttura o Libero', text: 'In alto puoi passare dalla modalità "Struttura" (a blocchi, responsive) alla modalità "Libero" (posiziona gli elementi liberamente, come un editor grafico).' },
+        { icon: 'fa-solid fa-bolt', title: 'Funzioni del sito', text: 'Dal pulsante "Funzioni" attivi invio email dai moduli, login e ruoli utente, blog, prodotti, prenotazioni, pagamenti, e newsletter - senza scrivere codice.' },
+        { icon: 'fa-solid fa-file', title: 'Più pagine', text: 'Vicino ai pulsanti di annulla/ripei puoi aggiungere altre pagine al tuo sito con il pulsante "+".' },
+        { icon: 'fa-solid fa-download', title: 'Anteprima ed Esporta', text: 'Quando sei pronto, usa "Anteprima" per vedere il risultato e "Esporta" per scaricare il codice o lo ZIP pronto da pubblicare online.' }
+    ];
 }

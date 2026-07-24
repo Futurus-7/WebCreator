@@ -156,7 +156,7 @@ const WBPlatform = (function() {
     }
     _init();
     function _publicUser(u) {
-        const meta = u.user_metadate || {};
+        const meta = u.user_metadata || {};
         return {
             id: u.id,
             email: u.email,
@@ -399,6 +399,6 @@ const WBPlatform = (function() {
         setProjectStatus, renameProject, addCollaborator, removeCollaborator, subscribeToProject,
         loginWithGoogle, updateProfile, changeEmail, changePasswordSecure, uploadFile, deleteAccount,
         requestPasswordReset, confirmNewPassword, listTrash, restoreProject, permanentDeleteProject,
-        saveHistorySnapshot, listHistorySnapshots, trackPresence
+        saveHistorySnapshot, listHistorySnapshots
     };
 })();
