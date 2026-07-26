@@ -707,6 +707,7 @@ async function renderProjects() {
         } else {
             actions = '<button data-action="open" data-id="' + p.id + '" title="Apri"><i class="fa-solid fa-pen"></i></button>' +
                 '<button data-action="toggle" data-id="' + p.id + '" title="Completato/In corso"><i class="fa-solid fa-check"></i></button>' +
+                '<button data-action="duplicate" data-id="' + p.id + '" title="Duplica progetto"><i class="fa-solid fa-copy"></i></button>' +
                 '<button data-action="rename" data-id="' + p.id + '" title="Rinomina"><i class="fa-solid fa-i-cursor"></i></button>' +
                 (isOwner ? '<button data-action="share" data-id="' + p.id + '" title="Condividi"><i class="fa-solid fa-user-plus"></i></button>' : '') +
                 (isOwner ? '<button data-action="delete" data-id="' + p.id + '" class="danger" title="Sposta nel cestino"><i class="fa-solid fa-trash"></i></button>' : '');
@@ -814,6 +815,9 @@ $('#projectsGrid').addEventListener('click', async function(e) {
             await WBPlatform.deleteProject(id);
             await renderProjects();
         }
+    } else if (action === 'duplicate') {
+        const clone = await WBPlatform.duplicateProject(id);
+        if (clone) await renderProjects();
     } else if (action === 'restore') {
         await WBPlatform.restoreProject(id);
         await renderProjects();

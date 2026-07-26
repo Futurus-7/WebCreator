@@ -4793,13 +4793,57 @@ function loadAdvancedConfig() {
 }
 function initTutorial() {
     const steps = [
-        { icon: 'fa-solid fa-hand-pointer', title: 'Benvenuto in WebBuilder!', text: 'In pochi passi ti mostriamo come funziona l\'editor. Puoi saltare quando vuoi e riaprire questa guida dal punto interrogativo in alo.' },
+        { icon: 'fa-solid fa-hand-pointer', title: 'Benvenuto in WebBuilder!', text: 'In pochi passi ti mostriamo come funziona l\'editor. Puoi saltare quando vuoi e riaprire questa guida dal punto interrogativo in alto.' },
         { icon: 'fa-solid fa-layer-group', title:'Elementi a sinistra', text: 'Nel pannello a sinistra trovi tutti gli elementi: layout, testi, media, moduli e blocchi già pronti (hero, navbar, pricing...). Trascinali nel canvas per costruire la pagina.' },
         { icon: 'fa-solid fa-arrows-up-down-left-right', title: 'Il canvas', text: 'Il canvas al centro è la tua pagina. Trascina un elemento sopra un altro per posizionarlo prima, dopo o dentro. Clicca un elemento per selezionarlo.' },
         { icon: 'fa-solid fa-sliders', title: 'Proprietà a destra', text: 'Selezionando un elemento, a destra puoi modificarne il contenuto, lo stile (colori, font, spaziature) e le opzioni avanzate (animazioni, azioni al click, visibilità).' },
         { icon: 'fa-solid fa-arrows-up-down-left-right', title: 'Struttura o Libero', text: 'In alto puoi passare dalla modalità "Struttura" (a blocchi, responsive) alla modalità "Libero" (posiziona gli elementi liberamente, come un editor grafico).' },
         { icon: 'fa-solid fa-bolt', title: 'Funzioni del sito', text: 'Dal pulsante "Funzioni" attivi invio email dai moduli, login e ruoli utente, blog, prodotti, prenotazioni, pagamenti, e newsletter - senza scrivere codice.' },
-        { icon: 'fa-solid fa-file', title: 'Più pagine', text: 'Vicino ai pulsanti di annulla/ripei puoi aggiungere altre pagine al tuo sito con il pulsante "+".' },
+        { icon: 'fa-solid fa-file', title: 'Più pagine', text: 'Vicino ai pulsanti di annulla/ripeti puoi aggiungere altre pagine al tuo sito con il pulsante "+".' },
         { icon: 'fa-solid fa-download', title: 'Anteprima ed Esporta', text: 'Quando sei pronto, usa "Anteprima" per vedere il risultato e "Esporta" per scaricare il codice o lo ZIP pronto da pubblicare online.' }
     ];
+    let stepIndex = 0;
+    const overlay = $('#tutorialOverlay');
+    if (!overlay) return;
+    const iconEl = $('#tutorialIcon');
+    const labelEl = $('#tutorialStepLabel');
+    const titleEl = $('#tutorialTitle');
+    const textEl = $('#tutorialText');
+    const dotsEl = $('#tutorialDots');
+    const backBtn = $('#tutorialBack');
+    const nextBtn = $('#tutorialNext');
+    function render() {
+        const s = steps[stepIndex];
+        iconEl.innerHTML = `<i class="${s.icon}"></i>`;
+        labelEl.textContent = `Passo ${stepIndex + 1} di ${steps.length}`;
+        titleEl.textContent = s.title;
+        textEl.textContent = s.text;
+        dotsEl.innerHTML = steps.map((_, i) => `<span class="tutorial-dot${i === stepIndex ? ' active' : ''}"></span>`).join('');
+        backBtn.disabled = stepIndex === 0;
+        nextBtn.textContent = stepIndex === steps.length - 1 ? 'Inizia a creare' : 'Avanti';
+    }
+    function openTutorial(fromStart) {
+        if (fromStart) stepIndex = 0;
+        render(); 
+        overlay.classList.add('visible');
+    }
+    function closeTutorial() {
+        overlay.classList.remove('visible');
+        try { localStorage.setItem('webbuilder-tutorial-seen', 'true'); } catch(e) {}
+    }
+    nextBtn.addEventListener('click', () => {
+        if (stepIndex === steps.length - 1) { closeTutorial(); return; }
+        stepIndex++;
+        render();
+    });
+    backBtn.addEventListener('click', () => {
+        if (stepIndex === 0) return;
+        stepIndex--;
+        render();
+    });
+    $('#tutorialSkip').addEventListener('click', closeTutorial);
+    $('#btnTutorial')?.addEventListener('click', () => openTutorial(true));
+    let seen = false;
+    try { seen = localStorage.getItem('webbuilder-tutorial-seen') === 'true'; } catch(e) {}
+    if (!seen) openTutorial(true);
 }

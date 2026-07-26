@@ -362,6 +362,22 @@ const WBPlatform = (function() {
         await ready;
         await _client.from('wb_platform_projects').delete().eq('id', id);
     }
+    async function duplicateProject(id) {
+        await ready;
+        if (!_currentUser) return null;
+        const source = await getProject(id);
+        if (!source) return null;
+        const emoji = ['🚀','✨','🎨','🌐','💡','🔥'][Math.floor(Math.random()*6)];
+        const { data, error } = await _client.from('wb_platform_projects').insert({
+            owner_id: _currentUser.id,
+            name: source.name + ' (copia)',
+            status: 'in-progress',
+            emoji,
+            data: source.data || {}
+        }).select().single();
+        if (error) { console.error(error); return null; }
+        return _mapProject(data);
+    }
     async function _notifyShare(targetEmail, projectName) {
         try {
             const { data: sessionData } = await _client.auth.getSession();
@@ -399,6 +415,6 @@ const WBPlatform = (function() {
         setProjectStatus, renameProject, addCollaborator, removeCollaborator, subscribeToProject,
         loginWithGoogle, updateProfile, changeEmail, changePasswordSecure, uploadFile, deleteAccount,
         requestPasswordReset, confirmNewPassword, listTrash, restoreProject, permanentDeleteProject,
-        saveHistorySnapshot, listHistorySnapshots
+        saveHistorySnapshot, listHistorySnapshots, duplicateProject
     };
 })();

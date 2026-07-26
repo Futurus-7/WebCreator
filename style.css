@@ -2393,7 +2393,7 @@ body.has-platform-warning .main-wrapper {
 .tutorial-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--border-light); transition: var(--transition); }
 .tutorial-dot.active { background: var(--accent); width: 18px; border-radius: 3px; }
 .tutorial-nav { display: flex; gap: 10px; }
-.tutorial-btn-back, tutorial-btn-next {
+.tutorial-btn-back, .tutorial-btn-next {
     flex: 1; padding: 10px; border-radius: var(--radius-sm); font-size: 12px; font-weight: 600; cursor: pointer; transition: var(--transition);
 }
 .tutorial-btn-back { background: transparent; border: 1px solid var(--border-light); color: var(--text-primary); }
