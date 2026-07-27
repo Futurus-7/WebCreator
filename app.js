@@ -2591,6 +2591,7 @@ function generateFullHTML() {
     const sbUrl = $('#supabaseUrl').value || '';
     const sbKey = $('#supabaseKey').value || '';
     const cfg = JSON.stringify(advancedConfig);
+    const palette = advancedConfig.palette || { primary: '#4361ee', secondary: '#3a0ca3', dark: '#1a1a2e' };
     const seoTitle = (pages[currentPageIndex] && pages[currentPageIndex].seoTitle) || 'Il mio sito';
     const seoDesc = (pages[currentPageIndex] && pages[currentPageIndex].seoDescription) || '';
     const seoImage = (pages[currentPageIndex] && pages[currentPageIndex].seoImage) || '';
@@ -2607,6 +2608,11 @@ function generateFullHTML() {
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
     <style>
+        :root {
+            --wb-color-primary: ${palette.primary};
+            --wb-color-secondary: ${palette.secondary};
+            --wb-color-dark: ${palette.dark};
+        }
         ${generateFontFacesCSS()}
         ${generateResponsiveCSS(canvas.querySelectorAll('.builder-element'))}
         * {margin: 0; padding: 0; box-sizing: border-box; }
@@ -3400,19 +3406,19 @@ function generateInlineStyles() {
         .wb-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; padding: 15px; }
         .wb-heading { font-size: 32px; font-weight: 700; color: #333; }
         .wb-paragraph { font-size: 16px; line-height: 1.6; color: #555 }
-        .wb-button { display: inline-block; padding: 12px 28px; background: #4361ee; color: white; border: none; border-radius: 4px; font-size: 14px; font-weight: 600; cursor: pointer; text-decoration: none; }
-        .wb-link { color: #4361ee; text-decoration: underline; }
+        .wb-button { display: inline-block; padding: 12px 28px; background: var(--wb-color-primary); color: white; border: none; border-radius: 4px; font-size: 14px; font-weight: 600; cursor: pointer; text-decoration: none; }
+        .wb-link { color: var(--wb-color-primary); text-decoration: underline; }
         .wb-divider { border: none; border-top: 1px solid #ddd; margin: 15px 0; }
         .wb-spacer { height: 40px; }
-        .wb-hero { text-align: center; padding: 80px 40px; background: linear-gradient(135deg, #1a1a2e, #16213e); color: white; }
+        .wb-hero { text-align: center; padding: 80px 40px; background: linear-gradient(135deg, var(--wb-color-dark), var(--wb-color-secondary)); color: white; }
         .wb-hero h1 { font-size: 42px; font-weight: 800; margin-bottom: 16px; }
         .wb-hero p { font-size: 18px; opacity: 0.85; margin-bottom: 30px; max-width: 600px; margin-left: auto; }
-        .hero-btn { display: inline-block; padding: 14px 36px; background: #4361ee; color: white; border: none; border-radius: 4px; font-size: 16px; font-weight: 600; cursor: pointer; }
+        .hero-btn { display: inline-block; padding: 14px 36px; background: var(--wb-color-primary); color: white; border: none; border-radius: 4px; font-size: 16px; font-weight: 600; cursor: pointer; }
         .wb-navbar {display: flex; align-items: center; justify-content: space-between; padding: 14px 30px; background: white; border-bottom: 1px solid #eee; }
         .nav-brand { font-size: 20px; font-weight: 700; color: #333; }
         .nav-links { display: flex; gap: 24px; list-style: none; }
         .nav-links a { color: #555; text-decoration: none; font-size: 14px; font-weight: 500; }
-        .wb-footer { padding: 40px 30px; background: #1a1a2e; color: rgba(255,255,255,0.7); text-align: center; font-size: 14px; }
+        .wb-footer { padding: 40px 30px; background: var(--wb-color-dark); color: rgba(255,255,255,0.7); text-align: center; font-size: 14px; }
         .wb-card { background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.08);}
         .card-img { width: 100%; height: 180px; background: #e8e8e8; display: flex; align-items: center; justify-content: center; color: #bbb; }
         .card-body { padding: 20px; }
@@ -3420,7 +3426,7 @@ function generateInlineStyles() {
         .card-body p { font-size: 14px; color: #777; line-height: 1.5; }
         .wb-pricing { background: white; border: 2px solid #eee; border-radius: 12px; padding: 30px; text-align: center; }
         .pricing-title { font-size: 18px; font-weight: 600; color: #333; margin-bottom: 10px; }
-        .pricing-price { font-size: 42px; font-weight: 800; color: #4361ee; margin-bottom: 20px; }
+        .pricing-price { font-size: 42px; font-weight: 800; color: var(--wb-color-primary); margin-bottom: 20px; }
         .pricing-price span { font-size: 16px; font-weight: 400; color: #999; }
         .pricing-features { list-style: none; margin-bottom: 24px; }
         .pricing-features li { padding: 8px 0; font-size: 14px; color: #555; border-bottom: 1px solid #f0f0f0; }
@@ -3708,6 +3714,7 @@ async function autoLoad() {
         if (saved.advancedConfig) Object.assign(advancedConfig, saved.advancedConfig);
         _lastThumbnailUrl = saved.thumbnailUrl || null;
         loadCustomFonts();
+        applyPaleteToCanvas();
         renderPageTabs();
         loadPage(currentPageIndex);
     }
@@ -4373,6 +4380,8 @@ function initFunctions() {
         functionsModal.classList.add('visible');
         populateFormSelects();
         loadSeoFields();
+        loadPaletteFields();
+        renderFaviconPreview();
     });
     closeFunctions.addEventListener('click', () => {
         functionsModal.classList.remove('visible');
@@ -4413,6 +4422,18 @@ function saveFields() {
     p.seoImage = $('#seoImage').value.trim();
     autoSave();
     showFnStatus($('#seoStatus'), ' Impostazioni SEO salvate!', 'success');
+}
+function loadPaletteFields() {
+    const p = advancedConfig.palette || { primary: '#4361ee', secondary: '#3a0ca3', dark: '#1a1a2e' };
+    if ($('#paletteColorPrimary')) { $('#paletteColorPrimary').value = p.primary; $('#paletteColorPrimaryText').value = p.primary; }
+    if ($('#paletteColorSecondary')) { $('#paletteColorSecondary').value = p.secondary; $('#paletteColorSecondaryText').value = p.secondary; }
+    if ($('#paletteColorDark')) { $('#paletteColorDark').value = p.dark; $('#paletteColorDarkText').value = p.dark; }
+}
+function applyPaletteToCanvas() {
+    const p = advancedConfig.palette || { primary: '#4361ee', secondary: '#3a0ca3', dark: '#1a1a2e' };
+    document.documentElement.style.setProperty('--wb-color-primary', p.primary);
+    document.documentElement.style.setProperty('--wb-color-secondary', p.secondary);
+    document.documentElement.style.setProperty('--wb-color-dark', p.dark);
 }
 function populateFormSelects() {
     const forms = canvas.querySelectorAll('.builder-element[data-type="form"], .builder-element[data-type="form-contact"]');
@@ -4756,8 +4777,27 @@ CREATE TRIGGER on_auth_user_created
     if (advancedConfig.bookingServices && $('#bookingServices')) $('#bookingServices').value = advancedConfig.bookingServices.join('\n');
     if (advancedConfig.bookingTimes && $('#bookingTimes')) $('#bookingTimes').value = advancedConfig.bookingTimes.join(', ');
 
-    loadAdvancedConfig();
+    ['Primary','Secondary','Dark'].forEach(key => {
+        const colorInput = document.getElementById('paletteColor' + key);
+        const textInput = document.getElementById('paletteColor' + key + 'Text');
+        if (!colorInput || !textInput) return;
+        colorInput.addEventListener('input', () => { textInput.value = colorInput.value; });
+        textInput.addEventListener('change', () => { colorInput.value = textInput.value; });
+    });
+    $('#btnSavePalette')?.addEventListener('click', function() {
+        advancedConfig.palette = {
+            primary: $('#paletteColorPrimaryText').value || '#4361ee',
+            secondary: $('#paletteColorSecondaryText').value || '#3a0ca3',
+            dark: $('#paletteColorDarkText').value || '#1a1a2e'
+        };
+        saveAdvancedConfig();
+        autoSave();
+        applyPaletteToCanvas();
+        showFnStatus($('#paletteStatus'), ' Palette salvata! Si applica a tutto il sito.', 'success');
+    });
+    loadAdvancedConfig;
     updateRoleSelects();
+    applyPaletteToCanvas();
 }
 function updateRoleSelects() {
     const roles = advancedConfig.roles || ['user', 'premium', 'moderator', 'admin'];

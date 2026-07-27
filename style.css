@@ -32,8 +32,10 @@
     --toolbar-height: 48px;
     --panel-width: 260px;
     --transition: 0.2s ease;
+    --wb-color-primary: #4361ee;
+    --wb-color-secondary: #3a0ca3;
+    --wb-color-dark: #1a1a2e;
 }
-
 html, body {
     height: 100%;
     overflow: hidden;
@@ -1033,7 +1035,7 @@ select.prop-input {
 .canvas .wb-button {
     display: inline-block;
     padding: 12px 28px;
-    background: var(--accent);
+    background: var(--wb-color-primary);
     color: white;
     border: none;
     border-radius: var(--radius-sm);
@@ -1044,7 +1046,7 @@ select.prop-input {
 }
 
 .canvas .wb-link {
-    color: var(--accent);
+    color: var(--wb-color-primary);
     text-decoration: underline;
     font-size: 14px;
     padding: 5px;
@@ -1146,7 +1148,7 @@ select.prop-input {
 .canvas .wb-hero {
     text-align: center;
     padding: 80px 40px;
-    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    background: linear-gradient(135deg, var(--wb-color-dark) 0%, var(--wb-color-secondary) 100%);
     color: white;
     min-height: 300px;
 }
@@ -1169,7 +1171,7 @@ select.prop-input {
 .canvas .wb-hero .hero-btn {
     display: inline-block;
     padding: 14px 36px;
-    background: var(--accent);
+    background: var(--wb-color-primary);
     color: white;
     border: none;
     border-radius: var(--radius-sm);
@@ -1208,7 +1210,7 @@ select.prop-input {
 
 .canvas .wb-footer {
     padding: 40px 30px;
-    background: #1a1a2a;
+    background: var(--wb-color-dark);
     color: rgba(255, 255, 255, 0.7);
     text-align: center;
     font-size: 14px;
@@ -1271,7 +1273,7 @@ select.prop-input {
 .canvas .wb-pricing .pricing-price {
     font-size: 42px;
     font-weight: 800;
-    color: var(--accent);
+    color: var(--wb-color-primary);
     margin-bottom: 20px;
 }
 

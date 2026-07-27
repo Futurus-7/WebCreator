@@ -978,6 +978,9 @@
                         <div class="fn-menu-item active" data-fn="email">
                             <i class="fa-solid fa-envelope"></i> Moduli & Email
                         </div>
+                        <div class="fn-menu-item" data-fn="palette">
+                            <i class="fa-solid fa-palette"></i> Palette Colori
+                        </div>
                         <div class="fn-menu-item" data-fn="sheets">
                             <i class="fa-solid fa-table"></i> Salva dati
                         </div>
@@ -1057,6 +1060,35 @@
                                 </button>
                                 <div id="formspreeStatus" style="display:none;margin-top:12px;padding:10px;border-radius:6px;font-size:13px;text-align:center;"></div>
                             </div>
+                        </div>
+                        <div class="fn-panel" id="fn-palette">
+                            <h2 style="font-size:18px;margin-bottom:6px;"> Palette Colori del sito</h2>
+                            <p style="color:var(--text-secondary);font-size:13px;margin-bottom:20px;">Scegli i colori una volta sola: si applicano automaticamente a bottoni, link e accenti in tutto il sito, invece di doverli impostare elemento per elemento.</p>
+                            <div class="prop-group">
+                                <label class="prop-label">Colore primario (bottoni, link, accenti)</label>
+                                <div class="color-picker-wrapper">
+                                    <input type="color" class="prop-color" id="paletteColorPrimary" value="#4361ee">
+                                    <input type="text" class="prop-input prop-color-text" id="paletteColorPrimaryText" value="#4361ee">
+                                </div>
+                            </div>
+                            <div class="prop-group">
+                                <label class="prop-label">Colore secondario (sfumature hero/footer)</label>
+                                <div class="color-picker-wrapper">
+                                    <input type="color" class="prop-color" id="paletteColorSecondary" value="#3a0ca3">
+                                    <input type="text" class="prop-input prop-color-text" id="paletteColorSecondaryText" value="#3a0ca3">
+                                </div>
+                            </div>
+                            <div class="prop-group">
+                                <label class="prop-label">Colore scuro (sfondi hero/footer)</label>
+                                <div class="color-pickker-wrapper">
+                                    <input type="color" class="prop-color" if="paletteColorDark" value="#1a1a2e">
+                                    <input type="text" class="prop-input prop-color-text" id="paletteColorDarkText" value="#1a1a2e">
+                                </div>
+                            </div>
+                            <button class="toolbar-btn btn-primary" id="btnSavePalette" style="width:100%;justify-content:center;padding:10px;margin-top:8px;">
+                                <i class="fa-solid fa-check"></i> Salva palette
+                            </button>
+                            <div id="paletteStatus" style="display:none;margin-top:12px;padding:10px;border-radius:6px;font-size:13px;text-align:center;"></div>
                         </div>
                         <div class="fn-panel" id="fn-sheets">
                                 <h2 style="font-size:18px;margin-bottom:6px;"> Salva dati in Google sheets</h2>
