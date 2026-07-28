@@ -3399,7 +3399,7 @@ else { _initWB(); }
 }
 
 function generateInlineStyles() {
-    return `
+    const newLocal = `
         .wb-section { padding: 60px 20px; }
         .wb-container { max-width: 1100px; margin: 0 auto; padding: 20px; }
         .wb-columns { display: flex; gap: 20px; }
@@ -3445,7 +3445,24 @@ function generateInlineStyles() {
         .visual-background { pointer-events: none; user-select: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; }
         .visual-background .wb-background { width: 100%; height: 100%; }
         body > *:not(.visual-background) { position: relative; z-index: 1; }
+        .wb-protected-gate { position: relative; border: 2px dashed #e63946; border-radius: 8px; overflow: hidden; min-height: 120px; }
+        .wb-protected-lock { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px 20px; background: rgba(230, 57, 70, 0.04); text-align: center; gap: 10px; }
+        .wb-protected-lock i { font-size: 36px; color: #e63946; }
+        .wb-protected-lock h3 { font-size: 18px; font-weight: 700; color: #333; margin: 0; }
+        .wb.protected-lock p { font-size: 13px; color: #666; margin: 0; }
+        .wb-protected-content { padding: 16px; min-height: 60px; border: 1px dashed #4361ee; border-radius: 6px; margin: 8px; background: rgba(67, 97, 238, 0.02); }
+        .wb-role-gate { padding: 24px 20px; border: 2px dashed #4361ee; border-radius: 8px; background: rgba(67, 97, 238, 0.04); text-align: center; display: flex; flex-direction: column; align-items: center; gap: 8px; }
+        .wb-role-gate i { font-size: 28px; color: #4361ee; }
+        .wb-role-gate-label { font-size: 13px; font-weight: 600; color: #4361ee; }
+        .wb-role-gate-sub { font-size: 11px; color: #888; }
+        .wb-user-profile { display: flex; align-items: center; gap: 16px; padding: 20px; background: white; border: 1px solid #eee; border-radius: 8px; flex-wrap: wrap; }
+        .wb-profile-avatar { width: 64px; height: 64px; border-radius: 50%; background: linear-gradient(135deg, #4361ee, #3a0ca3); display: flex; align-items: center; justify-content: center; color: white; font-size: 26px; font-weight: 700; flex-shrink: 0; overflow: hidden; }
+        .wb-profile-avatar img { width: 100%; height: 100%; object-fit: cover; }
+        .wb-profile-info { flex: 1; }
+        .wb-profile-name { font-size: 20px; font-weight: 700; color: #333; margin-bottom: 4px; }
+        .wb-profile-email { font-size: 13px; color: #888; margin-bottom: 6px; }
         `;
+    return newLocal;
 }
 
 function formatHTML(html) {
