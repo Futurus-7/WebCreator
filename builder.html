@@ -1008,6 +1008,9 @@
                         <div class="fn-menu-item" data-fn="seo">
                             <i class="fa-solid fa-magnifying-glass"></i> SEO pagina
                         </div>
+                        <div class="fn-menu-item" data-fn="favicon">
+                            <i class="fa-solid fa-icons"></i> Favicon
+                        </div>
                         <div class="fn-menu-item" data-fn="newsletter">
                             <i class="fa-solid fa-envelope-open-text"></i> Newsletter
                         </div>
@@ -1409,6 +1412,17 @@ admin</textarea>
                                 <i class="fa-solid fa-check"></i> Salva SEO
                             </button>
                             <div id="seoStatus" style="display:none;margin-top:12px;padding:10px;border-radius:6px;font-size:13px;text-align:center;"></div>
+                        </div>
+                        <div class="fn-panel" id="fn-favicon">
+                            <h2 style="font-size:18px;margin-bottom:6px;"> Favicon del sito</h2>
+                            <p style="color:var(--text-secondary);font-size:13px;margin-bottom:20px;">L'iconcina che appare nella scheda del browser. Vale per tutto il sito, non per la singola pagina. Consigliata un'immagine quadrata (es. 512x512px, .png).</p>
+                            <div style="display:flex;align-items:center;gap:14px;margin-bottom:16px;">
+                                <div id="faviconPreview" style="width:48px;height:48px;border-radius:8px;background:rgba(255,255,255,0.05);border:1px solid var(--border-color-);display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0;">
+                                    <i class="fa-solid fa-image" style="color:var(--text-secondary);"></i>
+                                </div>
+                                <button class="prop-btn-small" id="btnUploadFavicon" type="button">Carica immagine</button>
+                            </div>
+                            <div id="faviconStatus" style="display:none;margin-top:12px;padding:10px;border-radius:6px;font-size:13px;text-align:center;"></div>
                         </div>
                         <div class="fn-panel" id="fn-domain">
                             <h2 style="font-size:18px;margin-bottom:6px;"> Dominio personalizzato</h2>

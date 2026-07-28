@@ -2605,6 +2605,7 @@ function generateFullHTML() {
     <meta property="og:title" content="${seoTitle}">
     ${seoDesc ? '<meta property="og:description" content="' + seoDesc.replace(/"/g,'&quot;') + '">' : ''}
     ${seoImage ? '<meta property="og:image" content="' + seoImage + '">' : ''}
+    ${advancedConfig.faviconUrl ? '<link rel="icon" href="' + advancedConfig.faviconUrl + '">' : ''}
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
     <style>
@@ -3472,6 +3473,8 @@ function downloadZip() {
         return;
     }
     const zip = new JSZip();
+    const palette = advancedConfig.palette || { primary: '#4361ee', secondary: '#3a0ca3', dark: '#1a1a2e' };
+    const rootVars = ':root { --wb-color-primary: ' + palette.primary + '; --wb-color-secondary: ' + palette.secondary + '; --wb-color-dark: ' + palette.dark + '; }\n';
     const cssContent = generateInlineStyles();
     const fullCSS = generateFontFacesCSS() + '\n' + generateResponsiveCSS(canvas.querySelectorAll('.builder-element')) + '\n* { margin: 0; padding: 0; box-sizing: border-box; }\nbody { font-family: "Inter", -apple-system, sans-serif; }\nimg { max-width: 100%; height: auto; }\n' + cssContent;
     const htmlContent = generateCleanHTML();
@@ -3488,6 +3491,7 @@ function downloadZip() {
     <meta property="og:title" content="${seoTitle}">
     ${seoDesc ? '<meta property="og:description" content="' + seoDesc.replace(/"/g,'&quot;') + '">' : ''}
     ${seoImage ? '<meta property="og:image" content="' + seoImage + '">' : ''}
+    ${advancedConfig.faviconUrl ? '<link rel="icon" href="' + advancedConfig.faviconUrl + '">' : ''}
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="style.css">
 </head>
@@ -4224,6 +4228,7 @@ function addPage() {
     renderPageTabs();
 }
     function saveCurrentPage() {
+        syncSharedBlocks();
         if (currentMode === 'structure') {
             pages[currentPageIndex].structureHTML = canvas.innerHTML;
             pages[currentPageIndex].freeHTML = freeHTML;
@@ -4231,6 +4236,39 @@ function addPage() {
             pages[currentPageIndex].freeHTML = canvas.innerHTML;
             pages[currentPageIndex].structureHTML = structureHTML;
         }
+    }
+    function syncSharedBlocks() {
+        [
+            { type: 'block-navbar', selector: '.wb-navbar' },
+            { type: 'block-footer', selector: '.wb-footer' }
+        ].forEach(({ type, selector }) => {
+            const sourceWrapper = canvas.querySelector('.builder-element[data-type="' + type + '"]');
+            if (!sourceWrapper) return;
+            const sourceContent = sourceWrapper.querySelector(selector);
+            if (!sourceWrapper) return;
+            const html = sourceContent.outerHTML;
+            pages.forEach((page, i) => {
+                if (i === currentPageIndex) return;
+                ['structureHTML', 'freeHTML'].forEach(field => {
+                    if (!page[field]) return;
+                    page[field] = replaceSharedBlockHTML(page[field], type, selector, html);
+                });
+            });
+        });
+    }
+    function replaceSharedBlockHTML(htmlString, type, selector, newContentHTML) {
+        if (!htmlString.includes('data-type="' + type + '"')) return htmlString;
+        const temp = document.createElement('div');
+        temp.innerHTML = htmlString;
+        let changed = false;
+        temp.querySelectorAll('.builder-element[data-type="' + type + '"]').forEach(wrapper => {
+            const target = wrapper.querySelector(selector);
+            if (target) {
+                target.outerHTML = newContentHTML;
+                changed = true;
+            }
+        });
+        return changed ? temp.innerHTML : htmlString;
     }
 function loadPage(index) {
     currentPageIndex = index;
@@ -4434,6 +4472,15 @@ function applyPaletteToCanvas() {
     document.documentElement.style.setProperty('--wb-color-primary', p.primary);
     document.documentElement.style.setProperty('--wb-color-secondary', p.secondary);
     document.documentElement.style.setProperty('--wb-color-dark', p.dark);
+}
+function renderFaviconPreview() {
+    const preview = $('#faviconPreview');
+    if (!preview) return;
+    if (advancedConfig.faviconUrl) {
+        preview.innerHTML = '<img src="' + advancedConfig.faviconUrl + '" style="width:100%;height:100%;object-fit:cover;">';
+    } else {
+        preview.innetHTML = '<i class="fa-solid fa-image" style="color:var(--text-secondary);"></i>';
+    }
 }
 function populateFormSelects() {
     const forms = canvas.querySelectorAll('.builder-element[data-type="form"], .builder-element[data-type="form-contact"]');
@@ -4795,7 +4842,24 @@ CREATE TRIGGER on_auth_user_created
         applyPaletteToCanvas();
         showFnStatus($('#paletteStatus'), ' Palette salvata! Si applica a tutto il sito.', 'success');
     });
-    loadAdvancedConfig;
+    $('#btnUploadFavicon')?.addEventListener('click', () => {
+        const fileInput = document.createElement('input');
+        fileInput.type = 'file';
+        fileInput.accept = 'image/*';
+        fileInput.addEventlistener('change', async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            const res = await WBPlatform.uploadFile(file, 'favicons');
+            if (res.error) { showFnStatus($('#faviconStatus'), 'Caricamento fallito: ' + res.error, 'error'); return; }
+            advancedConfig.faviconUrl = res.url;
+            saveAdvancedConfig();
+            autoSave();
+            renderFaviconPreview();
+            showFnStatus($('#faviconStatus'), ' Favicon salvata!', 'success');
+        });
+        fileInput.click();
+    });
+    loadAdvancedConfig();
     updateRoleSelects();
     applyPaletteToCanvas();
 }
