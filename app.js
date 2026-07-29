@@ -3461,6 +3461,71 @@ function generateInlineStyles() {
         .wb-profile-info { flex: 1; }
         .wb-profile-name { font-size: 20px; font-weight: 700; color: #333; margin-bottom: 4px; }
         .wb-profile-email { font-size: 13px; color: #888; margin-bottom: 6px; }
+        .wb-profile-role { display: inline-block; font-size: 11px; font-weight: 700; padding: 3px 12px; background: #4361ee; color: white; border-radius: 20px; text-transform: uppercase; letter-spacing: 0.5px;}
+        .wb-profile-bio { font-size: 13px; color: #555; margin-top: 8px; font-style: italic; }
+        .wb-profile-edit-btn { display: inline-flex; align-items: center; gap: 6px; margin-top: 10px; padding: 7px 14px; background: #f0f4ff; border: 1px solid #4361ee; color: #4361ee; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 600; }
+        .wb-profile-edit-btn:hover { background: #4361ee; color: white; }
+        .wb-progress-tracker { padding: 20px; background: white; border: 1px solid #eee; border-radius: 8px; }
+        .wb-progress-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .wb-progress-label { font-size: 14px; font-weight: 600; color: #333; }
+        .wb-progress-value { font-size: 14px; font-weight: 700; color: #4361ee; }
+        .wb-progress-bar { width: 100%; height: 14px; background: #f0f0f0; border-radius: 7px; overflow: hidden; margin-bottom: 12px; }
+        .wb-progress-fill { height: 100%; background: linear-gradient(90deg, #4361ee, #3a0ca3); border-radius: 7px; transition: width 0.4s ease; width: 35%; }
+        .wb-progress-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+        .wb-blog-list { padding: 10px; min-height: 120px; }
+        .wb-blog-placeholder { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px; color: #bbb; text-align: center; gap: 10px; }
+        .wb-blog-placeholder i { font-size: 36px; }
+        .wb-blog-editor { padding: 20px; border: 1px solid #eee; border-radius: 8px; background: white; }
+        .wb-blog-editor h3 { font-size: 18px; font-weight: 700; color: #333; margin-bottom: 14px; }
+        .wb-blog-editor-actions { display: flex; gap: 8px; margin-top: 12px; }
+        .wb-user-data-widget { padding: 20px; border: 1px solid #eee; border-radius: 8px; background: white; }
+        .wb-user-data-label { font-size: 12px; font-weight: 600; color: #888; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+        .wb-user-data-value { font-size: 28px; font-weight: 800; color: #4361ee; margin-bottom: 10px; }
+        .wb-leaderboard { padding: 20px; border: 1px solid #eee; border-radius: 8px; background: white; }
+        .wb-leaderboard-title { font-size: 18px; font-weight; 700; color: #333; text-align: center; margin-bottom: 16px; }
+        .wb-admin-panel { padding: 20px; border: 2px solid #f4a261; border-radius: 8px; background: rgba(244,162,97,0.04); }
+        .wb-admin-title { font-size: 16px; font-weight: 700; color: #f4a261; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
+        .wb-admin-tabs { display: flex; gap: 4px; margin-bottom: 16px; borde-bottom: 1px solid #eee; }
+        .wb-admin-tab { padding: 8px 16px; font-size: 12px; font-weight: 600; cursor: pointer; border: none; background: none; color: #888; border-bottom: 2px solid transparent; }
+        .wb-admin-tab.active { color: #f4a261; border-bottom-color: #f4a261; }
+        [data-wb-role-show] { display: none; }
+        [data-wb-protected] .wb-protected-content { display: none; }
+        [data-wb-protected] .wb-protected-lock { display: flex; }
+        .wb-product-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 20px; padding: 16px; min-height: 120px; }
+        .wb-product-placeholder { grid-column: 1 / -1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px; color: #bbb; text-align: center; gap: 10px; }
+        .wb-product-placeholder i { font-size: 36px; }
+        .wb-product-card-static { background: white; border: 1px solid #eee; border-radius: 8px; overflow: hidden; max-width: 280px; transition: box-shadow 0.2s; }
+        .wb-product-img-wrap {width: 100%; height: 180px; background: #f0f0f0; display: flex; align-items: center; justify-content: center; color: #bbb; font-size: 32px; overflow: hidden; }
+        .wb-product-img-wrap img { width: 100% height: 100%; object-fit: cover; }
+        .wb-product-info { padding: 14px; }
+        .wb-product-name { font-size: 15px; font-weight: 700; color: #333; margin-bottom: 4px; }
+        .wb-product-desc { font-size: 13px; color: #777; line-height: 1.4; margin-bottom: 10px; }
+        .wb-product-price { font-size: 22px; font-weight: 800; color: #4361ee; margin-bottom: 12px; }
+        .wb-product-category { dispaly: inline-block; font-size: 10px; font-weight: 700: padding: 2px 8px; background: #f0f4ff; color: #4361ee; border-radius: 20px; text-transform: uppercase; margin-bottom: 6px; }
+        .wb-add-to-cart-btn { width: 100%; padding: 10px; background: #4361ee; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 600; }
+        .wb-cart-widget { background: white; border: 1px solid #eee; border-radius: 8px; padding: 20px; }
+        .wb-cart-title { font-size: 18px; font-weight: 700; color: #333; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
+        .wb-cart-count { background: #e63946; color: white; border-radius: 50%; width: 22px; height: 22px; display: inline-flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; }
+        .wb-cart-empty { text-align: center; padding: 20px; color: #bbb; font-size: 14px; }
+        .wb-cart-total-row { display: flex; justify-content: space-between; padding: 14px 0; border-top: 2px solid #eee; margin-top: 8px; font-weight: 700; font-size: 16px; color: #333; }
+        .wb-booking-form { background: white; border: 1px solid #eee; border-radius: 8px; padding: 24px; max-width: 520px; }
+        .wb-booking-form h3 { font-size: 20px; font-weight: 700; color: #333; margin-bottom: 16px; }
+        .wb-booking-row { display: flex; gap: 12px; margin-bottom: 12px; }
+        .wb-booking-admin { background: white; border: 1px solid #eee; border-radius: 8px; padding: 20px; }
+        .wb-booking-admin h3 { font-size: 18px; font-weight: 700; color: #333; margin-bottom: 14px; }
+        .wb-payment-widget { background: white; border: 1px solid #eee; border-radius: 8px; padding: 30px; text-align: center; max-width: 380px; }
+        .wb-payment-product { font-size: 17px; font-weight: 600; color: #333; margin-bottom: 4px; }
+        .wb-payment-desc { font-size: 13px; color: #888; margin-bottom: 16px; }
+        .wb-payment-amount { font-size: 40px; font-weight: 800; color: #4361ee; margin-bottom: 24px; }
+        .wb-payment-divider { border: none; border-top: 1px solid #eee; margin: 16px 0; }
+        .wb-stripe-btn { display: inline-flex; align-items: center; gap: 10px;  padding: 14px 28px; background: #635bff; color: white; border: none; border-radius: 6px; font-size: 15px; font-weight: 700; cursor: pointer; width: 100%; justify-content: center; margin-bottom: 10px; }
+        .wb-paypal-btn { display: inline-flex; align-items: center; gap: 10px;  padding: 14px 28px; background: #0070ba; color: white; border: none; border-radius: 6px; font-size: 15px; font-weight: 700; cursor: pointer; width: 100%; justify-content: center; margin-bottom: 10px; }
+        .wb-newsletter { background: linear-gradient(135deg, #4361ee, #3a0ca3); border-radius: 8px; padding: 40px 30px; text-align: center; color: white; }
+        .wb-newsletter h3 { font-size: 24px; font-weight: 700; margin-bottom: 8px; }
+        .wb-newsletter p { font-size: 15px; opacity: 0.85; margin-bottom: 24px; }
+        .wb-newsletter-form { display: flex; gap: 8px; max-width: 440px; margin: 0 auto; flex-wrap: wrap; }
+        .wb-newsletter.form input { flex: 1; min-width: 180px; padding: 12px 16px; border: none; border-radius: 6px; font-weight: 700; cursor: pointer; white-space; nowrap; }
+        .wb-newsletter-small { font-size: 11px; opacity: 0.6; margin-top: 10px; }
         `;
     return newLocal;
 }
