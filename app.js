@@ -31,6 +31,7 @@ let pages = [
     { name: 'Pagina 1', structureHTML: '', freeHTML: '' }
 ];
 let currentPageIndex = 0;
+let _draggedPageIndex = null;
 let advancedConfig = {
     roles: ['user', 'premium', 'moderator', 'admin'],
     defaultRole: 'user',
@@ -95,6 +96,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     initTouchDragAndDrop();
     initFunctions();
     initTutorial();
+    renderCustomComponents();
     setInterval(autoSave, 5000);
     const loaded = await autoLoad();
     if (!loaded) {
@@ -330,9 +332,11 @@ function showCanvasEmpty() {
 }
 
 function createElement(type) {
+    if (typeof type === 'string' && type.startsWith('custom:')) {
+        return createCustomElement(type.slice(7));
+    }
     state.elementCounter++;
     const id = 'el-' + state.elementCounter;
-
     const wrapper = document.createElement('div');
     wrapper.className = 'builder-element';
     wrapper.dataset.type = type;
@@ -1019,6 +1023,9 @@ function handleElementAction(action, element) {
             break;
         case 'copy':
             copyElement(element);
+            break;
+        case 'savecomponent':
+            saveAsCustomComponent(element);
             break;
         case 'paste':
             pasteElement();
@@ -3449,7 +3456,7 @@ function generateInlineStyles() {
         .wb-protected-lock { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px 20px; background: rgba(230, 57, 70, 0.04); text-align: center; gap: 10px; }
         .wb-protected-lock i { font-size: 36px; color: #e63946; }
         .wb-protected-lock h3 { font-size: 18px; font-weight: 700; color: #333; margin: 0; }
-        .wb.protected-lock p { font-size: 13px; color: #666; margin: 0; }
+        .wb-protected-lock p { font-size: 13px; color: #666; margin: 0; }
         .wb-protected-content { padding: 16px; min-height: 60px; border: 1px dashed #4361ee; border-radius: 6px; margin: 8px; background: rgba(67, 97, 238, 0.02); }
         .wb-role-gate { padding: 24px 20px; border: 2px dashed #4361ee; border-radius: 8px; background: rgba(67, 97, 238, 0.04); text-align: center; display: flex; flex-direction: column; align-items: center; gap: 8px; }
         .wb-role-gate i { font-size: 28px; color: #4361ee; }
@@ -3482,10 +3489,10 @@ function generateInlineStyles() {
         .wb-user-data-label { font-size: 12px; font-weight: 600; color: #888; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
         .wb-user-data-value { font-size: 28px; font-weight: 800; color: #4361ee; margin-bottom: 10px; }
         .wb-leaderboard { padding: 20px; border: 1px solid #eee; border-radius: 8px; background: white; }
-        .wb-leaderboard-title { font-size: 18px; font-weight; 700; color: #333; text-align: center; margin-bottom: 16px; }
+        .wb-leaderboard-title { font-size: 18px; font-weight: 700; color: #333; text-align: center; margin-bottom: 16px; }
         .wb-admin-panel { padding: 20px; border: 2px solid #f4a261; border-radius: 8px; background: rgba(244,162,97,0.04); }
         .wb-admin-title { font-size: 16px; font-weight: 700; color: #f4a261; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
-        .wb-admin-tabs { display: flex; gap: 4px; margin-bottom: 16px; borde-bottom: 1px solid #eee; }
+        .wb-admin-tabs { display: flex; gap: 4px; margin-bottom: 16px; border-bottom: 1px solid #eee; }
         .wb-admin-tab { padding: 8px 16px; font-size: 12px; font-weight: 600; cursor: pointer; border: none; background: none; color: #888; border-bottom: 2px solid transparent; }
         .wb-admin-tab.active { color: #f4a261; border-bottom-color: #f4a261; }
         [data-wb-role-show] { display: none; }
@@ -3501,7 +3508,7 @@ function generateInlineStyles() {
         .wb-product-name { font-size: 15px; font-weight: 700; color: #333; margin-bottom: 4px; }
         .wb-product-desc { font-size: 13px; color: #777; line-height: 1.4; margin-bottom: 10px; }
         .wb-product-price { font-size: 22px; font-weight: 800; color: #4361ee; margin-bottom: 12px; }
-        .wb-product-category { dispaly: inline-block; font-size: 10px; font-weight: 700: padding: 2px 8px; background: #f0f4ff; color: #4361ee; border-radius: 20px; text-transform: uppercase; margin-bottom: 6px; }
+        .wb-product-category { display: inline-block; font-size: 10px; font-weight: 700; padding: 2px 8px; background: #f0f4ff; color: #4361ee; border-radius: 20px; text-transform: uppercase; margin-bottom: 6px; }
         .wb-add-to-cart-btn { width: 100%; padding: 10px; background: #4361ee; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 600; }
         .wb-cart-widget { background: white; border: 1px solid #eee; border-radius: 8px; padding: 20px; }
         .wb-cart-title { font-size: 18px; font-weight: 700; color: #333; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
@@ -3524,7 +3531,8 @@ function generateInlineStyles() {
         .wb-newsletter h3 { font-size: 24px; font-weight: 700; margin-bottom: 8px; }
         .wb-newsletter p { font-size: 15px; opacity: 0.85; margin-bottom: 24px; }
         .wb-newsletter-form { display: flex; gap: 8px; max-width: 440px; margin: 0 auto; flex-wrap: wrap; }
-        .wb-newsletter.form input { flex: 1; min-width: 180px; padding: 12px 16px; border: none; border-radius: 6px; font-weight: 700; cursor: pointer; white-space; nowrap; }
+        .wb-newsletter-form input { flex: 1; min-width: 180px; padding: 12px 16px; border: none; border-radius: 6px; font-size: 14px; outline: none; }
+        .wb-newsletter-form button { padding: 12px 24px; background: #f4a261; color: white; border: none; border-radius: 6px; font-weight: 700; cursor: pointer; white-space: nowrap; }
         .wb-newsletter-small { font-size: 11px; opacity: 0.6; margin-top: 10px; }
         `;
     return newLocal;
@@ -3558,7 +3566,7 @@ function downloadZip() {
     const palette = advancedConfig.palette || { primary: '#4361ee', secondary: '#3a0ca3', dark: '#1a1a2e' };
     const rootVars = ':root { --wb-color-primary: ' + palette.primary + '; --wb-color-secondary: ' + palette.secondary + '; --wb-color-dark: ' + palette.dark + '; }\n';
     const cssContent = generateInlineStyles();
-    const fullCSS = generateFontFacesCSS() + '\n' + generateResponsiveCSS(canvas.querySelectorAll('.builder-element')) + '\n* { margin: 0; padding: 0; box-sizing: border-box; }\nbody { font-family: "Inter", -apple-system, sans-serif; }\nimg { max-width: 100%; height: auto; }\n' + cssContent;
+    const fullCSS = rootVars + generateFontFacesCSS() + '\n' + generateResponsiveCSS(canvas.querySelectorAll('.builder-element')) + '\n* { margin: 0; padding: 0; box-sizing: border-box; }\nbody { font-family: "Inter", -apple-system, sans-serif; }\nimg { max-width: 100%; height: auto; }\n' + cssContent;
     const htmlContent = generateCleanHTML();
     const seoTitle = (pages[currentPageIndex] && pages[currentPageIndex].seoTitle) || 'Il mio sito';
     const seoDesc = (pages[currentPageIndex] && pages[currentPageIndex].seoDescription) || '';
@@ -3800,7 +3808,7 @@ async function autoLoad() {
         if (saved.advancedConfig) Object.assign(advancedConfig, saved.advancedConfig);
         _lastThumbnailUrl = saved.thumbnailUrl || null;
         loadCustomFonts();
-        applyPaleteToCanvas();
+        applyPaletteToCanvas();
         renderPageTabs();
         loadPage(currentPageIndex);
     }
@@ -4327,7 +4335,7 @@ function addPage() {
             const sourceWrapper = canvas.querySelector('.builder-element[data-type="' + type + '"]');
             if (!sourceWrapper) return;
             const sourceContent = sourceWrapper.querySelector(selector);
-            if (!sourceWrapper) return;
+            if (!sourceContent) return;
             const html = sourceContent.outerHTML;
             pages.forEach((page, i) => {
                 if (i === currentPageIndex) return;
@@ -4431,6 +4439,7 @@ function renderPageTabs() {
         const tab = document.createElement('button');
         tab.className = 'page-tab' + (i === currentPageIndex ? ' active' : '');
         tab.dataset.page = i;
+        tab.draggable = true;
         tab.textContent = page.name;
         if (pages.length > 1) {
             const closeBtn = document.createElement('span');
@@ -4451,6 +4460,26 @@ function renderPageTabs() {
         tab.addEventListener('dblclick', (e) => {
             e.stopPropagation();
             renamePage(i);
+        });
+        tab.addEventListener('dragstart', () => {
+            _draggedPageIndex = i;
+            tab.style.opacity = '0.5';
+        });
+        tab.addEventListener('dragend', () => {
+            tab.style.opacity = '1';
+            _draggedPageIndex = null;
+        });
+        tab.addEventListener('dragover', (e) => { e.preventDefault(); });
+        tab.addEventListener('drop', (e) => {
+            e.preventDefault();
+            if (_draggedPageIndex === null || _draggedPageIndex === i) return;
+            saveCurrentPage();
+            const activePage = pages[currentPageIndex];
+            const moved = paged.splice(_draggedPageIndex, 1)[0];
+            pages.splice(i, 0, moved);
+            currentPageIndex = pages,indexOf(activePage);
+            renderPageTabs();
+            autoSave();
         });
         container.appendChild(tab);
     });
@@ -4561,7 +4590,7 @@ function renderFaviconPreview() {
     if (advancedConfig.faviconUrl) {
         preview.innerHTML = '<img src="' + advancedConfig.faviconUrl + '" style="width:100%;height:100%;object-fit:cover;">';
     } else {
-        preview.innetHTML = '<i class="fa-solid fa-image" style="color:var(--text-secondary);"></i>';
+        preview.innerHTML = '<i class="fa-solid fa-image" style="color:var(--text-secondary);"></i>';
     }
 }
 function populateFormSelects() {
@@ -4928,7 +4957,7 @@ CREATE TRIGGER on_auth_user_created
         const fileInput = document.createElement('input');
         fileInput.type = 'file';
         fileInput.accept = 'image/*';
-        fileInput.addEventlistener('change', async (e) => {
+        fileInput.addEventListener('change', async (e) => {
             const file = e.target.files[0];
             if (!file) return;
             const res = await WBPlatform.uploadFile(file, 'favicons');
@@ -5032,4 +5061,73 @@ function initTutorial() {
     let seen = false;
     try { seen = localStorage.getItem('webbuilder-tutorial-seen') === 'true'; } catch(e) {}
     if (!seen) openTutorial(true);
+}
+function getCustomComponents() {
+    try { return JSON.parse(localStorage.getItem('webbuilder-custom-components') || '[]'); } catch(e) { return []; }
+}
+function saveAsCustomComponent(element) {
+    const name = prompt('Nome del componente:', element.dataset.label || 'Il mio componente');
+    if (!name) return;
+    const clone = element.cloneNode(true);
+    clone.querySelectorAll('.element-actions, .resize-handle').forEach(el => el.remove());
+    const comps = getCustomComponents();
+    comps.push({ id: 'c' + Date.now().toString(36) + Math.random().toString(36).slice(2,6), name: name.trim(), html: clone.innerHTML });
+    localStorage.setItem('webbuilder-custom-components', JSON.stringify(comps));
+    renderCustomComponents();
+    alert('Componente "' + name.trim() + '" salvato! Lo trovi nel pannello a sinistra,  sezione "I tuoi componenti".');
+}
+function renderCustomComponents() {
+    const container = $('#customComponents');
+    if (!container) return;
+    const comps = getCustomComponents();
+    if (comps.length === 0) {
+        container.innerHTML = '<p style="grid-column:1/-1;font-size:11px;color:var(--text-secondary);padding:6px;">Nessuno ancora. Click destro su un elemento nel canvas -> "Salva come componente".</p>';
+        return;
+    }
+    container.innerHTML = comps.map(c =>
+        '<div class="draggable-item" draggable="true" data-type="custom:' + c.id + '">' +
+        '<i class="fa-solid fa-cube"></i><span>' + c.name + '</span></div>'
+    ).join('');
+    container.querySelectorAll('.draggable-item').forEach(item => {
+        item.addEventListener('dragstart', () => {
+            state.draggedType = item.dateset.type;
+            state.draggedElement = null;
+            item.style.opacity = '0.5'; 
+        });
+        item.addEventListener('dragend', () => {
+            state.draggedType = null;
+            item.style.opacity = '1';
+            removeAllDropIndicators();
+        });
+        item.addEventListener('contextmenu', (e) => {
+            e.preventDefault();
+            if (!confirm('Eliminare questo componente salvato?')) return;
+            const id = item.dataset.type.slice(7);
+            localStorage.setItem('webbuilder-custom-components', JSON.stringify(getCustomComponents().filter(c => c.id !== id)));
+            renderCustomComponents();
+        });
+    });
+}
+function createCustomElement(componentId) {
+    const comp = getCustomComponents().find(c => c.id === componentId);
+    state.elementCounter++;
+    const id = 'el-' + state.elementCounter;
+    const wrapper = document.createElement('div');
+    wrapper.className = 'builder-element';
+    wrapper.dataset.type = 'custom';
+    wrapper.dataset.id = id;
+    wrapper.dataset.label = comp ? comp.name : 'Componente';
+    wrapper.draggable = currentMode !== 'free';
+    wrapper.innerHTML = comp ? comp.html : '<div>Componente non trovato</div>';
+    const actions = document.createElement('div');
+    actions.className = 'element-actions';
+    actions.innetHTML = `
+        <button class="element-action-btn" data-action="moveup" title="Sposta su"><i class="fa-solid fa-arrow-up"></i></button>
+        <button class="element-action-btn" data-action="movedown" title="Sposta giu"><i class="fa-solid fa-arrow-down"></i></button>
+        <button class="element-action-btn" data-action:"duplicate" title="Duplica"><i class="fa-solid fa-clone"></i></button>
+        <button class="element-action-btn action-delete" data-action="delete" title="Elimina"><i class="fa-solid fa-trash"></i></button>`;
+    wrapper.appendChild(actions);
+    setupElementEvents(wrapper);
+    if (currentMode === 'free') { wrapper.style.position='absolute'; wrapper.style.left='50px'; wrapper.style.top='50px'; addResizeHandles(wrapper); addFreeDrag(wrapper); }
+    return wrapper;
 }

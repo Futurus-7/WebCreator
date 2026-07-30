@@ -59,7 +59,12 @@
             <div class="panel-header">
                 <h3>Elementi</h3>
             </div>
-
+            <div class="panel-section">
+                <h4 class="section-title" data-toggle="customComponents">I tuoi componenti</h4>
+                <div class="section-content" id="customComponents"></div>
+            </div>
+            <div class="panel-section">
+                <h4 class="section-title" data-toggle="users">Utenti & Contenuti</h4>
             <div class="panel-section">
                 <h4 class="section-title" data-toggle="layout">Layout</h4>
                 <div class="section-content" id="layout">
@@ -776,6 +781,12 @@
                             </p>
                         </div>
                         <div class="prop-group">
+                            <label class="prop-label" style="display:flex;align-items:center;gap:8px;cursor:pointer;">
+                                <input type="checkbox" id="propLockElement" style="width:16px;height:16px;cursor:pointer;">
+                                Blocca elemento (impedisci spostamento/eliminazione)
+                            </label>
+                        </div>
+                        <div class="prop-group">
                             <label class="prop-label">ID elemento</label>
                             <input type="text" class="prop-input" id="propId" placeholder="mio-elemento">
                         </div>
@@ -1083,8 +1094,8 @@
                             </div>
                             <div class="prop-group">
                                 <label class="prop-label">Colore scuro (sfondi hero/footer)</label>
-                                <div class="color-pickker-wrapper">
-                                    <input type="color" class="prop-color" if="paletteColorDark" value="#1a1a2e">
+                                <div class="color-picker-wrapper">
+                                    <input type="color" class="prop-color" id="paletteColorDark" value="#1a1a2e">
                                     <input type="text" class="prop-input prop-color-text" id="paletteColorDarkText" value="#1a1a2e">
                                 </div>
                             </div>
@@ -1417,7 +1428,7 @@ admin</textarea>
                             <h2 style="font-size:18px;margin-bottom:6px;"> Favicon del sito</h2>
                             <p style="color:var(--text-secondary);font-size:13px;margin-bottom:20px;">L'iconcina che appare nella scheda del browser. Vale per tutto il sito, non per la singola pagina. Consigliata un'immagine quadrata (es. 512x512px, .png).</p>
                             <div style="display:flex;align-items:center;gap:14px;margin-bottom:16px;">
-                                <div id="faviconPreview" style="width:48px;height:48px;border-radius:8px;background:rgba(255,255,255,0.05);border:1px solid var(--border-color-);display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0;">
+                                <div id="faviconPreview" style="width:48px;height:48px;border-radius:8px;background:rgba(255,255,255,0.05);border:1px solid var(--border-color);display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0;">
                                     <i class="fa-solid fa-image" style="color:var(--text-secondary);"></i>
                                 </div>
                                 <button class="prop-btn-small" id="btnUploadFavicon" type="button">Carica immagine</button>
@@ -1511,6 +1522,7 @@ admin</textarea>
 
     <div class="context-menu" id="contextMenu">
         <button class="context-item" data-action="duplicate"><i class="fa-solid fa-clone"></i> Duplica</button>
+        <button class="context-item" data-action="savecomponent"><i class="fa-solid fa-floppy-disk"></i> Salva come componente</button>
         <button class="context-item" data-action="copy"><i class="fa-solid fa-copy"></i> Copia</button>
         <button class="context-item" data-action="paste"><i class="fa-solid fa-paste"></i> Incolla</button>
         <button class="context-item" data-action="moveup"><i class="fa-solid fa-arrow-up"></i> Sposta su</button>
