@@ -399,6 +399,7 @@ function getTypeLabel(type) {
         'icon': 'Icona',
         'map': 'Mappa',
         'background': 'Background',
+        'custom-code': 'Codice personalizzato',
         'form-contact': 'Modulo Contatti',
         'input': 'Campo testo',
         'textarea': 'Area testo',
@@ -473,6 +474,11 @@ function getElementHTML(type) {
                 'icon': '<div class="wb-icon"><i class="fa-solid fa-star"></i></div>',
                 'map': '<div class="wb-map"><span><i class="fa-solid fa-map-location-dot"></i>Mappa</span></div>',
                 'background': '<div class="wb-background"></div>',
+                'custom-code': `
+                    <div class="wb-custom-code">
+                        <div class="wb-custom-html-preview" style="min-height:40px;"><em style="color:#999;font-size:12px;">Blocco codice personalizzato - modifica HTML/CSS nel pannello proprietà.</em></div>
+                        <style class="wb-custom-style"></style>
+                    </div>`,
                 'form': '<form class="wb-form" onsubmit="return false;"></form>',
                 'form-contact': `
                     <form class="wb-form" onsubmit="return false;" style="max-width:500px;">
@@ -862,7 +868,15 @@ function setupElementEvents(element) {
         if (element.dataset.type === 'background') {
             e.preventDefault();
             return;
-        } 
+        }
+        if (element.dataset.locked === 'true') {
+            e.preventDefault();
+            return;
+        }
+        if (element.dataset.locked === 'true') {
+            e.preventDefault();
+            return;
+        }
         if (e.target === element) {
             state.draggedElement = element;
             state.draggedType= null;
@@ -1035,6 +1049,10 @@ function handleElementAction(action, element) {
 
 function deleteElement(element) {
     if (!element) return;
+    if (element.dataset.locked === 'true') {
+        alert('Questo elemento è bloccato. Sbloccalo dal pannello Avanzato prima di eliminarlo.');
+        return;
+    }
     const shouldDeselect =
         state.selectedElement === element ||
         element.contains(state.selectedElement);
@@ -1498,6 +1516,18 @@ function initPropertyInputs() {
         state.selectedElement.dataset.optionActions = JSON.stringify(actions);
         saveHistory();
     });
+    $('#propCustomHTML')?.addEventListener('input', () => {
+        if (!state.selectedElement) return;
+        const preview = state.selectedElement.querySelector('.wb-custom-html-preview');
+        if (preview) preview.innerHTML = $('#propCustomHTML').value;
+        saveHistory();
+    });
+    $('#propCustomCSSBlock')?.addEventListener('input', () => {
+        if (!state.selectedElement) return;
+        const styleTag = state.selectedElement.querySelector('.wb-custom-style');
+        if (styleTag) styleTag.textContent = $('#propCustomCSSBlock').value;
+        saveHistory();
+    });
     $('#addActionBtn').addEventListener('click', () => {
         if (!state.selectedElement) return;
         let actions = [];
@@ -1507,7 +1537,11 @@ function initPropertyInputs() {
         renderActionsPanel(actions);
         saveHistory();
     });
-
+    $('#propLockElement').addEventListener('change', () => {
+        if (!state.selectedElement) return;
+        state.selectedElement.dataset.locked = $('#propLockElement').checked ? 'true' : 'false';
+        saveHistory();
+    });
     $('#propStartHidden').addEventListener('change', () => {
         if (!state.selectedElement) return;
         const el = state.selectedElement;
@@ -2008,8 +2042,11 @@ function updatePropertyPanel() {
     if (propStartHidden) {
         propStartHidden.checked = el.dataset.startHidden === 'true';
     }
-
-    ['protectedConfig', 'roleGateConfig', 'progressConfig','blogListConfig','userDataConfig','leaderboardConfig','productListConfig','bookingFormConfig','paymentConfig','newsletterConfig'].forEach(id => {
+    const propLockElement = $('#propLockElement');
+    if (propLockElement) {
+        propLockElement.checked = el.dataset.locked === 'true';
+    }
+    ['protectedConfig', 'roleGateConfig', 'progressConfig','blogListConfig','userDataConfig','leaderboardConfig','productListConfig','bookingFormConfig','paymentConfig','newsletterConfig','customCodeConfig'].forEach(id => {
         const cfgEl = document.getElementById(id);
         if (cfgEl) cfgEl.style.display = 'none';
     });
@@ -2091,8 +2128,15 @@ function updatePropertyPanel() {
             if ($('#propNewsletterSuccess')) $('#propNewsletterSuccess').value = el.querySelector('[data-wb-newsletter]')?.dataset.successMsg || '';
             break;
         }
-
-
+        case 'custom-code': {
+            const ccc = document.getElementById('customCodeConfig');
+            if (ccc) ccc.style.display = 'block';
+            const preview = el.querySelector('.wb-custom-html-preview');
+            const styleTag = el.querySelector('.wb-custom-style');
+            if ($('#propCustomHTML')) $('#propCustomHTML').value = preview ? preview.innerHTML.trim() : '';
+            if ($('#propCustomCSSBlock')) $('#propCustomCSSBlock').value = styleTag ? styleTag.textContent : '';
+            break;
+        }
         case 'block-leaderboard': {
             $('#leaderboardConfig').style.display = 'block';
             const lb = el.querySelector('[data-wb-leaderboard]');
@@ -2348,6 +2392,7 @@ const icons = {
     'icon': 'fa-solid fa-icons',
     'map': 'fa-solid fa-map-location-dot',
     'background': 'fa-solid fa-fill-drip',
+    'custom-code': 'fa-solid fa-code',
     'form-contact': 'fa-solid fa-envelope',
     'input': 'fa-solid fa-i-cursor',
     'textarea': 'fa-solid fa-align-left',
@@ -2536,6 +2581,7 @@ function generateCleanHTML() {
             el.style.removeProperty('opacity');
             }
         el.removeAttribute('data-start-hidden');
+        el.removeAttribute('data-locked');
     });
     clone.querySelectorAll('[contenteditable]').forEach(el => {
         el.removeAttribute('contenteditable');
@@ -4151,6 +4197,7 @@ function addFreeDrag(el) {
         if (e.target.closest('.element-actions')) return;
         if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') return;
         if (e.target.isContentEditable && document.activeElement === e.target) return;
+        if (el.dataset.locked === 'true') return;
         e.stopPropagation();
         const startX = e.clientX;
         const startY = e.clientY;
@@ -5131,3 +5178,74 @@ function createCustomElement(componentId) {
     if (currentMode === 'free') { wrapper.style.position='absolute'; wrapper.style.left='50px'; wrapper.style.top='50px'; addResizeHandles(wrapper); addFreeDrag(wrapper); }
     return wrapper;
 }
+$('#btnSearch')?.addEventListener('click', () => {
+    $('#searchModal').classList.add('visible');
+    $('#searchInput').value = '';
+    $('#searchResults').innerHTML = '';
+    $('#searchInput').focus();
+});
+$('#closeSearch')?.addEventListener('click', () => $('#searchModal').classList.remove('visible'));
+$('#searchModal')?.addEventListener('click', (e) => { if (e.target === $('#searchModal')) $('#searchModal').classList.remove('visible'); });
+$('#searchInput')?.addEventListener('input', () => {
+    const q = $('#searchInput').value.trim().toLowerCase();
+    const resultsEl = $('#searchResults');
+    if (!q) { resultsEl.innerHTML = ''; return; }
+    saveCurrentPage();
+    const results = [];
+    pages.forEach((page, i) => {
+        const html = page.structureHTML || page.freeHTML || '';
+        const temp = document.createElement('div');
+        temp.innerHTML = html;
+        const text = tempo.textContent || '';
+        const idx = text.toLowerCase().indexOf(q);
+        if (idx !== -1) {
+            const start = Math.max(0, idx - 30);
+            const snippet = (start > 0 ? '...' : '') + text.substring(start, idx + q.length + 30) + '...';
+            results.push({ pageIndex: i, pageName: page.name, snippet: snippet });
+        }
+    });
+    if (results.length === 0) {
+        resultsEl.innerHTML = '<p style="padding:10px;color:var(--text-secondary);font-size:13px;">Nessun risultato.</p>';
+        return;
+    }
+    resultsEl.innerHTML = results.map(r => 
+        '<div class="search-result-item" data-page="' + r.pageIndex + '" style="padding:10px;border-bottom:1px solid var(--border-color);cursor:pointer;">' +
+        '<strong style="font-size:12px;color:var(--accent);">' + r.pageName + '</strong>' +
+        '<p style="font-size:12px;color:var(--text-secondary);margin-top:4px;">' + r.snippet + '</p></div>'
+    ).join('');
+    resultsEl.querySelectorAll('.search-result-item').forEach(item => {
+        item.addEventListener('click', () => {
+            saveCurrentPage();
+            loadPage(parseInt(item.dataset.page));
+            renderPageTabs();
+            $('#searchModal').classList.remove('visible');
+        });
+    });
+});
+const LOREM_TITLES = ['Il titolo per la tua idea', 'Scopri qualcosa di nuovo', 'La soluzione che cercavi', 'Cresci con noi'];
+const LOREM_PARAGRAPHS = [
+    'Questo è un testo di esempio per mostare come apparirà il contenuto in questa sezione. Sostituiscilo con il tuo testo reale quando sei pronto.',
+    'Qui puoi scrivere una descrizione del tuo prodotto o servizio, mettendo in evidenza i punti di forza che vuoi comunicare ai visitatori.',
+    'Un paragrafo segnaposto aiuta a visualizzare meglio lo spazio e la lunghezza del testo prima di scrivere i contenuti definitivi.'
+];
+$('#btnFillPlaceholder')?.addEventListener('click', () => {
+    if (!confirm('Sostituisce i testi e le immagini vuote della pagina corrente con contenuti finti. Continuare?')) return;
+    canvas.querySelectorAll('h1[contenteditable], h2[contenteditable]').forEach(el => {
+        el.textContent = LOREM_TITLES[Math.floor(Math.random() * LOREM_TITLES.length)];
+    });
+    canvas.querySelectorAll('p[contenteditable]').forEach(el => {
+        el.textContent = LOREM_PARAGRAPHS[Math.floor(Math.random() * LOREM_PARAGRAPHS.length)];
+    });
+    canvas.querySelectorAll('.wb-image').forEach(imgContainer => {
+        if (imgContainer.querySelector('img')) return;
+        const placeholder = imgContainer.queryselector('.wb-image-placeholder');
+        const w = 600 + Math.floor(Math.random() * 200);
+        const h = 400 + Math.floor(Math.random() * 100);
+        const img = document.createElement('img');
+        img.src = 'https://picsum.photos/seed/' + Math.random().toString(36).slice(2) + '/' + w + '/' + h;
+        imgContainer.appendChild(img);
+        if (placeholder) placeholder.style.display = 'none';
+    });
+    saveHistory();
+    updatePropertyPanel();
+});
