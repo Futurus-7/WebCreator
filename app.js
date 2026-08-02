@@ -873,10 +873,6 @@ function setupElementEvents(element) {
             e.preventDefault();
             return;
         }
-        if (element.dataset.locked === 'true') {
-            e.preventDefault();
-            return;
-        }
         if (e.target === element) {
             state.draggedElement = element;
             state.draggedType= null;
@@ -3549,7 +3545,7 @@ function generateInlineStyles() {
         .wb-product-placeholder i { font-size: 36px; }
         .wb-product-card-static { background: white; border: 1px solid #eee; border-radius: 8px; overflow: hidden; max-width: 280px; transition: box-shadow 0.2s; }
         .wb-product-img-wrap {width: 100%; height: 180px; background: #f0f0f0; display: flex; align-items: center; justify-content: center; color: #bbb; font-size: 32px; overflow: hidden; }
-        .wb-product-img-wrap img { width: 100% height: 100%; object-fit: cover; }
+        .wb-product-img-wrap img { width: 100%; height: 100%; object-fit: cover; }
         .wb-product-info { padding: 14px; }
         .wb-product-name { font-size: 15px; font-weight: 700; color: #333; margin-bottom: 4px; }
         .wb-product-desc { font-size: 13px; color: #777; line-height: 1.4; margin-bottom: 10px; }
@@ -3572,7 +3568,7 @@ function generateInlineStyles() {
         .wb-payment-amount { font-size: 40px; font-weight: 800; color: #4361ee; margin-bottom: 24px; }
         .wb-payment-divider { border: none; border-top: 1px solid #eee; margin: 16px 0; }
         .wb-stripe-btn { display: inline-flex; align-items: center; gap: 10px;  padding: 14px 28px; background: #635bff; color: white; border: none; border-radius: 6px; font-size: 15px; font-weight: 700; cursor: pointer; width: 100%; justify-content: center; margin-bottom: 10px; }
-        .wb-paypal-btn { display: inline-flex; align-items: center; gap: 10px;  padding: 14px 28px; background: #0070ba; color: white; border: none; border-radius: 6px; font-size: 15px; font-weight: 700; cursor: pointer; width: 100%; justify-content: center; margin-bottom: 10px; }
+        .wb-paypal-btn { display: inline-flex; align-items: center; gap: 10px;  padding: 14px 28px; background: #0070ba; color: white; border: none; border-radius: 6px; font-size: 15px; font-weight: 700; cursor: pointer; width: 100%; justify-content: center; }
         .wb-newsletter { background: linear-gradient(135deg, #4361ee, #3a0ca3); border-radius: 8px; padding: 40px 30px; text-align: center; color: white; }
         .wb-newsletter h3 { font-size: 24px; font-weight: 700; margin-bottom: 8px; }
         .wb-newsletter p { font-size: 15px; opacity: 0.85; margin-bottom: 24px; }
@@ -4522,9 +4518,9 @@ function renderPageTabs() {
             if (_draggedPageIndex === null || _draggedPageIndex === i) return;
             saveCurrentPage();
             const activePage = pages[currentPageIndex];
-            const moved = paged.splice(_draggedPageIndex, 1)[0];
+            const moved = pages.splice(_draggedPageIndex, 1)[0];
             pages.splice(i, 0, moved);
-            currentPageIndex = pages,indexOf(activePage);
+            currentPageIndex = pages.indexOf(activePage);
             renderPageTabs();
             autoSave();
         });
@@ -5137,7 +5133,7 @@ function renderCustomComponents() {
     ).join('');
     container.querySelectorAll('.draggable-item').forEach(item => {
         item.addEventListener('dragstart', () => {
-            state.draggedType = item.dateset.type;
+            state.draggedType = item.dataset.type;
             state.draggedElement = null;
             item.style.opacity = '0.5'; 
         });
@@ -5168,10 +5164,10 @@ function createCustomElement(componentId) {
     wrapper.innerHTML = comp ? comp.html : '<div>Componente non trovato</div>';
     const actions = document.createElement('div');
     actions.className = 'element-actions';
-    actions.innetHTML = `
+    actions.innerHTML = `
         <button class="element-action-btn" data-action="moveup" title="Sposta su"><i class="fa-solid fa-arrow-up"></i></button>
         <button class="element-action-btn" data-action="movedown" title="Sposta giu"><i class="fa-solid fa-arrow-down"></i></button>
-        <button class="element-action-btn" data-action:"duplicate" title="Duplica"><i class="fa-solid fa-clone"></i></button>
+        <button class="element-action-btn" data-action="duplicate" title="Duplica"><i class="fa-solid fa-clone"></i></button>
         <button class="element-action-btn action-delete" data-action="delete" title="Elimina"><i class="fa-solid fa-trash"></i></button>`;
     wrapper.appendChild(actions);
     setupElementEvents(wrapper);
@@ -5196,7 +5192,7 @@ $('#searchInput')?.addEventListener('input', () => {
         const html = page.structureHTML || page.freeHTML || '';
         const temp = document.createElement('div');
         temp.innerHTML = html;
-        const text = tempo.textContent || '';
+        const text = temp.textContent || '';
         const idx = text.toLowerCase().indexOf(q);
         if (idx !== -1) {
             const start = Math.max(0, idx - 30);
@@ -5224,7 +5220,7 @@ $('#searchInput')?.addEventListener('input', () => {
 });
 const LOREM_TITLES = ['Il titolo per la tua idea', 'Scopri qualcosa di nuovo', 'La soluzione che cercavi', 'Cresci con noi'];
 const LOREM_PARAGRAPHS = [
-    'Questo è un testo di esempio per mostare come apparirà il contenuto in questa sezione. Sostituiscilo con il tuo testo reale quando sei pronto.',
+    'Questo è un testo di esempio per mostrare come apparirà il contenuto in questa sezione. Sostituiscilo con il tuo testo reale quando sei pronto.',
     'Qui puoi scrivere una descrizione del tuo prodotto o servizio, mettendo in evidenza i punti di forza che vuoi comunicare ai visitatori.',
     'Un paragrafo segnaposto aiuta a visualizzare meglio lo spazio e la lunghezza del testo prima di scrivere i contenuti definitivi.'
 ];
@@ -5238,7 +5234,7 @@ $('#btnFillPlaceholder')?.addEventListener('click', () => {
     });
     canvas.querySelectorAll('.wb-image').forEach(imgContainer => {
         if (imgContainer.querySelector('img')) return;
-        const placeholder = imgContainer.queryselector('.wb-image-placeholder');
+        const placeholder = imgContainer.querySelector('.wb-image-placeholder')
         const w = 600 + Math.floor(Math.random() * 200);
         const h = 400 + Math.floor(Math.random() * 100);
         const img = document.createElement('img');
