@@ -149,6 +149,7 @@ const WBPlatform = (function() {
         _client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         const { data } = await _client.auth.getUser();
         _currentUser = data?.user ? _publicUser(data.user) : null;
+        if (_currentUser) trackSession();
         _client.auth.onAuthStateChange((event, session) => {
             _currentUser = session?.user ? _publicUser(session.user) : null;
         });
@@ -192,7 +193,10 @@ const WBPlatform = (function() {
         const { data, error } = await _client.auth.signInWithPassword({ email, password });
         if (error) return { error: 'Email o password non corretti.' };
         _currentUser = _publicUser(data.user);
+        const needsMfa = await mfaNeeded();
+        if (needsMfa) return { mfaRequired: true };
         notifyLogin();
+        trackSession();
         return { user: _currentUser };
     }
     async function logout() {
@@ -409,12 +413,151 @@ const WBPlatform = (function() {
             .subscribe();;
         return () => _client.removeChannel(channel);
     }
+    async function addComment(projectId, elementId, pageIndex, text) {
+        await ready;
+        if (!_currentUser) return null;
+        const { data, error } = await _client.from('wb_platform_comments').insert({
+            project_id: projectId, element_id: elementId, page_index: pageIndex,
+            author_id: _currentUser.id, author_name: _currentUser.name, text: text
+        }).select().single();
+        if (error) { console.error(error); return null; }
+        return data;
+    }
+    async function listComments(projectId) {
+        await ready;
+        const { data, error } = await _client.from('wb_platform_comments').select('*').eq('project_id', projectId).order('created_at', { ascending: false });
+        if (error) return [];
+        return data;
+    }
+    async function resolveComment(id) {
+        await ready;
+        await _client.from('wb_platform_comments').update({ resolved: true }).eq('id', id);
+    }
+    async function deleteComment(id) {
+        await ready;
+        await _client.from('wb_platform_comments').delete().eq('id', id);
+    }
+    async function logActivity(projectId, pageName) {
+        await ready;
+        if (!_currentUser) return;
+        try { await _client.from('wb_platform_activity').insert({ project_id: projectId, user_id: _currentUser.id, user_name: _currentUser.name, page_name: pageName }); } catch(e) {}
+    }
+    async function listActivity(projectId) {
+        await ready;
+        const { data, error } = await _client.from('wb_platform_activity').select('*').eq('project_id', projectId).order('created_at', { ascending: false }).limit(30);
+        if (error) return [];
+        return data;
+    }
+    function _deviceLabel() {
+        const ua = navigator.userAgent;
+        let browser = 'Browser sconosciuto';
+        if (ua.includes('Edg/')) browser = 'Edge';
+        else if (ua.includes('Chrome/')) browser = 'Chrome';
+        else if (ua.includes('Firefox/')) browser = 'Firefox';
+        else if (ua.includes('Safari/')) browser = 'Safari';
+        let os = 'dispositivo sconosciuto';
+        if (ua.includes('Windows')) os = 'Windows';
+        else if (ua.includes('Mac OS')) os = 'Mac';
+        else if (ua.includes('Android')) os = 'Android';
+        else if (ua.includes('iPhone') || ua.includes('iPad')) os = 'iOS';
+        else if (ua.includes('Linux')) os = 'Linux';
+        return browser + ' su ' + os;
+    }
+    async function trackSession() {
+        if (!_currentUser) return;
+        if (sessionStorage.getItem('wb_session_logged')) return;
+        sessionStorage.setItem('wb_session_logged', '1');
+        try { await _client.from('wb_platform_sessions').insert({ user_id: _currentUser.id, device_label: _deviceLabel() }); } catch(e) {}
+    }
+    async function listSessions() {
+        await ready;
+        if (!_currentUser) return [];
+        const { data, error } = await _client.from('wb_platform_sessions').select('*').eq('user_id', _currentUser.id).order('created_at', { ascending: false }).limit(20);
+        if (error) return [];
+        return data;
+    }
+    async function removeSessionEntry(id) {
+        await ready;
+        await _client.from('wb_platform_sessions').delete().eq('id', id);
+    }
+    async function signOutOtherSessions() {
+        await ready;
+        const { error } = await _client.auth.signOut({ scope: 'others' });
+        if (error) return { error: error.message };
+        return { success: true };
+    }
+    async function mfaEnroll() {
+        await ready;
+        const { data, error } = await _client.auth.mfa.enroll({ factorType: 'totp' });
+        if (error) return { error: error.message };
+        return { factorId: data.id, qrCode: data.totp.qr_code, secret: data.totp.secret };
+    }
+    async function mfaVerifyEnroll(factorId, code) {
+        await ready;
+        const challenge = await _client.auth.mfa.challenge({ factorId });
+        if (challenge.error) return { error: challenge.error.message };
+        const verify = await _client.auth.mfa.verify({ factorId, challengeId: challenge.data.id, code });
+        if (verify.error) return { error: verify.error.message };
+        return { success: true };
+    }
+    async function mfaListFactors() {
+        await ready;
+        const { data, error } = await _client.auth.mfa.listFactors();
+        if (error) return [];
+        return data.totp || [];
+    }
+    async function mfaUnenroll(factorId) {
+        await ready;
+        const { error } = await _client.auth.mfa.unenroll({ factorId });
+        if (error) return { error: error.message };
+        return { success: true };
+    }
+    async function mfaVerifyEnroll(factorId, code) {
+        await ready;
+        const challenge = await _client.auth.mfa.challenge({ factorId });
+        if (challenge.error) return { error: challenge.error.message };
+        const verify = await _clienth.auth.mfa
+        if (verify.error) return { error: verify.error.message };
+        return { success: true };
+    }
+    async function mfaListFactors() {
+        await ready;
+        const { data, error } = await _client.auth.mfa.listFactors();
+        if (error) return [];
+        return data.totp || [];
+    }
+    async function mfaUnenroll(factorId) {
+        await ready;
+        const { error } = await _client.auth.mfa.unenroll({ factorId });
+        if (error) return { error: error.message };
+        return { success: true };
+    }
+    async function mfaNeeded() {
+        await ready;
+        const { data, error } = await _client.auth.mfa.getAuthanticatorAssuranceLevel();
+        if (error) return false;
+        return data.nextLevel === 'aal2' && data.nextLevel !== data.currentLevel;
+    }
+    async function mfaChallengeAndVerify(code) {
+        await ready;
+        const factors = await mfaListFactors();
+        if (!factors.length) return { error: 'Nessun fattore 2FA trovato.' };
+        const factorId = factors[0].id;
+        const challenge = await _client.auth.mfa.challenge({ factorId });
+        if (challenge.error) return { error: challenge.error.message };
+        const verify = await _client.auth.mfa.verify({ factorId, challengeId: challenge.data.id, code });
+        if (verify.error) return { error: verify.error.message };
+        return { success: true };
+    }
     return {
         ready, register, login, logout, currentUser, requireLogin,
         listProjects, getProject, createProject, touchProject, deleteProject,
         setProjectStatus, renameProject, addCollaborator, removeCollaborator, subscribeToProject,
         loginWithGoogle, updateProfile, changeEmail, changePasswordSecure, uploadFile, deleteAccount,
         requestPasswordReset, confirmNewPassword, listTrash, restoreProject, permanentDeleteProject,
-        saveHistorySnapshot, listHistorySnapshots, duplicateProject
+        saveHistorySnapshot, listHistorySnapshots, duplicateProject,
+        addComment, listComments, resolveComment, deleteComment,
+        logActivity, listActivity, trackSession, listSessions, removeSessionEntry, signOutOtherSessions,
+        mfaEnroll, mfaVerifyEnroll, mfaListFactors, mfaUnenroll, mfaNeeded, mfaChallengeAndVerify
     };
 })();

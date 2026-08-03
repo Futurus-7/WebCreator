@@ -5234,7 +5234,7 @@ $('#btnFillPlaceholder')?.addEventListener('click', () => {
     });
     canvas.querySelectorAll('.wb-image').forEach(imgContainer => {
         if (imgContainer.querySelector('img')) return;
-        const placeholder = imgContainer.querySelector('.wb-image-placeholder')
+        const placeholder = imgContainer.querySelector('.wb-image-placeholder');
         const w = 600 + Math.floor(Math.random() * 200);
         const h = 400 + Math.floor(Math.random() * 100);
         const img = document.createElement('img');
@@ -5245,3 +5245,46 @@ $('#btnFillPlaceholder')?.addEventListener('click', () => {
     saveHistory();
     updatePropertyPanel();
 });
+async function addCommentToElement(element) {
+    if (typeof WBPlatform === 'undefined' || !WBPlatform.currentUser()) { alert('Devi essere loggato per commentare.'); return; }
+    const text = prompt('Scrivi il commento:');
+    if (!text || !text.trim()) return;
+    if (!element.dataset.id) { element.dataset.id = 'el-' + (++state.elementCounter); }
+    const projectId = _getActiveProjectId();
+    if (projectId === 'default') { alert('Salva prima il progetto.'); return; }
+    saveHistory();
+    await WBPlatform.addComment(projectId, element.dataset.id, currentPageIndex, text.trim());
+    alert('Commento aggiunto!');
+}
+async function openCommentsModal() {
+    const projectId = _getActiveProjectId();
+    if (projectId === 'default') return;
+    const list = await WBPlatform.listComments(projectId);
+    const box = $('#commentsList');
+    if (!list.length) {
+        box.innerHTML = '<p style="color:var(--text-secondary);padding:10px;">Nessun commento ancora.</p>';
+    } else {
+        box.innerHTML = list.map(c => {
+            const d = new Date(c.created_at);
+            const pageName = pages[c.page_index] ? pages[c.page_index].name : ('Pagina ' + (c.page_index + 1));
+            return '<div style="padding:12px;border-bottom:1px solid var(--border-color);' + (c.resolved ? 'opacity:0.5;' : '') + '">' +
+                '<div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text-secondary);margin-bottom:4px;">' +
+                '<span>' + (c.author_name || 'Utente') + ' - ' + pageName + '</span>' +
+                '<span>' + d.toLocaleDateString('it-IT') + '</span></div>' +
+                '<div style="font-size:13px;margin-bottom:8px;">' + c.text.replace(/</g,'&lt;') + '</div>' +
+                '<div style="display:flex;gap:6px;">' +
+                '<button class="toolbar-btn" data-goto="' + c.page_index + '" data-el="' + (c.element_id||'') + '" style="font-size:11px;padding:4px 8px;">Vai alla pagina</button>' +
+                (c.resolved ? '' : '<button class="toolbar-btn" data-resolve="' + c.id + '" style="font-size:11px;padding:4px 8px;">Risolvi</button>') +
+                '<button class="toolbar-btn" data-delcomment="' + c.id + '" style="font-size:11px;padding:4px 8px;color:var(--danger);">Elimina</button>' +
+                '</div></div>';
+        }).join('');
+        box.querySelectorAll('[data-goto]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                saveCurrentPage();
+                loadPage(parseInt(btn.dataset.goto));
+                renderPageTabs();
+
+            })
+        })
+    }
+}
