@@ -50,6 +50,8 @@
             <button class="toolbar-btn" id="btnFunctions" title="Funzioni del sito"><i class="fa-solid fa-bolt"></i>Funzioni</button>
             <button class="toolbar-btn" id="btnPreview" title="Anteprima"><i class="fa-solid fa-eye"></i>Anteprima</button>
             <button class="toolbar-btn" id="btnSearch" title="Cerca nel progetto"><i class="fa-solid fa-magnifying-glass"></i></button>
+            <button class="toolbar-btn" id="btnComments" title="Commenti"><i class="fa-solid fa-comment-dots"></i></button>
+            <button class="toolbar-btn" id="btnActivity" title="Registro attività"><i class="fa-solid fa-list-check"></i></button>
             <button class="toolbar-btn" id="btnHistory" title="Cronologia versioni"><i class="fa-solid fa-clock-rotate-left"></i></button>
             <button class="toolbar-btn" id="btnFillPlaceholder" title="Riempi con contenuto finto"><i class="fa-solid fa-wand-magic-sparkles"></i></button>
             <button class="toolbar-btn" id="btnBackupJSON" title="Scarica backup JSON"><i class="fa-solid fa-file-arrow-down"></i></button>
@@ -1038,6 +1040,9 @@
                         <div class="fn-menu-item" data-fn="favicon">
                             <i class="fa-solid fa-icons"></i> Favicon
                         </div>
+                        <div class="fn-menu-item" data-fn="tracking">
+                            <i class="fa-solid fa-cookie-bite"></i> Cookie & Analytics
+                        </div>
                         <div class="fn-menu-item" data-fn="newsletter">
                             <i class="fa-solid fa-envelope-open-text"></i> Newsletter
                         </div>
@@ -1435,6 +1440,17 @@ admin</textarea>
                                 <label class="prop-label">Immagine anteprima (mostrata su WhatsApp/social)</label>
                                 <input type="text" class="prop-input" id="seoImage" placeholder="https://...">
                             </div>
+                            <div class="prop-group">
+                                <label class="prop-label">Password pagina (lascia vuoto per nessuna protezione)</label>
+                                <input type="password" class="prop-input" id="pagePassword" placeholder="Password per questa pagina">
+                                <button class="prop-btn-small" id="btnRemovePagePassword" type="button">Rimuovi protezione password</button>
+                            </div>
+                            <div class="prop-group">
+                                <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:12px;color:var(--text-secondary);">
+                                    <input type="checkbox" id="pageIs404" style="width:14px;height:14px;">
+                                    Usa questa pagina come 404 personalizzata
+                                </label>
+                            </div>
                             <button class="toolbar-btn btn-primary" id="btnSaveSeo" style="width:100%;justify-content:center;padding:10px;">
                                 <i class="fa-solid fa-check"></i> Salva SEO
                             </button>
@@ -1451,6 +1467,15 @@ admin</textarea>
                             </div>
                             <div id="faviconStatus" style="display:none;margin-top:12px;padding:10px;border-radius:6px;font-size:13px;text-align:center;"></div>
                         </div>
+                        <div class="fn-panel" id="fn-tracking">
+                            <h2 style="font-size:18px;margin-bottom:6px;"> Cookie & Analytics</h2>
+                            <p style="color:var(--text-secondary);font-size:13px;margin-bottom:20px;">Banner cookie di base e integrazione con strumenti di statistiche (opzionali).</p>
+                            <div class="prop-group">
+                                <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:12px;color:var(--text-secondary);">
+                                    
+
+
+
                         <div class="fn-panel" id="fn-domain">
                             <h2 style="font-size:18px;margin-bottom:6px;"> Dominio personalizzato</h2>
                             <p style="color:var(--text-secondary);font-size:13px;margin-bottom:20px;">Vuoi che il tuo sito sia raggiungibile da un indirizzo tipo www.iltuosito.com invece del link lungo? Ecco come.</p>
@@ -1539,6 +1564,7 @@ admin</textarea>
     <div class="context-menu" id="contextMenu">
         <button class="context-item" data-action="duplicate"><i class="fa-solid fa-clone"></i> Duplica</button>
         <button class="context-item" data-action="savecomponent"><i class="fa-solid fa-floppy-disk"></i> Salva come componente</button>
+        <button class="context-item" data-action="addcomment"><i class="fa-solid fa-comment"></i> Aggiungi commento</button>
         <button class="context-item" data-action="copy"><i class="fa-solid fa-copy"></i> Copia</button>
         <button class="context-item" data-action="paste"><i class="fa-solid fa-paste"></i> Incolla</button>
         <button class="context-item" data-action="moveup"><i class="fa-solid fa-arrow-up"></i> Sposta su</button>

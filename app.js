@@ -2690,8 +2690,38 @@ ${bodyContent}
 ${pagePasswordHash ? '</div>' : ''}
 ${advancedConfig.cookieBannerEnabled ? '<div id="_wbCookieBanner" style="position:fixed;bottom:0;left:0;right:0;background:#16213e;color:white;padding:16px;display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:center;z-index:99998;font-size:13px;"><span>' + (advancedConfig.cookieBannerText || 'Questo sito utilizza cookie tenici.') + '</span><button id="_wbCookieAccept" style="padding:8px 20px;background:#4361ee;color:white;border:none;border-radius:6px;cursor:pointer;">Accetta</button></div>' : ''}
 <script>
-
-
+var _pwHash = '${pagePasswordHash}';
+if (_pwHash) {
+    var _pwGate = document.getElementById('_wbPwGate');
+    var _pwContent = document.getElementById('_wbPwContent');
+    if (sessionStorage.getItem('_wbPwOk_' + _pwHash) === '1') {
+        _pwGate.style.display = 'none';
+        _pwContent.style.display = '';
+    } else {
+        var _checkPw = function() {
+            var val = document.getElementById('_wbPwInput').value;
+            crypto.subtle.digest('SHA-256', new TextEncoder().encode(val)).then(function(buf) {
+                var hex = Array.from(new Uint8Array(buf)).map(function(b){return b.toString(16).padStart(2,'0');}).join('');
+                if (hex === _pwHash) {
+                    sessionStorage.setItem('_wbPwok_' + _pwHash, '1');
+                    _pwGate.style.display = 'none';
+                    _pwContent.style.display = '';
+                } else {
+                    document.getElementById('_wbPwErr').style.display = 'block';
+                }
+            });
+        };
+        document.getElementById('_wbPwBtn').addEventListener('click', _checkPw);
+        document.getElementById('_wbPwInput').addEventListener('keydown', function(e) { if (e.key === 'Enter') _checkPw(); });
+    }
+}
+if (document.getElementById('_wbCookieBanner')) {
+    if (localStorage.getItem('wb_cookie_consent')) { document.getElementById('_wbCookieBanner').style.display = 'none'; }
+    document.getElementById('_wbCookieAccept').addEventListener('click', function() {
+        localStorage.setItem('wb_cookie_consent', '1');
+        document.getElementById('_wbCookieBanner').style.display = 'none';
+    });
+}
 var _sbUrl = '${sbUrl}';
 var _sbKey = '${sbKey}';
 var _cfg = ${cfg};
@@ -3675,6 +3705,23 @@ document.querySelectorAll('[data-actions]').forEach(el => {
 </html>`;
     zip.file('index.html', htmlFile);
     zip.file('style.css', fullCSS);
+    const p404 = pages.find(pg => pg.is404);
+    if (p404) {
+        const html404 = generateCleanHTMLFromString(p404.structureHTML || p404.freeHTML || '');
+        zip.file('404.html', `<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pagina non trovata</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+${html404}
+</body>
+</html>`);
+    }
     zip.generateAsync({ type: 'blob' }).then(function(content) {
         const url = URL.createObjectURL(content);
         const a = document.createElement('a');
@@ -4957,6 +5004,18 @@ CREATE TRIGGER on_auth_user_created
         showFnStatus($('#rolesStatus'), ' Ruoli salvati!', 'success');
     });
     $('#btnUpdateRoleSelects')?.addEventListener('click', updateRoleSelects);
+    $('#btnSaveTracking')?.addEventListener('click', function() {
+        advancedConfig.cookieBannerEnabled = $('#cookieBannerEnabled').checked;
+        advancedConfig.cookieBannerText = $('#cookieBannerText').value;
+        advancedConfig.gaId = $('#gaId').value.trim();
+        advancedConfig.metaPixelId = $('#metaPixelId').value.trim();
+        saveAdvancedConfig();
+        showFnStatus($('#trackingStatus'), ' Impostazioni salvate!', 'success');
+    });
+    if ($('#cookieBannerEnabled')) $('#cookieBannerEnabled').checked = !!advancedConfig.cookieBannerEnabled;
+    if (advancedConfig.cookieBannerText && $('#cookieBannerText')) $('#cookieBannerText').value = advancedConfig.cookieBannerText;
+    if (advancedConfig.gaId && $('#gaId')) $('#gaId').value = advancedConfig.gaId;
+    if (advancedConfig.metaPixelId && $('#metaPixelId')) $('#metaPixelId').value = advancedConfig.metaPixelId;
     $('#btnSaveBlog')?.addEventListener('click', function() {
         advancedConfig.blogEnabled = $('#blogEnabled').checked;
         advancedConfig.blogPostsPerPage = parseInt($('#blogPostsPerPage').value) || 10;
