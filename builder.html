@@ -1472,10 +1472,27 @@ admin</textarea>
                             <p style="color:var(--text-secondary);font-size:13px;margin-bottom:20px;">Banner cookie di base e integrazione con strumenti di statistiche (opzionali).</p>
                             <div class="prop-group">
                                 <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:12px;color:var(--text-secondary);">
-                                    
-
-
-
+                                    <input type="checkbox" id="cookieBannerEnabled" style="width:16px;height:16px;cursor:pointer;">
+                                    Mostra banner cookie nel sito esportato
+                                </label>
+                            </div>
+                            <div class="prop-group">
+                                <label class="prop-label">Testo banner</label>
+                                <textarea class="prop-input prop-textarea" id="cookieBannerText" rows="2">Questo sito utilizza cookie tecnici necessari al funzionamento.</textarea>
+                            </div>
+                            <div class="prop-group">
+                                <label class="prop-label">Google Analytics - Measurement ID</label>
+                                <input type="text" class="prop-input" id="gaId" placeholder="G-XXXXXXXXXX">
+                            </div>
+                            <div class="prop-group">
+                                <label class="prop-label">Meta Pixel ID</label>
+                                <input type="text" class="prop-input" id="metaPixelId" placeholder="123456789012345">
+                            </div>
+                            <button class="toolbar-btn btn-primary" id="btnSaveTracking" style="width:100%;justify-content:center;padding:10px;margin-top:8px;">
+                                <i class="fa-solid fa-check"></i> Salva impostazioni
+                            </button>
+                            <div id="trackingStatus" style="display:none;margin-top:12px;padding:10px;border-radius:6px;font-size:13px;text-align:center;"></div>
+                        </div>
                         <div class="fn-panel" id="fn-domain">
                             <h2 style="font-size:18px;margin-bottom:6px;"> Dominio personalizzato</h2>
                             <p style="color:var(--text-secondary);font-size:13px;margin-bottom:20px;">Vuoi che il tuo sito sia raggiungibile da un indirizzo tipo www.iltuosito.com invece del link lungo? Ecco come.</p>
@@ -1592,6 +1609,25 @@ admin</textarea>
                 </div>
             </div>
         </div>
+    <div class="modal-overlay" id="commentsModal">
+        <div class="modal-content" style="max-width:520px;">
+            <div class="modal-header">
+                <h3>Commenti del progetto</h3>
+                <button class="close-btn" id="closeComments"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body" id="commentsList"></div>
+        </div>
+        <div class="modal-body" id="commentsList"></div>
+    </div>
+    <div class="modal-overlay" id="activityModal">
+        <div class="modal-content" style="max-width:480px;">
+            <div class="modal-header">
+                <h3>Registro attività</h3>
+                <button class="close-btn" id="closeActivity"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body" id="activityList"></div>
+        </div>
+    </div>
     <div class="modal-overlay" id="searchModal">
         <div class="modal-content" style="max-width:480px;">
             <div class="modal-header">

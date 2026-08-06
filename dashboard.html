@@ -489,6 +489,7 @@ a {
     <div class="user-box" id="userBox">
         <div class="user-avatar" id="userAvatar" style="cursor:pointer;overflow:hidden;" title="Impostazioni profilo">U</div>
         <span class="user-name" id="userNameLabel" style="cursor:pointer;" title="Impostazioni profilo">Utente</span>
+        <button class="btn-ghost" id="btnQr" title="Genera QR Code"><i class="fa-solid fa-qrcode"></i></button>
         <button class="btn-ghost" id="btnLogout"><i class="fa-solid fa-right-from-bracket"></i> Esci</button>
     </div>
 </div>
@@ -634,10 +635,30 @@ a {
         <input type="password" id="profileNewPassword" style="margin-bottom:10px;">        
         <button class="cancel" id="btnChangePassword" style="width:100%;margin-bottom:20px;">Cambia password</button>
         <div id="profileStatus" style="display:none;font-size:12px;padding:8px;border-radius:6px;margin-bottom:16px;text-align:center;"></div>
+        <hr style="border:none;border-top:1px solid rgba(255,255,255,0.1);margin:16px 0;">
+        <label style="display:block;font-size:12px;color:var(--wb-gray-light);margin-bottom:6px;">Autenticazione a due fattori (2FA)</label>
+        <div id="mfaStatus" style="font-size:12px;color:var(--wb-gray);margin-bottom:10px;">Verifica in corso...</div>
+        <div id="mfaQrBox" style="display:none;text-align:center;margin-bottom:10px;"></div>
+        <button class="cancel" id="btnToggleMfa" style="width:100%;margin-bottom:20px;">Attiva 2FA</button>
+        <hr style="border:none;border-top:1px solid rgba(255,255,255,0.1);margin:16px 0;">
+        <label style="display:block;font-size:12px;color:var(--wb-gray-light);margin-bottom:6px;">Dispositivi collegati</label>
+        <div id="sessionsList" style="margin-bottom:10px;"></div>
+        <button class="cancel" id="btnSignOutOthers" style="width:100%;margin-bottom:20px;">Disconnetti tutte le altre sessioni</button>
         <hr style="border:none;border-top:1px solid rgba(230,57,70,0.3);margin:16px 0;">
         <button class="cancel" id="btnDeleteAccount" style="width:100%;color:#ff8a93;border-color:rgba(230,57,70,0.4);">Elimina account definitivamente</button>
         <div class="modal-actions" style="margin-top:18px;">
             <button class="cancel" id="cancelProfile">Chiudi</button>
+        </div>
+    </div>
+</div>
+<div class="modal-ov" id="qrModal">
+    <div class="modal-box">
+        <h3>Genera QR Code</h3>
+        <input type="text" id="qrUrlInput" placeholder="https://tuosito.com">
+        <div id="qrResult" style="text-align:center;margin-bottom:16px;"></div>
+        <div class="modal-actions">
+            <button class="cancel" id="cancelQr">Chiudi</button>
+            <button class="confirm" id="generateQr">Genera</button>
         </div>
     </div>
 </div>
@@ -948,6 +969,55 @@ $('#btnGoogleLogin').addEventListener('click', async () => {
     const res = await WBPlatform.loginWithGoogle();
     if (res.error) alert('Errore Google: ' + res.error);
 });
+$('#btnQr').addEventListener('click', () => {
+    $('#qrUrlInput').value = '';
+    $('#qrResult').innerHTML = '';
+    $('#qrModal').classLIst.add('visible');
+});
+$('#cancelQr').addEventListener('click', () => $('#qrModal').classList.remove('visible'));
+$('#qrModal').addEventListener('click', e => { if (e.target === $('#qrModal')) $('#qrModal').classList.remove('visible'); });
+$('#generateQr').addEventListener('click', () => {
+    const url = $('#qrUrlInput').value.trim();
+    if (!url) return;
+    const qrSrc = 'https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=' + encodeURIComponent(url);
+    $('#qrResult').innerHTML = '<img src="' + qrSrc + '" style="width:200px;height:200px;background:white;padding:8px;border-radius:8px;"><br><a href="' + qrSrc + '" download="qrcode.png" style="color:var(--wb-cyan);font-size:12px;display:inline-block;margin-top:10px;">Scarica immagine</a>';
+});
+async function refreshMfaStatus() {
+    const factors = await WBPlatform.mfaListFactors();
+    const verified = factors.filter(f => f.status === 'verified');
+    const statusEl = $('#mfaStatus');
+    const btn = $('#btnToggleMfa');
+    if (!statusEl || !btn) return;
+    if (verified.length) {
+        statusEl.textContent = '2FA attiva.';
+        btn.textContent = 'Disattiva 2FA';
+        btn.dataset.mode = 'disable';
+        btn.dataset.factorId = verified[0].id;
+    } else {
+        statusEl.textContent = '2FA non attiva.';
+        btn.textContent = 'Attiva 2FA';
+        btn.dataset.mode = 'enabled';
+    }
+}
+$('#btnToggleMfa').addEventListener('click', async () => {
+    const btn = $('#btnToggleMfa');
+    if (btn.dataset.mode === 'disable') {
+        if (!confirm('Disattivare la 2FA?')) return;
+        await WBPlatform.mfaUnenroll(btn.dataset.factorId);
+        await refreshMfaStatus();
+        return;
+    }
+    const res = await WBPlatform.mfaEnroll();
+    if (res.error) { alert('Errore: ' + res.error); return; }
+    const box = $('#mfaQrBox');
+    box.innerHTML = '<img src="' + res.qrCode + '" style="width:160px;height:160px;background:white;padding:8px;border-radius:8px;">' +
+        '<p style="font-size:11px;color:var(--wb-gray);margin-top:8px;">Scansiona con la tua app di autenticazione (es. Google Authenticator), poi inserisci il codice.</p>';
+    box.style.display = 'block';
+    
+})
+
+
+
 function parseHashParams() {
     const hash = window.location.hash.startsWith('#') ? window.location.hash.slice(1) : window.location.hash;
     return new URLSearchParams(hash);
