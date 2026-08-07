@@ -262,12 +262,11 @@ function handleCanvasDrop(e) {
         if (isContainer(target)) {
             const innerZone = rect.height * 0.3;
             if (e.clientY > rect.top + innerZone && e.clientY < rect.bottom - innerZone) {
-                target.appendChild(newElement);
+                getContainerInner(target).appendChild(newElement);
                 finalizeDrop(newElement);
                 return;
             }
         }
-
         if (e.clientY < midY) {
             target.parentNode.insertBefore(newElement, target);
         } else {
@@ -309,6 +308,11 @@ function isContainer(el) {
         'block-card', 'block-pricing', 'block-testimonial'
     ];
     return containers.includes(type);
+}
+function getContainerInner(el) {
+    if (!el) return el;
+    const inner = el.querySelector('.wb-section, .wb-container, .wb-grid, .wb-form, .wb-hero, .wb-navbar, .wb-footer, .wb-card, .wb-pricing, .wb-testimonial');
+    return inner || el;
 }
 
 function removeAllDropIndicators() {
@@ -1121,7 +1125,7 @@ function pasteElement() {
         addFreeDrag(clone);
     }
     if (state.selectedElement && isContainer(state.selectedElement)) {
-        const container = state.selectedElement.querySelector('.wb-section, .wb-container, .wb-form') || state.selectedElement;
+        const container = getContainerInner(state.selectedElement);
         container.appendChild(clone);
     } else if (state.selectedElement) {
         state.selectedElement.parentNode.insertBefore(clone, state.selectedElement.nextSibling);
@@ -2703,7 +2707,7 @@ if (_pwHash) {
             crypto.subtle.digest('SHA-256', new TextEncoder().encode(val)).then(function(buf) {
                 var hex = Array.from(new Uint8Array(buf)).map(function(b){return b.toString(16).padStart(2,'0');}).join('');
                 if (hex === _pwHash) {
-                    sessionStorage.setItem('_wbPwok_' + _pwHash, '1');
+                    sessionStorage.setItem('_wbPwOk_' + _pwHash, '1');
                     _pwGate.style.display = 'none';
                     _pwContent.style.display = '';
                 } else {
@@ -3684,7 +3688,7 @@ document.querySelectorAll('[data-actions]').forEach(el => {
             } else if (action.type === 'scroll' && action.value) {
                 var target = document.getElementById(action.value);
                 if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            } else if (action.type === 'show-hide' && action.value) {
+            } else if ((action.type === 'show-hide' || action.type === 'summon' || action.type === 'toggle-visibility') && action.value) {
                 var target = document.getElementById(action.value);
                 if (target) {
                     var hidden = target.style.visibility === 'hidden' || target.style.opacity === '0';
@@ -4038,7 +4042,7 @@ function switchMode(mode) {
                 addFreeDrag(el);
             });
         } else {
-            canvas.querySelectorAll('.builder-element').forEach(el => {
+            canvas.querySelectorAll(':scope > .builder-element').forEach(el => {
                 if (!el.closest('.free-toolbar') && !el.classList.contains('resize-handle')) {
                     convertToFreeMode(el);
                 }
@@ -4053,7 +4057,7 @@ function switchMode(mode) {
                 setupElementEvents(el);
             });
         } else {
-            canvas.querySelectorAll('.builder-element').forEach(el => {
+            canvas.querySelectorAll(':scope > .builder-element').forEach(el => {
                 convertToStructureMode(el);
             });
         }
@@ -5411,11 +5415,11 @@ $('#closeActivity')?.addEventListener('click', () => $('#activityModal').classLi
 $('#activityModal')?.addEventListener('click', (e) => { if (e.target === $('#activityModal')) $('#activityModal').classList.remove('visible'); });
 
 async function sha256Hex(str) {
-    const buf = await crypto.subtle.digest('SHA-256', new TextEncoder(),encode(str));
+    const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
     return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
 }
 $('#btnRemovePagePassword')?.addEventListener('click', () => {
-    const p = pags[currentPageIndex];
+    const p = pages[currentPageIndex];
     if (!p) return;
     delete p.passwordHash;
     if ($('#pagePassword')) $('#pagePassword').value = '';

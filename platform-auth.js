@@ -512,29 +512,9 @@ const WBPlatform = (function() {
         if (error) return { error: error.message };
         return { success: true };
     }
-    async function mfaVerifyEnroll(factorId, code) {
-        await ready;
-        const challenge = await _client.auth.mfa.challenge({ factorId });
-        if (challenge.error) return { error: challenge.error.message };
-        const verify = await _clienth.auth.mfa
-        if (verify.error) return { error: verify.error.message };
-        return { success: true };
-    }
-    async function mfaListFactors() {
-        await ready;
-        const { data, error } = await _client.auth.mfa.listFactors();
-        if (error) return [];
-        return data.totp || [];
-    }
-    async function mfaUnenroll(factorId) {
-        await ready;
-        const { error } = await _client.auth.mfa.unenroll({ factorId });
-        if (error) return { error: error.message };
-        return { success: true };
-    }
     async function mfaNeeded() {
         await ready;
-        const { data, error } = await _client.auth.mfa.getAuthanticatorAssuranceLevel();
+        const { data, error } = await _client.auth.mfa.getAuthenticatorAssuranceLevel();
         if (error) return false;
         return data.nextLevel === 'aal2' && data.nextLevel !== data.currentLevel;
     }
