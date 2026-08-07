@@ -1,0 +1,5 @@
+WebBuilder is a project I decided to undertake mainly for hackclub but also to learn how to manage backends in a better and economically sustainable way. It was a large project that required many hours of refinement and 
+corrections and was initially full of bugs, especially in the builder itself. Personally, I am proud of the final result. Now let's talk about the project itself. I will explain it briefly and concisely. WebBuilder is a site
+aimed at an audience that does not know how to create sites. It is a very easy and intuitive site creator to use, allowing you to insert many features into your site, everything I could think of. I made it so that in a 
+"simple" way it is possible to insert backends or functions in which external services are needed. The ""problem"" is that this is a little more professional, but nothing special, it is still usable by a non-expert audience.
+I also included instructions to guide those who are not experts in this by inserting and having access to even more functions.
